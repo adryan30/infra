@@ -19,6 +19,7 @@ spec:
       valuesObject:
         ingress:
           enabled: true
+          className: nginx
           annotations:
              cert-manager.io/cluster-issuer: default
           hosts:
