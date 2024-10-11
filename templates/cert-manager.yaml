@@ -16,3 +16,7 @@ spec:
     chart: cert-manager
     helm:
       releaseName: cert-manager
+  syncPolicy:
+    automated: 
+    syncOptions:
+    - CreateNamespace=true
