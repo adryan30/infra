@@ -8,7 +8,7 @@ metadata:
 spec:
   destination:
     namespace: kube-system
-    server: {{ .Values.spec.destination.server }}
+    server: "https://kubernetes.default.svc"
   project: default
   source:
     repoURL: https://metallb.github.io/metallb
