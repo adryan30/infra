@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-ingress-grpc
+  namespace: argocd
+  annotations:
+    cert-manager.io/cluster-issuer: default
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              name: https
+    host: argogrpc.adryan.me
+  tls:
+  - hosts:
+    - argogrpc.adryan.me
+    secretName: argogrpc.adryan.me-tls
