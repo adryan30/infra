@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: home-assistant
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: home-assistant
+    server: "https://kubernetes.default.svc"
+  project: default
+  source:
+    repoURL: http://pajikos.github.io/home-assistant-helm-chart/
+    targetRevision: 0.2.81
+    chart: home-assistant
+    helm:
+      releaseName: home-assistant
+      valuesObject:
+        ingress:
+          enabled: true
+          annotations:
+             cert-manager.io/cluster-issuer: default
+          hosts:
+            - host: home.adryan.me
+              paths:
+                - path: /
+                  pathType: ImplementationSpecific
+          tls: 
+            - secretName: home.adryan.me-tls
+              hosts:
+                  - home.adryan.me
+        persistence:
+          enabled:
+          size: 10Gi
+        configuration:
+          enabled: true
+          trusted_proxies:
+            - 10.0.0.0/8
+            - 172.16.0.0/12
+            - 192.168.0.0/16
+            - 127.0.0.0/8
+            - 10.43.0.0/16
+  syncPolicy:
+    automated: 
+    syncOptions:
+    - CreateNamespace=true
