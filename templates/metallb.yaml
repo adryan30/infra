@@ -11,7 +11,8 @@ spec:
     server: {{ .Values.spec.destination.server }}
   project: default
   source:
-    path: guestbook
     repoURL: https://metallb.github.io/metallb
-    targetRevision: HEAD
+    targetRevision: 0.14.8
     chart: metallb
+    helm:
+      releaseName: metallb
