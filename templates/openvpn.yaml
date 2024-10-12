@@ -20,8 +20,8 @@ spec:
         replicaCount: 1
         service:
           type: ClusterIP
-          externalPort: 443
-          internalPort: 443
+          externalPort: 1194
+          internalPort: 1194
         ipForwardInitContainer: true
         persistence:
           enabled: true
