@@ -32,7 +32,7 @@ spec:
               hosts:
                   - home.adryan.me
         persistence:
-          enabled:
+          enabled: true
           size: 10Gi
         configuration:
           enabled: true
