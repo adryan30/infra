@@ -18,6 +18,9 @@ spec:
       releaseName: openvpn
       valuesObject:
         replicaCount: 1
+        image:
+          repository: giggio/openvpn-arm
+          tag: latest
         service:
           type: ClusterIP
           externalPort: 1194
