@@ -17,6 +17,32 @@ spec:
     helm:
       releaseName: minecraft
       valuesObject:
+        extraDeploy:
+          - |
+            apiVersion: networking.k8s.io/v1
+            kind: Ingress
+            metadata:
+              name: minecraft
+              namespace: minecraft
+              annotations:
+                cert-manager.io/cluster-issuer: default
+            spec:
+              ingressClassName: nginx
+              rules:
+              - http:
+                  paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: minecraft-minecraft
+                        port:
+                          name: minecraft
+                host: mc.adryan.me
+              tls:
+              - hosts:
+                - mc.adryan.me
+                secretName: mc.adryan.me-tls
         resources:
           requests:
             memory: 2048M
