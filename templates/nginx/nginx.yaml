@@ -16,3 +16,6 @@ spec:
     chart: ingress-nginx
     helm:
       releaseName: nginx
+      valuesObject:
+        tcp:
+          "25565": "minecraft/minecraft-minecraft:25565"
