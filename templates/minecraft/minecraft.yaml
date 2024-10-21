@@ -22,7 +22,7 @@ spec:
             memory: 2048M
         minecraftServer:
           eula: true
-          difficulty: medium
+          difficulty: normal
           motd: "Bem-vindo ao servidor da Terceira Guilda"
           onlineMode: false
           overrideServerProperties: true
