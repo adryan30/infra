@@ -24,8 +24,6 @@ spec:
             metadata:
               name: minecraft
               namespace: minecraft
-              annotations:
-                cert-manager.io/cluster-issuer: default
             spec:
               ingressClassName: nginx
               rules:
@@ -39,10 +37,6 @@ spec:
                         port:
                           name: minecraft
                 host: mc.adryan.me
-              tls:
-              - hosts:
-                - mc.adryan.me
-                secretName: mc.adryan.me-tls
         resources:
           requests:
             memory: 2048M
