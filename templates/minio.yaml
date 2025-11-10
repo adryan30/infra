@@ -15,7 +15,7 @@ spec:
     targetRevision: 0.5.5
     helm:
       valuesObject:
-        ingress:
+        consoleIngress:
           enabled: true
           className: "traefik"
           hosts:
@@ -24,9 +24,9 @@ spec:
                 - path: /
                   pathType: Prefix
           tls:
-           - secretName: adryan.me-tls
-             hosts:
-               - minio.adryan.me
+            - secretName: adryan.me-tls
+              hosts:
+                - minio.adryan.me
 
   destination:
     server: https://kubernetes.default.svc
