@@ -1,0 +1,5 @@
+apiVersion: v2
+name: app-of-apps
+version: 1.0.0
+description: A Helm chart for deploying the app-of-apps pattern
+type: application
