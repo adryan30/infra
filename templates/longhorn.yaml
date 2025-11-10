@@ -1,49 +1,49 @@
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: longhorn
-#   namespace: argocd
-#   finalizers:
-#     - resources-finalizer.argocd.argoproj.io
-#   labels:
-#     name: longhorn
-# spec:
-#   project: default
-#   source:
-#     repoURL: https://charts.longhorn.io
-#     targetRevision: v1.10.0
-#     chart: longhorn
-#     helm:
-#       valuesObject:
-#         preUpgradeChecker:
-#           jobEnabled: false
-#         ingress:
-#           enabled: true
-#           ingressClassName: "traefik"
-#           host: longhorn.adryan.me
-#           tls: true
-#           tlsSecret: adryan.me-tls
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: longhorn
+spec:
+  project: default
+  source:
+    repoURL: https://charts.longhorn.io
+    targetRevision: v1.10.0
+    chart: longhorn
+    helm:
+      valuesObject:
+        preUpgradeChecker:
+          jobEnabled: false
+        ingress:
+          enabled: true
+          ingressClassName: "traefik"
+          host: longhorn.adryan.me
+          tls: true
+          tlsSecret: adryan.me-tls
 
-#   destination:
-#     server: https://kubernetes.default.svc
-#     namespace: longhorn
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn
 
-#   info:
-#     - name: "Homepage:"
-#       value: "https://longhorn.adryan.me"
+  info:
+    - name: "Homepage:"
+      value: "https://longhorn.adryan.me"
 
-#   syncPolicy:
-#     automated:
-#       enabled: true
-#       prune: true
-#       selfHeal: true
-#     syncOptions:
-#       - CreateNamespace=true
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
 
-#     retry:
-#       limit: 5
-#       backoff:
-#         duration: 5s
-#         factor: 2
-#         maxDuration: 3m
-#   revisionHistoryLimit: 3
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
