@@ -11,9 +11,8 @@ spec:
   project: default
   source:
     repoURL: oci://registry-1.docker.io/cloudpirates/minio
-    path: minio
+    path: .
     targetRevision: 0.5.5
-    chart: minio
     helm:
       valuesObject:
         ingress:
