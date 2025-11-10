@@ -21,7 +21,7 @@ spec:
           hosts:
             - host: minio.adryan.me
               paths:
-                  - path: /
+                - path: /
                   pathType: Prefix
           tls:
            - secretName: adryan.me-tls
