@@ -1,25 +1,25 @@
-apiVersion: postgres-operator.crunchydata.com/v1beta1
-kind: PostgresCluster
-metadata:
-  name: broam
-  annotations:
-    postgres-operator.crunchydata.com/autoCreateUserSchema: "true"
-spec:
-  postgresVersion: 17
-  users:
-    - name: potato
-      databases:
-        - authentik
-      options: "SUPERUSER"
-    - name: authentik
-      databases:
-        - authentik
-  instances:
-    - name: broam-001
-      dataVolumeClaimSpec:
-        storageClassName: longhorn
-        accessModes:
-          - "ReadWriteOnce"
-        resources:
-          requests:
-            storage: 5Gi
+# apiVersion: postgres-operator.crunchydata.com/v1beta1
+# kind: PostgresCluster
+# metadata:
+#   name: broam
+#   annotations:
+#     postgres-operator.crunchydata.com/autoCreateUserSchema: "true"
+# spec:
+#   postgresVersion: 17
+#   users:
+#     - name: potato
+#       databases:
+#         - authentik
+#       options: "SUPERUSER"
+#     - name: authentik
+#       databases:
+#         - authentik
+#   instances:
+#     - name: broam-001
+#       dataVolumeClaimSpec:
+#         storageClassName: longhorn
+#         accessModes:
+#           - "ReadWriteOnce"
+#         resources:
+#           requests:
+#             storage: 5Gi
