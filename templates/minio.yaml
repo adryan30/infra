@@ -19,7 +19,7 @@ spec:
           enabled: true
           className: "traefik"
           hosts:
-              - host: minio.adryan.me
+            - host: minio.adryan.me
               paths:
                   - path: /
                   pathType: Prefix
