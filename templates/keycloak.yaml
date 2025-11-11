@@ -1,18 +1,24 @@
-apiVersion: external-secrets.io/v1
-kind: ExternalSecret
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterExternalSecret
 metadata:
-  name: database-credentials
-  namespace: keycloak
+  name: "keycloak-db-credentials"
 spec:
-  refreshInterval: 1h
-  secretStoreRef:
-    kind: ClusterSecretStore
-    name: default-ns
-  target:
-    name: database-credentials
-  dataFrom:
-    - extract:
-        key: broam-pguser-keycloak
+  externalSecretName: "keycloak-db-credentials-es"
+  namespaceSelectors:
+    - matchNames:
+        - "keycloak"
+  refreshTime: "1h"
+  externalSecretSpec:
+    secretStoreRef:
+      name: default-ns
+      kind: ClusterSecretStore
+    refreshInterval: "10m"
+    target:
+      name: keycloak-db-credentials
+      creationPolicy: "Owner"
+    dataFrom:
+      - extract:
+          key: broam-pguser-keycloak
 ---
 # apiVersion: argoproj.io/v1alpha1
 # kind: Application
