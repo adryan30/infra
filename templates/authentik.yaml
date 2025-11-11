@@ -33,9 +33,6 @@ spec:
                 hosts:
                   - auth.adryan.me
         global:
-          env:
-            - name: AUTHENTIK_POSTGRESQL__DEFAULT_SCHEMA
-              value: "authentik"
           volumes:
             - name: postgres-creds
               secret:
