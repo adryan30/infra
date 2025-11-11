@@ -37,6 +37,8 @@ spec:
     chart: keycloak
     helm:
       valuesObject:
+        image:
+          repository: bitnamilegacy/keycloak
         externalDatabase:
           host: "broam-primary.default.svc"
           port: 5432
