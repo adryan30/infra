@@ -17,7 +17,7 @@ spec:
       valuesObject:
         preUpgradeChecker:
           jobEnabled: false
-        defaultSettings
+        defaultSettings:
           defaultReplicaCount: 1
         ingress:
           enabled: true
