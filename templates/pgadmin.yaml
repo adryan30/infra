@@ -2,7 +2,7 @@ apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PGAdmin
 metadata:
   name: pgadmin
-  namespace: postgres-operator
+  namespace: default
 spec:
   serviceName: "pgadmin"
   users:
