@@ -7,12 +7,12 @@ spec:
   namespaceSelectors:
     - matchLabels:
         kubernetes.io/metadata.name: keycloak
-  refreshTime: "1h"
+  refreshTime: "1h0m0s"
   externalSecretSpec:
     secretStoreRef:
       name: default-ns
       kind: ClusterSecretStore
-    refreshInterval: "10m"
+    refreshInterval: "10m0s"
     target:
       name: keycloak-db-credentials
       creationPolicy: "Owner"
