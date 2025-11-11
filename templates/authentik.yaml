@@ -1,68 +1,68 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: authentik
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-  labels:
-    name: authentik
-spec:
-  project: default
-  source:
-    repoURL: https://charts.goauthentik.io/
-    targetRevision: 2025.10.1
-    chart: authentik
-    helm:
-      valuesObject:
-        authentik:
-          secret_key: file:///postgres-creds/secret-key
-          postgresql:
-            host: broam-primary.default.svc
-            port: 5432
-            name: authentik
-            user: file:///postgres-creds/username
-            password: file:///postgres-creds/password
-        server:
-          ingress:
-            enabled: true
-            hosts:
-              - auth.adryan.me
-            tls:
-              - secretName: adryan.me-tls
-                hosts:
-                  - auth.adryan.me
-        global:
-          env:
-            - name: AUTHENTIK_POSTGRESQL__DEFAULT_SCHEMA
-              value: "authentik"
-          volumes:
-            - name: postgres-creds
-              secret:
-                secretName: authentik-postgres-credentials
-          volumeMounts:
-            - name: postgres-creds
-              mountPath: /postgres-creds
-              readOnly: true
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: authentik
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: authentik
+#   namespace: argocd
+#   finalizers:
+#     - resources-finalizer.argocd.argoproj.io
+#   labels:
+#     name: authentik
+# spec:
+#   project: default
+#   source:
+#     repoURL: https://charts.goauthentik.io/
+#     targetRevision: 2025.10.1
+#     chart: authentik
+#     helm:
+#       valuesObject:
+#         authentik:
+#           secret_key: file:///postgres-creds/secret-key
+#           postgresql:
+#             host: broam-primary.default.svc
+#             port: 5432
+#             name: authentik
+#             user: file:///postgres-creds/username
+#             password: file:///postgres-creds/password
+#         server:
+#           ingress:
+#             enabled: true
+#             hosts:
+#               - auth.adryan.me
+#             tls:
+#               - secretName: adryan.me-tls
+#                 hosts:
+#                   - auth.adryan.me
+#         global:
+#           env:
+#             - name: AUTHENTIK_POSTGRESQL__DEFAULT_SCHEMA
+#               value: "authentik"
+#           volumes:
+#             - name: postgres-creds
+#               secret:
+#                 secretName: authentik-postgres-credentials
+#           volumeMounts:
+#             - name: postgres-creds
+#               mountPath: /postgres-creds
+#               readOnly: true
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: authentik
 
-  info:
-    - name: "Homepage:"
-      value: "https://auth.adryan.me"
+#   info:
+#     - name: "Homepage:"
+#       value: "https://auth.adryan.me"
 
-  syncPolicy:
-    automated:
-      enabled: true
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-  revisionHistoryLimit: 3
+#   syncPolicy:
+#     automated:
+#       enabled: true
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true
+#     retry:
+#       limit: 5
+#       backoff:
+#         duration: 5s
+#         factor: 2
+#         maxDuration: 3m
+#   revisionHistoryLimit: 3
