@@ -27,10 +27,10 @@ spec:
             enabled: true
             hosts:
               - auth.adryan.me
-              tls: 
-              - secretName: adryan.me-tls
-                hosts:
-                  - auth.adryan.me
+            tls: 
+            - secretName: adryan.me-tls
+              hosts:
+                - auth.adryan.me
           volumes:
               - name: postgres-creds
               secret:
