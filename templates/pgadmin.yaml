@@ -23,3 +23,24 @@ spec:
       postgresClusterSelector: {}
     - name: name-discovery
       postgresClusterName: broam
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pgadmin
+spec:
+  tls:
+  - hosts:
+      - pg.adryan.me
+    secretName: adryan.me-tls
+  rules:
+  - host: pg.adryan.me
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: pgadmin
+            port: 
+              number: 5050
