@@ -9,12 +9,12 @@ spec:
   users:
     - name: potato
       databases:
-        - authentik
+        - keycloak
         - aiostreams
       options: "SUPERUSER"
-    - name: authentik
+    - name: keycloak
       databases:
-        - authentik
+        - keycloak
     - name: aiostreams
       databases:
         - aiostreams
