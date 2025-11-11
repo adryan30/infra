@@ -5,8 +5,8 @@ metadata:
 spec:
   externalSecretName: "keycloak-db-credentials-es"
   namespaceSelectors:
-    - matchNames:
-        - "keycloak"
+    - matchLabels:
+        - kubernetes.io/metadata.name: keycloak
   refreshTime: "1h"
   externalSecretSpec:
     secretStoreRef:
