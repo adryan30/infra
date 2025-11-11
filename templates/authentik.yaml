@@ -32,22 +32,22 @@ spec:
               hosts:
                 - auth.adryan.me
           volumes:
-              - name: postgres-creds
-              secret:
-                  secretName: authentik-postgres-credentials
+            - name: postgres-creds
+            secret:
+              secretName: authentik-postgres-credentials
           volumeMounts:
-              - name: postgres-creds
-              mountPath: /postgres-creds
-              readOnly: true
+            - name: postgres-creds
+            mountPath: /postgres-creds
+            readOnly: true
         worker:
           volumes:
-              - name: postgres-creds
-              secret:
-                  secretName: authentik-postgres-credentials
+            - name: postgres-creds
+            secret:
+              secretName: authentik-postgres-credentials
           volumeMounts:
-              - name: postgres-creds
-              mountPath: /postgres-creds
-              readOnly: true
+            - name: postgres-creds
+            mountPath: /postgres-creds
+            readOnly: true
 
   destination:
     server: https://kubernetes.default.svc
