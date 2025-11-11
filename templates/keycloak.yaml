@@ -1,0 +1,64 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: database-credentials
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: default-ns
+  target:
+    name: database-credentials
+  dataFrom:
+    - extract:
+        key: broam-pguser-keycloak
+---
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: keycloak
+#   namespace: argocd
+#   finalizers:
+#     - resources-finalizer.argocd.argoproj.io
+#   labels:
+#     name: keycloak
+# spec:
+#   project: default
+#   source:
+#     repoURL: https://charts.bitnami.com/bitnami
+#     targetRevision: 25.2.0
+#     chart: keycloak
+#     helm:
+#       valuesObject:
+#         externalDatabase:
+#           host: "broam-primary.default.svc"
+#           port: 5432
+#           database: bitnami_keycloak
+#           schema: public
+#           existingSecret: "broam-db-keycloak-credentials"
+#           existingSecretUserKey: "username"
+#           existingSecretPasswordKey: "password"
+
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: keycloak
+
+#   info:
+#     - name: "Homepage:"
+#       value: "https://auth.adryan.me"
+
+#   syncPolicy:
+#     automated:
+#       enabled: true
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true
+
+#     retry:
+#       limit: 5
+#       backoff:
+#         duration: 5s
+#         factor: 2
+#         maxDuration: 3m
+#   revisionHistoryLimit: 3
