@@ -1,0 +1,25 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PGAdmin
+metadata:
+  name: pgadmin
+  namespace: postgres-operator
+spec:
+  serviceName: "pgadmin"
+  users:
+    - username: root@adryan.me
+      role: Administrator
+      passwordRef:
+        name: pgadmin-root-password
+        key: password
+  dataVolumeClaimSpec:
+    storageClassName: longhorn
+    accessModes:
+      - "ReadWriteOnce"
+    resources:
+      requests:
+        storage: 1Gi
+  serverGroups:
+    - name: supply
+      postgresClusterSelector: {}
+    - name: name-discovery
+      postgresClusterName: broam
