@@ -16,6 +16,7 @@ spec:
     helm:
       valuesObject:
         authentik:
+          secret_key: file:///postgres-creds/secret-key
           postgresql:
             host: broam-primary.default.svc
             port: 5432
