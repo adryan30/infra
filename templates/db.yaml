@@ -18,6 +18,11 @@ spec:
     - name: aiostreams
       databases:
         - aiostreams
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        pg_hba:
+          - "hostnossl all all all password"
   instances:
     - name: broam-001
       dataVolumeClaimSpec:
