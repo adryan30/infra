@@ -20,52 +20,59 @@ spec:
       - extract:
           key: broam-pguser-keycloak
 ---
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: keycloak
-#   namespace: argocd
-#   finalizers:
-#     - resources-finalizer.argocd.argoproj.io
-#   labels:
-#     name: keycloak
-# spec:
-#   project: default
-#   source:
-#     repoURL: https://charts.bitnami.com/bitnami
-#     targetRevision: 25.2.0
-#     chart: keycloak
-#     helm:
-#       valuesObject:
-#         externalDatabase:
-#           host: "broam-primary.default.svc"
-#           port: 5432
-#           database: bitnami_keycloak
-#           schema: public
-#           existingSecret: "broam-db-keycloak-credentials"
-#           existingSecretUserKey: "username"
-#           existingSecretPasswordKey: "password"
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: keycloak
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: 25.2.0
+    chart: keycloak
+    helm:
+      valuesObject:
+        externalDatabase:
+          host: "broam-primary.default.svc"
+          port: 5432
+          database: keycloak
+          schema: keycloak
+          existingSecret: "keycloak-db-credentials"
+          existingSecretUserKey: "user"
+          existingSecretPasswordKey: "password"
+        ingress:
+          enabled: true
+          hostname: auth.adryan.me
+          extraTls:
+            - hosts:
+                - auth.adryan.me
+              secretName: adryan.me-tls
 
-#   destination:
-#     server: https://kubernetes.default.svc
-#     namespace: keycloak
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: keycloak
 
-#   info:
-#     - name: "Homepage:"
-#       value: "https://auth.adryan.me"
+  info:
+    - name: "Homepage:"
+      value: "https://auth.adryan.me"
 
-#   syncPolicy:
-#     automated:
-#       enabled: true
-#       prune: true
-#       selfHeal: true
-#     syncOptions:
-#       - CreateNamespace=true
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
 
-#     retry:
-#       limit: 5
-#       backoff:
-#         duration: 5s
-#         factor: 2
-#         maxDuration: 3m
-#   revisionHistoryLimit: 3
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
