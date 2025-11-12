@@ -39,6 +39,10 @@ spec:
       valuesObject:
         image:
           repository: bitnamilegacy/keycloak
+        livenessProbe:
+          enabled: false
+        readinessProbe:
+          enabled: false
         externalDatabase:
           host: "broam-primary.default.svc"
           port: 5432
