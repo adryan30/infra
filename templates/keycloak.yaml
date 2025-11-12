@@ -38,7 +38,7 @@ spec:
     helm:
       valuesObject:
         keycloak:
-          proxyHeaders: xforwarded
+          proxyHeaders: forwarded
           adminUser: admin
           existingSecret: keycloak-admin-password
           secretKeys:
