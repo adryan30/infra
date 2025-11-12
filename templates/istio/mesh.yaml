@@ -21,6 +21,7 @@ spec:
         pilot:
           cni:
             enabled: true
+        profile: demo
 
   destination:
     server: https://kubernetes.default.svc
