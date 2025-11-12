@@ -21,7 +21,7 @@ spec:
         pilot:
           cni:
             enabled: true
-        platform: k3s
+
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system
