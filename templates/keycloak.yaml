@@ -39,7 +39,7 @@ spec:
       valuesObject:
         keycloak:
           production: true
-          proxyHeaders: forwarded
+          proxyHeaders: xforwarded
           adminUser: admin
           existingSecret: keycloak-admin-password
           secretKeys:
