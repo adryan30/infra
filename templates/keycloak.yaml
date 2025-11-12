@@ -32,9 +32,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: registry-1.docker.io/cloudpirates/keycloak
+    repoURL: oci://registry-1.docker.io/cloudpirates/keycloak
     targetRevision: 0.8.4
-    chart: keycloak
+    path: .
     helm:
       valuesObject:
         keycloak:
