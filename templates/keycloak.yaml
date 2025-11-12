@@ -52,6 +52,8 @@ spec:
           secretKeys:
             usernameKey: "user"
             passwordKey: "password"
+        postgres:
+          enabled: false
         cache:
           stack: ispn
         ingress:
