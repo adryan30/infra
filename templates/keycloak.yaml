@@ -32,34 +32,40 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: registry-1.docker.io/bitnamicharts
+    repoURL: registry-1.docker.io/cloudpirates/keycloak
     targetRevision: 25.2.0
     chart: keycloak
     helm:
       valuesObject:
-        image:
-          repository: bitnamilegacy/keycloak
-        livenessProbe:
-          enabled: false
-        readinessProbe:
-          enabled: false
-        externalDatabase:
-          host: "broam-primary.default.svc"
+        keycloak:
+          adminUser: admin
+          existingSecret: keycloak-admin-password
+          secretKeys:
+            adminPasswordKey: password
+          hostname: auth.adryan.me
+        database:
+          type: postgres
+          host: broam-primary.default.svc
           port: 5432
-          database: keycloak
           schema: keycloak
           existingSecret: "keycloak-db-credentials"
-          existingSecretUserKey: "user"
-          existingSecretPasswordKey: "password"
-        postgresql:
-          enabled: false
+          secretKeys:
+            usernameKey: "user"
+            passwordKey: "password"
+        cache:
+          stack: ispn
         ingress:
           enabled: true
-          hostname: auth.adryan.me
-          extraTls:
-            - hosts:
+          className: traefik
+          hosts:
+            - host: auth.adryan.me
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - secretName: adryan.me-tls
+              hosts:
                 - auth.adryan.me
-              secretName: adryan.me-tls
 
   destination:
     server: https://kubernetes.default.svc
