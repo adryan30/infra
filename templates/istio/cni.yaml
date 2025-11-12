@@ -17,7 +17,8 @@ spec:
     targetRevision: 1.28.0
     helm:
       valuesObject:
-        defaultRevision: default
+        global:
+          platform: k3s
 
   destination:
     server: https://kubernetes.default.svc
