@@ -3,16 +3,21 @@ kind: Application
 metadata:
   name: istio-base
   namespace: argocd
+
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
     name: istio-base
+    app: istio
 spec:
   project: default
   source:
     repoURL: https://istio-release.storage.googleapis.com/charts
     chart: base
     targetRevision: 1.28.0
+    helm:
+      valuesObject:
+        defaultRevision: default
 
   destination:
     server: https://kubernetes.default.svc

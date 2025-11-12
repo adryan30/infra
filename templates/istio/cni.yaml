@@ -1,25 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: istio-gateway
+  name: istio-cni
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "3"
+
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    name: istio-gateway
+    name: istio-cni
     app: istio
 spec:
   project: default
   source:
     repoURL: https://istio-release.storage.googleapis.com/charts
-    chart: gateway
+    chart: cni
     targetRevision: 1.28.0
+    helm:
+      valuesObject:
+        defaultRevision: default
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: istio-ingress
+    namespace: istio-system
 
   syncPolicy:
     automated:

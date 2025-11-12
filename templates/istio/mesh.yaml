@@ -3,16 +3,24 @@ kind: Application
 metadata:
   name: istio
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
     name: istio
+    app: istio
 spec:
   project: default
   source:
     repoURL: https://istio-release.storage.googleapis.com/charts
     chart: istiod
     targetRevision: 1.28.0
+    helm:
+      valuesObject:
+        pilot:
+          cni:
+            enabled: true
 
   destination:
     server: https://kubernetes.default.svc
