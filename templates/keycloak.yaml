@@ -38,6 +38,7 @@ spec:
     helm:
       valuesObject:
         keycloak:
+          production: true
           proxyHeaders: forwarded
           adminUser: admin
           existingSecret: keycloak-admin-password
