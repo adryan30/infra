@@ -1,0 +1,20 @@
+apiVersion: external-secrets.io/v1
+kind: ClusterExternalSecret
+metadata:
+  name: "wildcard-certificate"
+spec:
+  externalSecretName: "wildcard-certificate-es"
+  namespaceSelectors:
+    - matchLabels: {}
+  refreshTime: "1h0m0s"
+  externalSecretSpec:
+    secretStoreRef:
+      name: default-ns
+      kind: ClusterSecretStore
+    refreshInterval: "10m0s"
+    target:
+      name: adryan.me-tls
+      creationPolicy: "Owner"
+    dataFrom:
+      - extract:
+          key: adryan.me-tls
