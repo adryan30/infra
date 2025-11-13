@@ -1,6 +1,6 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
-metadate:
+metadata:
   name: adryan.me-tls
   namespace: default
   annotations:
