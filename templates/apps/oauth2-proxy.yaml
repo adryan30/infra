@@ -25,7 +25,6 @@ spec:
         extraArgs:
           provider: keycloak-oidc
           oidc-issuer-url: https://auth.adryan.me/realms/master
-          # redirect-url: https://auth.adryan.me/oauth2/callback
           cookie-secure: true
           cookie-samesite: lax
           cookie-refresh: 1h

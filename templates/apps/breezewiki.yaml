@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breezewiki
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: breezewiki
+  template:
+    metadata:
+      labels:
+        app: breezewiki
+    spec:
+      containers:
+      - name: breezewiki
+        image: quay.io/pussthecatorg/breezewiki:latest
+        resources:
+          requests:
+            memory: "0"
+            cpu: "0"
+          limits:
+            memory: "0"
+            cpu: "0"
+        ports:
+        - containerPort: 10416
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: breezewiki
+  namespace: default
+spec:
+  selector:
+    app: breezewiki
+  ports:
+  - port: 10416
+    targetPort: 10416
+
