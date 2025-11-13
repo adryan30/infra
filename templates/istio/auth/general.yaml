@@ -2,6 +2,7 @@ apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
   name: oauth2-general
+  namespace: istio-system
 spec:
   selector:
     matchLabels:
