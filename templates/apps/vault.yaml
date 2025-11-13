@@ -15,6 +15,16 @@ spec:
     chart: vault
     helm:
       valuesObject:
+        server:
+          readinessProbe:
+            enabled: true
+            path: "/v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204"
+          livenessProbe:
+            enabled: true
+            path: "/v1/sys/health?standbyok=true"
+            initialDelaySeconds: 60
+        ui:
+          enabled: true
 
   destination:
     server: https://kubernetes.default.svc
