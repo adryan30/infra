@@ -22,6 +22,7 @@ spec:
           existingSecret: oauth2-proxy-config
         extraArgs:
           provider: keycloak-oidc
+          issuer-url: https://auth.adryan.me
         #   redirect-url: https://auth.adryan.me/oauth2/callback
         #   cookie-secure: false
         #   cookie-domain: "adryan.me"
