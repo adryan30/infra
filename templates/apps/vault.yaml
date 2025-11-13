@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: vault
+spec:
+  project: default
+  source:
+    repoURL: https://helm.releases.hashicorp.com
+    targetRevision: 0.31.0
+    chart: vault
+    helm:
+      valuesObject:
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vault
+
+  info:
+    - name: "Homepage:"
+      value: "https://vault.adryan.me"
+
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
