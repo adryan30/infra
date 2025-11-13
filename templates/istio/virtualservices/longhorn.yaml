@@ -5,7 +5,7 @@ metadata:
   namespace: istio-ingress
   labels:
     app: longhorn
-    protected: true
+    protected: "true"
 spec:
   hosts:
     - "longhorn.adryan.me"

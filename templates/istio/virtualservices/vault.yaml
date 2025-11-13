@@ -5,7 +5,7 @@ metadata:
   namespace: istio-ingress
   labels:
     app: vault
-    protected: false
+    protected: "false"
 spec:
   hosts:
     - "vault.adryan.me"

@@ -5,7 +5,7 @@ metadata:
   namespace: istio-ingress
   labels:
     app: argocd
-    protected: false
+    protected: "false"
 spec:
   hosts:
     - "argo.adryan.me"
