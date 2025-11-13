@@ -5,7 +5,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      protected: true
+      protected: "true"
   action: CUSTOM
   provider:
     name: oauth2-proxy
