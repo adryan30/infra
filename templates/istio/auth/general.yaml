@@ -6,7 +6,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      protected: "true"
+      istio: gateway
   action: CUSTOM
   provider:
     name: oauth2-proxy
