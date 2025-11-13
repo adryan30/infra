@@ -20,6 +20,8 @@ spec:
       valuesObject:
         config:
           existingSecret: oauth2-proxy-config
+        service:
+          portNumber: 4180
         extraArgs:
           provider: keycloak-oidc
           oidc-issuer-url: https://auth.adryan.me/realms/master
