@@ -19,12 +19,6 @@ spec:
           jobEnabled: false
         defaultSettings:
           defaultReplicaCount: "1"
-        ingress:
-          enabled: true
-          ingressClassName: "traefik"
-          host: longhorn.adryan.me
-          tls: true
-          tlsSecret: adryan.me-tls
 
   destination:
     server: https://kubernetes.default.svc
