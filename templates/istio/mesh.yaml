@@ -38,10 +38,19 @@ spec:
                   - x-auth-request-email
                   - x-auth-request-access-token
                 includeHeadersInCheck:
-                  - "authorization"
-                  - "cookie"
-                  - "x-forwarded-for"
-                  - "x-request-id"
+                    - "authorization",
+                    - "cookie",
+                    - "x-forwarded-access-token",
+                    - "x-forwarded-user",
+                    - "x-forwarded-email",
+                    - "x-forwarded-proto",
+                    - "proxy-authorization",
+                    - "user-agent",
+                    - "x-forwarded-host",
+                    - "from",
+                    - "x-forwarded-for",
+                    - "accept",
+                    - "x-auth-request-redirect",
                 includeHeadersInResponse:
                   - "authorization"
                   - "set-cookie"
