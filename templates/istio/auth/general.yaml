@@ -13,4 +13,4 @@ spec:
   rules:
     - to:
         - operation:
-            hosts: ["*.adryan.me"]
+            hosts: ["longhorn.adryan.me"]
