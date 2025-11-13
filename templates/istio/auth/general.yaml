@@ -12,5 +12,4 @@ spec:
   rules:
     - to:
         - operation:
-            hosts:
-              - "*"
+            hosts: ["*.adryan.me"]
