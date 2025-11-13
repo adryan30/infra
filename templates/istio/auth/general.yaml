@@ -1,0 +1,17 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: ext-authz
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  action: CUSTOM
+  provider:
+    name: sample-ext-authz-grpc
+  rules:
+    # The rules specify when to trigger the external authorizer.
+    - to:
+        - operation:
+            hosts:
+              - longhorn.adryan.me
