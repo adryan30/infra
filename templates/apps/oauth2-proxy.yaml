@@ -25,7 +25,7 @@ spec:
         extraArgs:
           provider: keycloak-oidc
           oidc-issuer-url: https://auth.adryan.me/realms/master
-          redirect-url: https://auth.adryan.com/oauth2/callback
+          redirect-url: https://auth.adryan.me/oauth2/callback
           cookie-secure: true
           cookie-samesite: lax
           cookie-refresh: 1h
@@ -38,7 +38,7 @@ spec:
           pass-host-header: true
           set-xauthrequest: true
           pass-access-token: true
-          # scope: "openid email"
+          scope: "openid email"
           standard-logging: true
           auth-logging: true
           request-logging: true
