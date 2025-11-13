@@ -3,6 +3,9 @@ kind: VirtualService
 metadata:
   name: longhorn
   namespace: istio-ingress
+  labels:
+    app: longhorn
+    protected: true
 spec:
   hosts:
     - "longhorn.adryan.me"

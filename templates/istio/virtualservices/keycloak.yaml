@@ -3,6 +3,9 @@ kind: VirtualService
 metadata:
   name: keycloak
   namespace: istio-ingress
+  labels:
+    app: keycloak
+    protected: false
 spec:
   hosts:
     - "auth.adryan.me"

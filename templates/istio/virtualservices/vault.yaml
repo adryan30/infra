@@ -3,6 +3,9 @@ kind: VirtualService
 metadata:
   name: vault
   namespace: istio-ingress
+  labels:
+    app: vault
+    protected: false
 spec:
   hosts:
     - "vault.adryan.me"

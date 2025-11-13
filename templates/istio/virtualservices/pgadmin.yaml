@@ -3,6 +3,9 @@ kind: VirtualService
 metadata:
   name: pgadmin
   namespace: istio-ingress
+  labels:
+    app: pgadmin
+    protected: false
 spec:
   hosts:
     - "pg.adryan.me"

@@ -3,6 +3,9 @@ kind: VirtualService
 metadata:
   name: argocd
   namespace: istio-ingress
+  labels:
+    app: argocd
+    protected: false
 spec:
   hosts:
     - "argo.adryan.me"
