@@ -38,8 +38,14 @@ spec:
                   - x-auth-request-email
                   - x-auth-request-access-token
                 includeHeadersInCheck:
-                  - authorization
-                  - cookie
+                  - "authorization"
+                  - "cookie"
+                  - "x-forwarded-for"
+                  - "x-request-id"
+                includeHeadersInResponse:
+                  - "authorization"
+                  - "set-cookie"
+                  - "x-auth-user"
           defaultConfig:
             terminationDrainDuration: 310s
 
