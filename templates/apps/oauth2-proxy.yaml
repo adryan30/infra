@@ -42,7 +42,6 @@ spec:
           request-logging: true
           code-challenge-method: S256
           email-domain: "*"
-          http-address: 0.0.0.0:80
 
         #   reverse-proxy: true
         #   whitelist-domain: <WHITELIST_DOMAIN>
