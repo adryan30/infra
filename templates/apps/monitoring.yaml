@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: observability
+  name: monitoring
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    name: observability
+    name: monitoring
 spec:
   project: default
   source:
@@ -15,10 +15,12 @@ spec:
     path: .
     helm:
       valuesObject:
+        nameOverride: monitoring
+        fullnameOverride: monitoring
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: observability
+    namespace: monitoring
 
   syncPolicy:
     automated:
