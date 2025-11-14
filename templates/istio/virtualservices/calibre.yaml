@@ -13,17 +13,17 @@ spec:
   http:
     - match:
         - uri:
-            prefix: /
-      route:
-        - destination:
-            port:
-              number: 8083
-            host: calibre-main.books.svc.cluster.local
-    - match:
-        - uri:
             prefix: /downloader
       route:
         - destination:
             port:
               number: 8084
             host: calibre-downloader.books.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 8083
+            host: calibre-main.books.svc.cluster.local
