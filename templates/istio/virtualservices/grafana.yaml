@@ -18,4 +18,4 @@ spec:
         - destination:
             port:
               number: 80
-            host: observability-grafana.observability.svc.cluster.local
+            host: monitoring-grafana.monitoring.svc.cluster.local
