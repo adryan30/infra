@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aiostreams
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: aiostreams
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.4.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/viren070/aiostreams
+                  tag: latest
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 3000
+        persistence:
+          data:
+            accessMode: ReadWriteOnce
+            size: 5Gi
+            type: persistentVolumeClaim
+            globalMounts:
+              - path: /app/data
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: streaming
+
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istion-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
