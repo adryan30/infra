@@ -12,4 +12,3 @@ spec:
     grafana:
       enabled: true
       internal_url: "http://monitoring-grafana.monitoring:3000/"
-      external_url: "http://grafana.adryan.me/grafana"
