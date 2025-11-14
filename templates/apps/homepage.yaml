@@ -16,7 +16,8 @@ spec:
     helm:
       valuesObject:
         config:
-          allowedHosts: home.adryan.me
+          allowedHosts:
+            - home.adryan.me
 
   destination:
     server: https://kubernetes.default.svc
