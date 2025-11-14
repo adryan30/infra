@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: breezewiki
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: breezewiki
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.4.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            containers:
+              main:
+                image:
+                  repository: quay.io/pussthecatorg/breezewiki
+                  tag: latest
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 10416
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: breezewiki
+
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istion-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
