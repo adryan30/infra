@@ -24,6 +24,11 @@ spec:
             serviceMonitorSelectorNilUsesHelmValues: false
         nameOverride: monitoring
         fullnameOverride: monitoring
+        grafana:
+          admin:
+            existingSecret: monitoring-grafana-admin
+            userKey: user
+            passwordKey: password
 
   destination:
     server: https://kubernetes.default.svc
