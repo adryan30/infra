@@ -14,4 +14,9 @@ spec:
     - to:
         - operation:
             hosts:
-              ["longhorn.adryan.me", "grafana.adryan.me", "kiali.adryan.me"]
+              [
+                "longhorn.adryan.me",
+                "grafana.adryan.me",
+                "kiali.adryan.me",
+                "cdownloader.adryan.me",
+              ]
