@@ -15,6 +15,9 @@ spec:
     path: .
     helm:
       valuesObject:
+        global:
+          rbac:
+            createAggregateClusterRoles: true
         nameOverride: monitoring
         fullnameOverride: monitoring
 
