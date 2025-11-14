@@ -18,4 +18,4 @@ spec:
         - destination:
             port:
               number: 10416
-            host: breezewiki.default.svc.cluster.local
+            host: breezewiki.breezewiki.svc.cluster.local
