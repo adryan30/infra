@@ -18,6 +18,10 @@ spec:
         global:
           rbac:
             createAggregateClusterRoles: true
+        prometheus:
+          prometheusSpec:
+            podMonitorSelectorNilUsesHelmValues: false
+            serviceMonitorSelectorNilUsesHelmValues: false
         nameOverride: monitoring
         fullnameOverride: monitoring
 
