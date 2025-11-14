@@ -20,24 +20,18 @@ spec:
             containers:
               main:
                 image:
-                  repository: muniftanjim/stremthru
+                  repository: caomingjun/warp
                   tag: latest
-              envFrom:
-                - secretRef:
-                    name: stremthru-env
+                securityContext:
+                  capabilities:
+                    add:
+                      - NET_ADMIN
         service:
           main:
             controller: main
             ports:
               http:
-                port: 3000
-        persistence:
-          data:
-            accessMode: ReadWriteOnce
-            size: 5Gi
-            type: persistentVolumeClaim
-            globalMounts:
-              - path: /app/data
+                port: 1080
 
   destination:
     server: https://kubernetes.default.svc
