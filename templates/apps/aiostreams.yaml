@@ -22,6 +22,9 @@ spec:
                 image:
                   repository: ghcr.io/viren070/aiostreams
                   tag: latest
+                envFrom:
+                  - secretRef:
+                      name: aiostreams-env
         service:
           main:
             controller: main
