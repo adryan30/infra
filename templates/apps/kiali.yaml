@@ -9,3 +9,7 @@ spec:
   external_services:
     prometheus:
       url: "http://monitoring-prometheus.monitoring:9090/"
+    grafana:
+      enabled: true
+      internal_url: "http://monitoring-grafana.monitoring:3000/"
+      external_url: "http://grafana.adryan.me/grafana"
