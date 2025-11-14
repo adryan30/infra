@@ -22,7 +22,16 @@ spec:
     server: https://kubernetes.default.svc
     namespace: monitoring
 
+  ignoreDifferences:
+    - group: "v1"
+      kind: "ConfigMap"
+      jsonPointers:
+        - /data/grafana.ini
+
   syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istion-injection: enabled
     automated:
       enabled: true
       prune: true
@@ -30,6 +39,7 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
 
     retry:
       limit: 5
