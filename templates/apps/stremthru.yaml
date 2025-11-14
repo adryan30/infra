@@ -22,9 +22,9 @@ spec:
                 image:
                   repository: muniftanjim/stremthru
                   tag: latest
-              envFrom:
-                - secretRef:
-                    name: stremthru-env
+                envFrom:
+                  - secretRef:
+                      name: stremthru-env
         service:
           main:
             controller: main
