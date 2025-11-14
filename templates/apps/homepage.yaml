@@ -16,7 +16,7 @@ spec:
     helm:
       valuesObject:
         image:
-          tag: "1.7.0"
+          tag: "latest"
         config:
           allowedHosts:
             - home.adryan.me
