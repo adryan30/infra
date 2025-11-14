@@ -5,7 +5,7 @@ metadata:
   namespace: istio-system
 spec:
   auth:
-    strategy: header
+    strategy: anonymous
   external_services:
     prometheus:
       url: "http://monitoring-prometheus.monitoring:9090/"
