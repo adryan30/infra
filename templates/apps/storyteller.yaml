@@ -24,7 +24,7 @@ spec:
                   tag: latest
                 envFrom:
                   - secretRef:
-                      identifier: storyteller-env
+                      name: storyteller-env
         service:
           main:
             controller: main
