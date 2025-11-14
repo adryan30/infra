@@ -1,13 +1,13 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: calibre
+  name: calibre-downloader
   namespace: istio-ingress
   labels:
     app: calibre
 spec:
   hosts:
-    - "calibre.adryan.me"
+    - "cdownloader.adryan.me"
   gateways:
     - public
   http:
@@ -17,5 +17,5 @@ spec:
       route:
         - destination:
             port:
-              number: 8083
-            host: calibre-main.books.svc.cluster.local
+              number: 8084
+            host: calibre-downloader.books.svc.cluster.local
