@@ -20,7 +20,7 @@ spec:
             containers:
               main:
                 image:
-                  repository: ghcr.io/viren070/stremthru
+                  repository: muniftanjim/stremthru
                   tag: latest
         service:
           main:
