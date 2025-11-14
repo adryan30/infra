@@ -29,6 +29,11 @@ spec:
             existingSecret: monitoring-grafana-admin
             userKey: user
             passwordKey: password
+          persistence:
+            enabled: true
+            accessModes:
+              - ReadWriteOnce
+            size: 5Gi
 
   destination:
     server: https://kubernetes.default.svc
