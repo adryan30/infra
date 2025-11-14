@@ -13,4 +13,5 @@ spec:
   rules:
     - to:
         - operation:
-            hosts: ["longhorn.adryan.me", "grafana.adryan.me"]
+            hosts:
+              ["longhorn.adryan.me", "grafana.adryan.me", "kiali.adryan.me"]
