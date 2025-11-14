@@ -23,7 +23,7 @@ spec:
     namespace: monitoring
 
   ignoreDifferences:
-    - group: "v1"
+    - group: "apps"
       kind: "ConfigMap"
       jsonPointers:
         - /data/grafana.ini
