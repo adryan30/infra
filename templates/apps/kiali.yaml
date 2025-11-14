@@ -6,3 +6,6 @@ metadata:
 spec:
   auth:
     strategy: anonymous
+  external_services:
+    prometheus:
+      url: "http://monitoring-prometheus.monitoring:9090/"
