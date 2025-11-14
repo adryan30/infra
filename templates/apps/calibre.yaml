@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: stremthru
+  name: calibre
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    name: stremthru
+    name: calibre
 spec:
   project: default
   source:
@@ -20,28 +20,42 @@ spec:
             containers:
               main:
                 image:
-                  repository: muniftanjim/stremthru
+                  repository: crocodilestick/calibre-web-automated
                   tag: latest
-                envFrom:
-                  - secretRef:
-                      name: stremthru-env
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: "America/Bahia"
+                  CWA_PORT_OVERRIDE: "8083"
         service:
           main:
             controller: main
             ports:
               http:
-                port: 8080
+                port: 8083
         persistence:
-          data:
+          config:
             accessMode: ReadWriteOnce
-            size: 5Gi
+            size: 1Gi
             type: persistentVolumeClaim
             globalMounts:
-              - path: /app/data
+              - path: /config
+          ingest:
+            accessMode: ReadWriteOnce
+            size: 4Gi
+            type: persistentVolumeClaim
+            globalMounts:
+              - path: /cwa-book-ingest
+          library:
+            accessMode: ReadWriteOnce
+            size: 20Gi
+            type: persistentVolumeClaim
+            globalMounts:
+              - path: /calibre-library
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: streaming
+    namespace: books
 
   syncPolicy:
     managedNamespaceMetadata:
