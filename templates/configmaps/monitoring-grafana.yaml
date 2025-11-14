@@ -17,14 +17,14 @@ data:
 kind: ConfigMap
 metadata:
   annotations:
-    argocd.argoproj.io/tracking-id: observability:/ConfigMap:observability/observability-grafana
-  creationTimestamp: "2025-11-13T23:46:52Z"
+    argocd.argoproj.io/tracking-id: monitoring:/ConfigMap:monitoring/monitoring-grafana
+  creationTimestamp: "2025-11-14T00:39:09Z"
   labels:
-    app.kubernetes.io/instance: observability
+    app.kubernetes.io/instance: monitoring
     app.kubernetes.io/name: grafana
     app.kubernetes.io/version: 12.2.1
     helm.sh/chart: grafana-10.1.4
-  name: observability-grafana
-  namespace: observability
-  resourceVersion: "1700207"
-  uid: 2baddaab-a661-4889-a3c3-f45808afc2c7
+  name: monitoring-grafana
+  namespace: monitoring
+  resourceVersion: "1716851"
+  uid: 17e434cd-cb16-4a7b-8747-0868f1969bd0
