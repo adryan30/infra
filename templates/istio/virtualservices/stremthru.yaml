@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: stremthru
+  namespace: istio-ingress
+  labels:
+    app: stremthru
+spec:
+  hosts:
+    - "stremthru.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 3000
+            host: stremthru.streaming.svc.cluster.local
