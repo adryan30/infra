@@ -27,12 +27,33 @@ spec:
                   PGID: "1000"
                   TZ: "America/Bahia"
                   CWA_PORT_OVERRIDE: "8083"
+              downloader:
+                dependsOn: main
+                image:
+                  repository: ghcr.io/calibrain/calibre-web-automated-book-downloader
+                  tag: latest
+                env:
+                  FLASK_PORT: 8084
+                  LOG_LEVEL: info
+                  BOOK_LANGUAGE: en
+                  USE_BOOK_TITLE: true
+                  TZ: America/Bahia
+                  APP_ENV: prod
+                  UID: 1000
+                  GID: 100
+                  MAX_CONCURRENT_DOWNLOADS: 3
+                  DOWNLOAD_PROGRESS_UPDATE_INTERVAL: 5
         service:
           main:
             controller: main
             ports:
               http:
                 port: 8083
+          downloader:
+            controller: main
+            ports:
+              http:
+                port: 8084
         persistence:
           config:
             accessMode: ReadWriteOnce
