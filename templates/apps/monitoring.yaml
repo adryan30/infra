@@ -17,11 +17,6 @@ spec:
       valuesObject:
         nameOverride: monitoring
         fullnameOverride: monitoring
-        prometheusOperator:
-          namespaces:
-            releaseNamespace: true
-            additional:
-              - argocd
 
   destination:
     server: https://kubernetes.default.svc
