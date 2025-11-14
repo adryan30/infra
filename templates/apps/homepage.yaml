@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: homepage
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: homepage
+spec:
+  project: default
+  source:
+    repoURL: oci://registry-1.docker.io/cloudpirates/homepage
+    targetRevision: 4.3.0
+    path: .
+    helm:
+      valuesObject:
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: homepage
+
+  info:
+    - name: "Homepage:"
+      value: "https://home.adryan.me"
+
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
