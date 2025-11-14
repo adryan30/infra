@@ -10,7 +10,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://registry-1.docker.io/cloudpirates/homepage
+    repoURL: oci://ghcr.io/m0nsterrr/helm-charts/homepage
     targetRevision: 4.3.0
     path: .
     helm:
