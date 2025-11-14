@@ -17,5 +17,5 @@ spec:
       route:
         - destination:
             port:
-              number: 3000
+              number: 8080
             host: stremthru.streaming.svc.cluster.local
