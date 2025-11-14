@@ -15,8 +15,8 @@ spec:
     repoURL: https://github.com/istio/istio.git
     path: samples/addons
     targetRevision: release-1.28
-    directory:
-      include: "{prometheus.yml,grafana.yml}"
+    # directory:
+    #   include: "{prometheus.yml,grafana.yml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: istio-system
