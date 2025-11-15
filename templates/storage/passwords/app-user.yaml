@@ -30,6 +30,7 @@ apiVersion: external-secrets.io/v1alpha1
 kind: PushSecret
 metadata:
   name: app-user-pushsecret
+  namespace: storage
 spec:
   deletionPolicy: Delete
   refreshInterval: 24h
