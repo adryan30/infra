@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arr
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: arr
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.4.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          prowlarr:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/prowlarr
+                  tag: latest
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: "America/Bahia"
+        service:
+          prowlarr:
+            controller: prowlarr
+            ports:
+              http:
+                port: 9696
+        persistence:
+          prowlarr-config:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+            advancedMounts:
+              prowlarr:
+                main:
+                  - path: /config
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arr
+
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
