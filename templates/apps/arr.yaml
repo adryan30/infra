@@ -36,6 +36,10 @@ spec:
                 image:
                   repository: caomingjun/warp
                   tag: latest
+                securityContext:
+                  capabilities:
+                    add:
+                      - NET_ADMIN
                 env:
                   WARP_SLEEP: 2
         service:
