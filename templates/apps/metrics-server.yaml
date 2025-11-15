@@ -13,8 +13,9 @@ spec:
     repoURL: https://kubernetes-sigs.github.io/metrics-server/
     targetRevision: 3.13.0
     chart: metrics-server
-    valuesObject:
-      replicas: 2
+    helm:
+      valuesObject:
+        replicas: 2
 
   destination:
     server: https://kubernetes.default.svc
