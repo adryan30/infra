@@ -18,4 +18,4 @@ spec:
         - destination:
             port:
               number: 9696
-            host: prowlarr.arr.svc.cluster.local
+            host: arr-prowlarr.arr.svc.cluster.local
