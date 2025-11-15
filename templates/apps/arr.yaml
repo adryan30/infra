@@ -29,27 +29,26 @@ spec:
                   TZ: "America/Bahia"
                   PROWLARR__SERVER__URLBASE: /prowlarr
                   PROWLARR__AUTH__METHOD: EXTERNAL
-          flaresolverr:
+          warp:
             strategy: RollingUpdate
             containers:
               main:
                 image:
-                  repository: ghcr.io/flaresolverr/flaresolverr
+                  repository: caomingjun/warp
                   tag: latest
                 env:
-                  LOG_LEVEL: "DEBUG"
-                  TEST_URL: "https://torrentio.strem.fun/"
+                  WARP_SLEEP: 2
         service:
           prowlarr:
             controller: prowlarr
             ports:
               http:
                 port: 9696
-          flaresolverr:
-            controller: flaresolverr
+          warp:
+            controller: warp
             ports:
               http:
-                port: 8191
+                port: 1080
         persistence:
           prowlarr-config:
             accessMode: ReadWriteOnce
