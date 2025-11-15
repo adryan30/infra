@@ -13,7 +13,7 @@ spec:
         labels:
           cnpg.io/reload: "true"
       data:
-        password: "{{ .password }}"
+        password: "{{ .password | b64dec }}"
         pgpass: "sphere-rw:5432:app:app:{{ .password }}"
         jdbc-uri: "jdbc:postgresql://sphere-rw.default:5432/app?password={{ .password }}&user=app"
         uri: "postgresql://app:{{ .password }}@sphere-rw.default:5432/app"
