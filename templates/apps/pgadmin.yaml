@@ -21,5 +21,3 @@ spec:
   serverGroups:
     - name: supply
       postgresClusterSelector: {}
-    - name: name-discovery
-      postgresClusterName: broam
