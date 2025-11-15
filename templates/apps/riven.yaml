@@ -37,7 +37,7 @@ spec:
                   TZ: "America/Bahia"
                 envFrom:
                   - secretRef:
-                      identifier: riven-db-credentials
+                      name: riven-db-credentials
         service:
           main:
             controller: main
