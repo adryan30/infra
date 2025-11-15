@@ -12,6 +12,7 @@ spec:
       - name: app
         createdb: true
         login: true
+        superuser: true
       - name: keycloak
         createdb: false
         login: true
