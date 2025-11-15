@@ -31,6 +31,8 @@ kind: PushSecret
 metadata:
   name: app-user-pushsecret
   namespace: storage
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   deletionPolicy: Delete
   refreshInterval: 24h
