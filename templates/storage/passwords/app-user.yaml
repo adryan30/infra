@@ -13,7 +13,7 @@ spec:
         labels:
           cnpg.io/reload: "true"
       data:
-        password: "{{ .password | b64dec }}"
+        password: "{{ .password }}"
         pgpass: "sphere-rw:5432:app:app:{{ .password }}"
         jdbc-uri: "jdbc:postgresql://sphere-rw.default:5432/app?password={{ .password }}&user=app"
         uri: "postgresql://app:{{ .password }}@sphere-rw.default:5432/app"
@@ -22,4 +22,4 @@ spec:
         generatorRef:
           apiVersion: generators.external-secrets.io/v1alpha1
           kind: ClusterGenerator
-          name: cnpg-passgen
+          name: "cnpg-passgen"
