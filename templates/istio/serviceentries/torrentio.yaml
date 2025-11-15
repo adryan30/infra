@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: torrentio-https
+spec:
+  hosts:
+    - torrentio.strem.fun
+  location: MESH_EXTERNAL
+  ports:
+    - number: 443
+      name: https
+      protocol: TLS
+  resolution: DNS

@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: argocd
+  namespace: istio-ingress
+  labels:
+    app: argocd
+spec:
+  hosts:
+    - "flaresolverr.streaming.svc.cluster.local"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 8091
+            host: flaresolverr.streaming.svc.cluster.local
