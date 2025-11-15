@@ -39,7 +39,7 @@ spec:
   refreshInterval: 24h
   secretStoreRefs:
     - name: vault
-      kind: SecretStore
+      kind: ClusterSecretStore
   selector:
     secret:
       name: sphere-keycloak
