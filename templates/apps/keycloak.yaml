@@ -25,12 +25,12 @@ spec:
           hostname: auth.adryan.me
         database:
           type: postgres
-          host: broam-primary.default.svc
+          host: sphere-rw.storage.svc.default.svc
           port: "5432"
           schema: keycloak
           existingSecret: "keycloak-db-credentials"
           secretKeys:
-            usernameKey: "user"
+            usernameKey: "username"
             passwordKey: "password"
         postgres:
           enabled: false
