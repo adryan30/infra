@@ -1,0 +1,26 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: app-user
+  namespace: storage
+spec:
+  refreshInterval: "24h"
+  target:
+    name: cluster-chip-app
+    creationPolicy: Merge
+    template:
+      metadata:
+        labels:
+          cnpg.io/reload: "true"
+      data:
+        password: "{{ .password }}"
+        pgpass: "cluster-chip-rw:5432:app:app:{{ .password }}"
+        jdbc-uri: "jdbc:postgresql://cluster-chip-rw.default:5432/app?password={{ .password }}&user=app"
+        uri: "postgresql://app:{{ .password }}@cluster-chip-rw.default:5432/app"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: Password
+          name: cnpg-passgen
+          namespace: storage
