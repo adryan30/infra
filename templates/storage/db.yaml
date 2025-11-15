@@ -10,14 +10,10 @@ spec:
     - name: potato
       databases:
         - keycloak
-        - aiostreams
       options: "SUPERUSER"
     - name: keycloak
       databases:
         - keycloak
-    - name: aiostreams
-      databases:
-        - aiostreams
   patroni:
     dynamicConfiguration:
       postgresql:
