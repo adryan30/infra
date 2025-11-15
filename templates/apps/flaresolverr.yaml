@@ -23,6 +23,8 @@ spec:
                 image:
                   repository: ghcr.io/flaresolverr/flaresolverr
                   tag: latest
+                env:
+                  LOG_LEVEL: "DEBUG"
         service:
           main:
             controller: main
