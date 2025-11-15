@@ -35,6 +35,7 @@ spec:
                   tag: latest
                 env:
                   TZ: "America/Bahia"
+                  BACKEND_URL: http://riven-main.streaming.svc.cluster.local:8080
                 envFrom:
                   - secretRef:
                       name: riven-db-credentials
