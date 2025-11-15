@@ -27,7 +27,7 @@ spec:
                   PGID: "1000"
                   TZ: "America/Bahia"
                   RIVEN_FORCE_ENV: "true"
-
+                  RIVEN_FILESYSTEM_MOUNT_PATH: /mount
               frontend:
                 dependsOn: main
                 image:
