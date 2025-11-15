@@ -12,3 +12,22 @@ spec:
       - name: app
         createdb: true
         login: true
+      - name: keycloak
+        createdb: false
+        login: true
+        passwordSecret:
+          name: sphere-keycloak
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: keycloak-db
+  namespace: storage
+spec:
+  name: keycloak
+  owner: keycloak
+  cluster:
+    name: sphere
+  schemas:
+    - name: keycloak
+      owner: keycloak

@@ -1,0 +1,30 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: keycloak-user
+  namespace: storage
+spec:
+  refreshInterval: "24h"
+  target:
+    name: sphere-keycloak
+    template:
+      metadata:
+        labels:
+          cnpg.io/reload: "true"
+      data:
+        password: "{{ .password }}"
+        pgpass: "sphere-rw:5432:keycloak:keycloak:{{ .password }}"
+        jdbc-uri: "jdbc:postgresql://sphere-rw.default:5432/keycloak?password={{ .password }}&user=keycloak"
+        uri: "postgresql://keycloak:{{ .password }}@sphere-rw.default:5432/keycloak"
+        fqdn-jdbc-uri: jdbc:postgresql://sphere-rw.storage.svc.cluster.local:5432/keycloak?password={{ .password }}&user=keycloak
+        fqdn-uri: postgresql://keycloak:{{ .password }}@sphere-rw.storage.svc.cluster.local:5432/keycloak
+        port: "5432"
+        host: "sphere-rw"
+        user: "keycloak"
+        username: "keycloak"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ClusterGenerator
+          name: "cnpg-passgen"
