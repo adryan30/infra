@@ -51,6 +51,7 @@ spec:
                 port: 1080
         persistence:
           prowlarr-config:
+            nameOverride: prowlarr
             accessMode: ReadWriteOnce
             size: 1Gi
             type: persistentVolumeClaim
