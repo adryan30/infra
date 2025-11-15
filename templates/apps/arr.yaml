@@ -28,6 +28,7 @@ spec:
                   PGID: "1000"
                   TZ: "America/Bahia"
                   PROWLARR__SERVER__URLBASE: /prowlarr
+                  PROWLARR__AUTH__METHOD: EXTERNAL
           flaresolverr:
             strategy: RollingUpdate
             containers:
