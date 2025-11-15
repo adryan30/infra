@@ -28,6 +28,9 @@ spec:
                   TZ: "America/Bahia"
                   RIVEN_FORCE_ENV: "true"
                   RIVEN_FILESYSTEM_MOUNT_PATH: /mount
+                envFrom:
+                  - secretRef:
+                      name: riven-db-credentials
               frontend:
                 dependsOn: main
                 image:
