@@ -38,7 +38,7 @@ metadata:
     reloader.stakater.com/auto: "true"
 spec:
   deletionPolicy: Delete
-  refreshInterval: 24h
+  refreshInterval: 10s
   secretStoreRefs:
     - name: vault
       kind: ClusterSecretStore
