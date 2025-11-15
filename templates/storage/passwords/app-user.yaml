@@ -25,3 +25,21 @@ spec:
           apiVersion: generators.external-secrets.io/v1alpha1
           kind: ClusterGenerator
           name: "cnpg-passgen"
+---
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: app-user-pushsecret
+spec:
+  deletionPolicy: Delete
+  refreshInterval: 24h
+  secretStoreRefs:
+    - name: vault
+      kind: SecretStore
+  selector:
+    secret:
+      name: sphere-app
+  data:
+    - match:
+        remoteRef:
+          remoteKey: storage/sphere-app
