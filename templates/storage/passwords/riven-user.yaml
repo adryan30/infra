@@ -1,0 +1,49 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: riven-user
+  namespace: storage
+spec:
+  refreshInterval: "24h"
+  target:
+    name: sphere-riven
+    template:
+      metadata:
+        labels:
+          cnpg.io/reload: "true"
+      data:
+        password: "{{ `{{ .password }}` }}"
+        pgpass: "sphere-rw:5432:riven:riven:{{`{{ .password }}`}}"
+        jdbc-uri: "jdbc:postgresql://sphere-rw.default:5432/riven?password={{`{{ .password }}`}}&user=riven"
+        uri: "postgresql://riven:{{`{{ .password }}`}}@sphere-rw.default:5432/riven"
+        fqdn-jdbc-uri: "jdbc:postgresql://sphere-rw.storage.svc.cluster.local:5432/riven?password={{`{{ .password }}`}}&user=riven"
+        fqdn-uri: "postgresql://riven:{{`{{ .password }}`}}@sphere-rw.storage.svc.cluster.local:5432/riven"
+        port: "5432"
+        host: "sphere-rw"
+        user: "riven"
+        username: "riven"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ClusterGenerator
+          name: "cnpg-passgen"
+---
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: riven-user-pushsecret
+  namespace: storage
+spec:
+  deletionPolicy: Delete
+  refreshInterval: 24h
+  secretStoreRefs:
+    - name: vault
+      kind: ClusterSecretStore
+  selector:
+    secret:
+      name: sphere-riven
+  data:
+    - match:
+        remoteRef:
+          remoteKey: storage/sphere-riven
