@@ -6,7 +6,7 @@ metadata:
 spec:
   refreshInterval: "24h"
   target:
-    name: cluster-chip-app
+    name: sphere-app
     creationPolicy: Merge
     template:
       metadata:
@@ -14,9 +14,9 @@ spec:
           cnpg.io/reload: "true"
       data:
         password: "{{ .password }}"
-        pgpass: "cluster-chip-rw:5432:app:app:{{ .password }}"
-        jdbc-uri: "jdbc:postgresql://cluster-chip-rw.default:5432/app?password={{ .password }}&user=app"
-        uri: "postgresql://app:{{ .password }}@cluster-chip-rw.default:5432/app"
+        pgpass: "sphere-rw:5432:app:app:{{ .password }}"
+        jdbc-uri: "jdbc:postgresql://sphere-rw.default:5432/app?password={{ .password }}&user=app"
+        uri: "postgresql://app:{{ .password }}@sphere-rw.default:5432/app"
   dataFrom:
     - sourceRef:
         generatorRef:
