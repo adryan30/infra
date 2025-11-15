@@ -17,6 +17,8 @@ spec:
       valuesObject:
         controllers:
           main:
+            annotations:
+              reloader.stakater.com/auto: "true"
             containers:
               main:
                 image:
