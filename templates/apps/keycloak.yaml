@@ -25,7 +25,7 @@ spec:
           hostname: auth.adryan.me
         database:
           type: postgres
-          host: sphere-rw.storage.svc.default.svc
+          host: sphere-rw.storage.svc.cluster.local
           port: "5432"
           schema: keycloak
           existingSecret: "keycloak-db-credentials"
