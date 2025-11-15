@@ -13,7 +13,7 @@ spec:
   http:
     - match:
         - uri:
-            prefix: /
+            prefix: /prowlarr
       route:
         - destination:
             port:
