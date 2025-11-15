@@ -1,0 +1,14 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: sphere
+  namespace: storage
+spec:
+  instances: 2
+  storage:
+    size: 10Gi
+  managed:
+    roles:
+      - name: app
+        createdb: true
+        login: true
