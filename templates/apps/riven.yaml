@@ -18,6 +18,8 @@ spec:
         controllers:
           main:
             strategy: RollingUpdate
+            nodeSelector:
+              kubernetes.io/hostname: shardblade-001
             annotations:
               reloader.stakater.com/auto: "true"
             containers:
