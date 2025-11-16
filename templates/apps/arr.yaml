@@ -87,12 +87,6 @@ spec:
               http:
                 port: 9117
         persistence:
-          shared:
-            accessMode: ReadWriteOnce
-            size: 1Gi
-            type: persistentVolumeClaim
-            globalMounts:
-              - path: /shared
           prowlarr-config:
             accessMode: ReadWriteOnce
             size: 1Gi
