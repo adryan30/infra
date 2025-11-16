@@ -41,6 +41,10 @@ spec:
             accessMode: ReadWriteOnce
             size: 20Gi
             type: persistentVolumeClaim
+          mount:
+            enabled: true
+            type: persistentVolumeClaim
+            existingClaim: riven-riven-backend-mount
 
   destination:
     server: https://kubernetes.default.svc
