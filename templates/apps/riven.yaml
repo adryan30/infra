@@ -73,7 +73,7 @@ spec:
             advancedMounts:
               main:
                 main:
-                  - path: /mount/rclone
+                  - path: /rclone
           riven-backend-mount:
             accessMode: ReadWriteMany
             size: 5Gi
