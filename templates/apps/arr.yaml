@@ -53,6 +53,18 @@ spec:
                   PUID: "1000"
                   PGID: "1000"
                   TZ: "America/Bahia"
+          jackett:
+            strategy: RollingUpdate
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/jackett
+                  tag: latest
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: "America/Bahia"
+                  AUTO_UPDATE: "true"
         service:
           prowlarr:
             controller: prowlarr
@@ -69,6 +81,11 @@ spec:
             ports:
               http:
                 port: 5055
+          jackett:
+            controller: jackett
+            ports:
+              http:
+                port: 9117
         persistence:
           shared:
             accessMode: ReadWriteOnce
