@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: overseer
+  namespace: istio-ingress
+  labels:
+    app: overseer
+spec:
+  hosts:
+    - "overseer.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 5055
+            host: arr-overseer.arr.svc.cluster.local

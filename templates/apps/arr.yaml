@@ -42,6 +42,17 @@ spec:
                       - NET_ADMIN
                 env:
                   WARP_SLEEP: 2
+          overseer:
+            strategy: RollingUpdate
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/overseerr
+                  tag: latest
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: "America/Bahia"
         service:
           prowlarr:
             controller: prowlarr
@@ -53,6 +64,11 @@ spec:
             ports:
               http:
                 port: 1080
+          overseer:
+            controller: overseer
+            ports:
+              http:
+                port: 5055
         persistence:
           shared:
             accessMode: ReadWriteOnce
@@ -66,6 +82,14 @@ spec:
             type: persistentVolumeClaim
             advancedMounts:
               prowlarr:
+                main:
+                  - path: /config
+          overseer-config:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+            advancedMounts:
+              overseer:
                 main:
                   - path: /config
 
