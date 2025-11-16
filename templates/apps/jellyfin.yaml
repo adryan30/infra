@@ -1,90 +1,90 @@
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: jellyfin
-#   namespace: argocd
-#   finalizers:
-#     - resources-finalizer.argocd.argoproj.io
-#   labels:
-#     name: jellyfin
-# spec:
-#   project: default
-#   source:
-#     repoURL: https://bjw-s-labs.github.io/helm-charts
-#     targetRevision: 4.4.0
-#     chart: app-template
-#     helm:
-#       valuesObject:
-#         defaultPodOptions:
-#           affinity:
-#             nodeAffinity:
-#               requiredDuringSchedulingIgnoredDuringExecution:
-#                 nodeSelectorTerms:
-#                   - matchExpressions:
-#                       - key: kubernetes.io/hostname
-#                         operator: In
-#                         values:
-#                           - shardblade-001
-#         controllers:
-#           main:
-#             strategy: RollingUpdate
-#             annotations:
-#               reloader.stakater.com/auto: "true"
-#             containers:
-#               main:
-#                 image:
-#                   repository: lscr.io/linuxserver/jellyfin
-#                   tag: latest
-#                 env:
-#                   PUID: "1000"
-#                   PGID: "1000"
-#                   TZ: "America/Bahia"
-#                   JELLYFIN_PublishedServerUrl: "https://jellyfin.adryan.me"
-#         service:
-#           main:
-#             controller: main
-#             ports:
-#               http:
-#                 port: 8096
-#         persistence:
-#           config:
-#             accessMode: ReadWriteOnce
-#             size: 5Gi
-#             type: persistentVolumeClaim
-#           mount:
-#             enabled: true
-#             type: persistentVolumeClaim
-#             existingClaim: riven-riven-backend-mount
-#           rclone:
-#             type: hostPath
-#             enabled: true
-#             hostPath: /mnt/rd
-#             advancedMounts:
-#               main:
-#                 main:
-#                   - path: /rclone
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: jellyfin
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: jellyfin
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.4.0
+    chart: app-template
+    helm:
+      valuesObject:
+        defaultPodOptions:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: In
+                        values:
+                          - shardblade-001
+        controllers:
+          main:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/jellyfin
+                  tag: latest
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: "America/Bahia"
+                  JELLYFIN_PublishedServerUrl: "https://jellyfin.adryan.me"
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 8096
+        persistence:
+          config:
+            accessMode: ReadWriteOnce
+            size: 5Gi
+            type: persistentVolumeClaim
+          mount:
+            enabled: true
+            type: persistentVolumeClaim
+            existingClaim: riven-riven-backend-mount
+          rclone:
+            type: hostPath
+            enabled: true
+            hostPath: /mnt/rd
+            advancedMounts:
+              main:
+                main:
+                  - path: /rclone
 
-#   destination:
-#     server: https://kubernetes.default.svc
-#     namespace: streaming
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: streaming
 
-#   syncPolicy:
-#     managedNamespaceMetadata:
-#       labels:
-#         istio-injection: enabled
-#     automated:
-#       enabled: true
-#       prune: true
-#       selfHeal: true
-#     syncOptions:
-#       - CreateNamespace=true
-#       - ServerSideApply=true
-#       - RespectIgnoreDifferences=true
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
 
-#     retry:
-#       limit: 5
-#       backoff:
-#         duration: 5s
-#         factor: 2
-#         maxDuration: 3m
-#   revisionHistoryLimit: 3
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
