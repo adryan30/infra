@@ -18,8 +18,16 @@ spec:
         controllers:
           main:
             strategy: RollingUpdate
-            nodeSelector:
-              kubernetes.io/hostname: shardblade-001
+            defaultPodOptions:
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                      - matchExpressions:
+                          - key: kubernetes.io/hostname
+                            operator: In
+                            values:
+                              - shardblade-001
             annotations:
               reloader.stakater.com/auto: "true"
             containers:
