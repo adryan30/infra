@@ -66,6 +66,14 @@ spec:
               main:
                 main:
                   - path: /riven/data
+          riven-backend-rclone:
+            type: hostPath
+            enabled: true
+            hostPath: /mnt/rd
+            advancedMounts:
+              main:
+                main:
+                  - path: /mount/rclone
           riven-backend-mount:
             accessMode: ReadWriteMany
             size: 5Gi
@@ -73,7 +81,7 @@ spec:
             advancedMounts:
               main:
                 main:
-                  - path: /mount
+                  - path: /mount/library
           riven-frontend:
             accessMode: ReadWriteOnce
             size: 1Gi
