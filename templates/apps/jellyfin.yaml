@@ -45,6 +45,14 @@ spec:
             enabled: true
             type: persistentVolumeClaim
             existingClaim: riven-riven-backend-mount
+          rclone:
+            type: hostPath
+            enabled: true
+            hostPath: /mnt/rd
+            advancedMounts:
+              main:
+                main:
+                  - path: /rclone
 
   destination:
     server: https://kubernetes.default.svc
