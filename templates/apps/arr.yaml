@@ -42,7 +42,7 @@ spec:
                       - NET_ADMIN
                 env:
                   WARP_SLEEP: 2
-          overseer:
+          overseerr:
             strategy: RollingUpdate
             containers:
               main:
@@ -64,8 +64,8 @@ spec:
             ports:
               http:
                 port: 1080
-          overseer:
-            controller: overseer
+          overseerr:
+            controller: overseerr
             ports:
               http:
                 port: 5055
@@ -84,12 +84,12 @@ spec:
               prowlarr:
                 main:
                   - path: /config
-          overseer-config:
+          overseerr-config:
             accessMode: ReadWriteOnce
             size: 1Gi
             type: persistentVolumeClaim
             advancedMounts:
-              overseer:
+              overseerr:
                 main:
                   - path: /config
 
