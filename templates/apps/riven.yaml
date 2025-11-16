@@ -15,19 +15,19 @@ spec:
     chart: app-template
     helm:
       valuesObject:
+        defaultPodOptions:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: In
+                        values:
+                          - shardblade-001
         controllers:
           main:
             strategy: RollingUpdate
-            defaultPodOptions:
-              affinity:
-                nodeAffinity:
-                  requiredDuringSchedulingIgnoredDuringExecution:
-                    nodeSelectorTerms:
-                      - matchExpressions:
-                          - key: kubernetes.io/hostname
-                            operator: In
-                            values:
-                              - shardblade-001
             annotations:
               reloader.stakater.com/auto: "true"
             containers:
