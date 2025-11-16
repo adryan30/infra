@@ -103,6 +103,14 @@ spec:
               overseerr:
                 main:
                   - path: /config
+          jackett-config:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+            advancedMounts:
+              jackett:
+                main:
+                  - path: /config
 
   destination:
     server: https://kubernetes.default.svc
