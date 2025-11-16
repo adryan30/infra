@@ -81,7 +81,7 @@ spec:
             advancedMounts:
               main:
                 main:
-                  - path: /mount/library
+                  - path: /library
           riven-frontend:
             accessMode: ReadWriteOnce
             size: 1Gi
