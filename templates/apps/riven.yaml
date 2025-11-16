@@ -74,6 +74,20 @@ spec:
               main:
                 main:
                   - path: /rclone
+          mock-rclone:
+            type: emptyDir
+            enabled: true
+            advancedMounts:
+              main:
+                main:
+                  - path: /mount/rclone
+          mock-lib:
+            type: emptyDir
+            enabled: true
+            advancedMounts:
+              main:
+                main:
+                  - path: /mount/library
           riven-backend-mount:
             accessMode: ReadWriteMany
             size: 5Gi
