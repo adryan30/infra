@@ -41,7 +41,7 @@ spec:
                       app: breezewiki
                 - Books:
                     - Calibre:
-                        icon: sh-Calibre-Web
+                        icon: sh-calibre-web
                         href: https://calibre.adryan.me
                         description: E-Book Management
                         widget:
@@ -50,7 +50,7 @@ spec:
                           namespace: books
                           app: calibre
                     - Calibre Downloader:
-                        icon: sh-Calibre-Web-Automated-Book-Downloader
+                        icon: sh-calibre-web-automated-book-downloader
                         href: https://cdownloader.adryan.me
                         description: E-Book Downloader
                         widget:
@@ -59,7 +59,7 @@ spec:
                           namespace: books
                           app: calibre
                     - Storyteller:
-                        icon: sh-Storyteller
+                        icon: sh-storyteller
                         href: https://storyteller.adryan.me
                         description: EPUB 3 Content Layers Alignment Tool
                         widget:
@@ -69,7 +69,7 @@ spec:
                           app: storyteller
                 - Infra:
                     - Longhorn:
-                        icon: sh-Longhorn
+                        icon: sh-longhorn
                         href: https://longhorn.adryan.me
                         description: Distributed Block Storage for Kubernetes
                         widget:
@@ -78,7 +78,7 @@ spec:
                           namespace: longhorn
                           app: longhorn
                     - Keycloak:
-                        icon: sh-Keycloak
+                        icon: sh-keycloak
                         href: https://auth.adryan.me
                         description: Identity and Access Management
                         widget:
@@ -87,7 +87,7 @@ spec:
                           namespace: keycloak
                           app: keycloak
                     - Vault:
-                        icon: sh-Vault
+                        icon: sh-hashicorp-vault
                         href: https://vault.adryan.me
                         description: Secrets Management
                         widget:
