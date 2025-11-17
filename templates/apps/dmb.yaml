@@ -86,18 +86,30 @@ spec:
             accessMode: ReadWriteOnce
             size: 1Gi
             type: persistentVolumeClaim
-          plex_debrid:
+          plex-debrid:
             accessMode: ReadWriteOnce
             size: 1Gi
             type: persistentVolumeClaim
-          cli_debrid:
+            advancedMounts:
+              main:
+                main:
+                  - path: /plex_debrid
+          cli-debrid:
             accessMode: ReadWriteOnce
             size: 1Gi
             type: persistentVolumeClaim
-          phalanx_db:
+            advancedMounts:
+              main:
+                main:
+                  - path: /cli_debrid
+          phalanx-db:
             accessMode: ReadWriteOnce
             size: 1Gi
             type: persistentVolumeClaim
+            advancedMounts:
+              main:
+                main:
+                  - path: /phalanx_db
           decypharr:
             accessMode: ReadWriteOnce
             size: 1Gi
