@@ -22,10 +22,12 @@ spec:
             value: "home.adryan.me"
         config:
           services:
-            - Cluster:
+            - General:
                 - Homepage:
+                    icon: sh-homepage
                     href: https://home.adryan.me
                     description: Application Dashboard
+                    siteMonitor: https://home.adryan.me
                     widget:
                       type: kubernetes
                       cluster: default
@@ -39,20 +41,21 @@ spec:
                       cluster: default
                       namespace: breezewiki
                       app: breezewiki
+                    siteMonitor: https://breeze.adryan.me
                 - Books:
                     - Calibre:
                         icon: sh-calibre-web
                         href: https://calibre.adryan.me
                         description: E-Book Management
+                        siteMonitor: https://calibre.adryan.me
                         widget:
-                          type: kubernetes
-                          cluster: default
-                          namespace: books
-                          app: calibre
+                          type: calibreweb
+                          url: https://calibre.adryan.me
                     - Calibre Downloader:
                         icon: sh-calibre-web-automated-book-downloader
                         href: https://cdownloader.adryan.me
                         description: E-Book Downloader
+                        siteMonitor: https://cdownloader.adryan.me
                         widget:
                           type: kubernetes
                           cluster: default
@@ -62,6 +65,7 @@ spec:
                         icon: sh-storyteller
                         href: https://storyteller.adryan.me
                         description: EPUB 3 Content Layers Alignment Tool
+                        siteMonitor: https://storyteller.adryan.me
                         widget:
                           type: kubernetes
                           cluster: default
@@ -69,9 +73,10 @@ spec:
                           app: storyteller
                 - Infra:
                     - Longhorn:
-                        icon: sh-longhorn
+                        icon: sh-rancher-longhorn
                         href: https://longhorn.adryan.me
                         description: Distributed Block Storage for Kubernetes
+                        siteMonitor: https://longhorn.adryan.me
                         widget:
                           type: kubernetes
                           cluster: default
@@ -81,6 +86,7 @@ spec:
                         icon: sh-keycloak
                         href: https://auth.adryan.me
                         description: Identity and Access Management
+                        siteMonitor: https://auth.adryan.me
                         widget:
                           type: kubernetes
                           cluster: default
@@ -90,11 +96,22 @@ spec:
                         icon: sh-hashicorp-vault
                         href: https://vault.adryan.me
                         description: Secrets Management
+                        siteMonitor: https://vault.adryan.me
                         widget:
                           type: kubernetes
                           cluster: default
                           namespace: vault
                           app: vault
+                    - ArgoCD:
+                        icon: sh-argo-cd
+                        href: https://argo.adryan.me
+                        description: GitOps Continuous Delivery
+                        siteMonitor: https://argo.adryan.me
+                        widget:
+                          type: kubernetes
+                          cluster: default
+                          namespace: argocd
+                          app: argocd
           widgets:
             - kubernetes:
                 cluster:
@@ -113,6 +130,11 @@ spec:
                 expanded: true
                 cpu: true
                 memory: true
+            - longhorn:
+              expanded: true
+              total: true
+              labels: true
+              nodes: true
 
   destination:
     server: https://kubernetes.default.svc
