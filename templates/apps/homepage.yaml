@@ -10,16 +10,44 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://ghcr.io/m0nsterrr/helm-charts/homepage
-    targetRevision: 4.3.0
-    path: .
+    repoURL: https://unknowniq.github.io/helm-charts/
+    targetRevision: 1.7.3
+    chart: homepage
     helm:
       valuesObject:
-        image:
-          tag: "latest"
+        env:
+          - name: LOG_TARGETS
+            value: "stdout"
+          - name: HOMEPAGE_ALLOWED_HOSTS
+            value: "home.adryan.me"
         config:
-          allowedHosts:
-            - home.adryan.me
+          services:
+            - Cluster:
+                - Homepage:
+                    href: https://home.adryan.me
+                    description: Application Dashboard
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: default
+          widgets:
+            - kubernetes:
+                cluster:
+                  show: true
+                  cpu: true
+                  memory: true
+                  showLabel: true
+                  label: "cluster"
+                nodes:
+                  show: true
+                  cpu: true
+                  memory: true
+                  showLabel: true
+            - resources:
+                backend: kubernetes
+                expanded: true
+                cpu: true
+                memory: true
 
   destination:
     server: https://kubernetes.default.svc
