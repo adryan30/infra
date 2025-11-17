@@ -29,7 +29,8 @@ spec:
                     widget:
                       type: kubernetes
                       cluster: default
-                      namespace: default
+                      namespace: homepage
+                      app: homepage
           widgets:
             - kubernetes:
                 cluster:
