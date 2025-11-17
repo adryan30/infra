@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cs-driver-rclone
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: cs-driver-rclone
+spec:
+  project: default
+  source:
+    repoURL: oci://ghcr.io/veloxpack/charts/csi-driver-rclone
+    targetRevision: 0.3.0
+    path: .
+    helm:
+      valuesObject:
+        node:
+          metrics:
+            enbled: true
+            service:
+              enabled: true
+            serviceMonitor:
+              enabled: true
+            dashboard:
+              enabled: true
+              namespace: monitoring
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+
+  syncPolicy:
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
