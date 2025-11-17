@@ -21,6 +21,12 @@ spec:
           - name: HOMEPAGE_ALLOWED_HOSTS
             value: "home.adryan.me"
         config:
+          settings:
+            disableHostValidation: true
+            title: Shardblade Cluster
+            providers:
+              longhorn:
+                url: https://longhorn-frontend.longhorn.svc.cluster.local:80
           services:
             - General:
                 - Homepage:
@@ -50,7 +56,7 @@ spec:
                         siteMonitor: https://calibre.adryan.me
                         widget:
                           type: calibreweb
-                          url: https://calibre.adryan.me
+                          url: http://calibre-main.books.svc.cluster.local:8083
                     - Calibre Downloader:
                         icon: sh-calibre-web-automated-book-downloader
                         href: https://cdownloader.adryan.me
