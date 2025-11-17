@@ -10,7 +10,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://ghcr.io/veloxpack/charts/csi-driver-rclone
+    repoURL: oci://registry-1.docker.io/veloxpack/csi-driver-rclone-charts
+    targetRevision: 1.0.0
     path: .
     helm:
       valuesObject:
