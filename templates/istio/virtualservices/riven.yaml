@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: riven
+  namespace: istio-ingress
+  labels:
+    app: riven
+spec:
+  hosts:
+    - "riven.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 3000
+            host: dmb-riven.streaming.svc.cluster.local
