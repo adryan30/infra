@@ -27,6 +27,16 @@ spec:
             providers:
               longhorn:
                 url: http://longhorn-frontend.longhorn.svc.cluster.local:80
+            layout:
+              General:
+                style: row
+                columns: 2
+              Books:
+                style: row
+                columns: 3
+              Infra:
+                style: row
+                columns: 4
           services:
             - General:
                 - Homepage:
