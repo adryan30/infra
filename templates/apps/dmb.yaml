@@ -38,6 +38,9 @@ spec:
                   capabilities:
                     add:
                       - NET_ADMIN
+                resources:
+                  limits:
+                    adryan.me/fuse: 1
         service:
           dmb:
             controller: main
