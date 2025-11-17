@@ -1,0 +1,123 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dmb
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: dmb
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.4.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: iampuid0/dmb
+                  tag: latest
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: "America/Bahia"
+                  POSTGRES_ENABLED: "false"
+                  PGADMIN_ENABLED: "false"
+                envFrom:
+                  - secretRef:
+                      name: dmb-secrets
+
+                securityContext:
+                  capabilities:
+                    add:
+                      - NET_ADMIN
+                
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 8083
+        persistence:
+          config:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          log:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          zurg:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          riven:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          zilean:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          zilean:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          plex_debrid:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          cli_debrid:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          phalanx_db:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          decypharr:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          rd:
+            accessMode: ReadWriteMany
+            size: 5Gi
+            type: persistentVolumeClaim
+            advancedMounts:
+              main:
+                main:
+                  - path: /mnt/debrid
+
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: streaming
+
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
