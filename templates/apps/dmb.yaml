@@ -34,12 +34,10 @@ spec:
                 envFrom:
                   - secretRef:
                       name: dmb-secrets
-
                 securityContext:
                   capabilities:
                     add:
                       - NET_ADMIN
-                
         service:
           dmb:
             controller: main
