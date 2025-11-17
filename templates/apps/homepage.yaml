@@ -111,7 +111,7 @@ spec:
                           type: kubernetes
                           cluster: default
                           namespace: argocd
-                          app: argocd
+                          app: argocd-server
           widgets:
             - kubernetes:
                 cluster:
@@ -131,10 +131,10 @@ spec:
                 cpu: true
                 memory: true
             - longhorn:
-              expanded: true
-              total: true
-              labels: true
-              nodes: true
+                expanded: true
+                total: true
+                labels: true
+                nodes: true
 
   destination:
     server: https://kubernetes.default.svc
