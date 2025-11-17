@@ -41,11 +41,26 @@ spec:
                       - NET_ADMIN
                 
         service:
-          main:
+          dmb:
             controller: main
             ports:
               http:
-                port: 8083
+                port: 3005
+          riven:
+            controller: main
+            ports:
+              http:
+                port: 3000
+          cli-debrid:
+            controller: main
+            ports:
+              http:
+                port: 5000
+          decypharr:
+            controller: main
+            ports:
+              http:
+                port: 8282
         persistence:
           config:
             accessMode: ReadWriteOnce
