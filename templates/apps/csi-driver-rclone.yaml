@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cs-driver-rclone
+  name: csi-driver-rclone
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    name: cs-driver-rclone
+    name: csi-driver-rclone
 spec:
   project: default
   source:
