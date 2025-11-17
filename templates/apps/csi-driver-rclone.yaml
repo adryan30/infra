@@ -11,7 +11,6 @@ spec:
   project: default
   source:
     repoURL: oci://ghcr.io/veloxpack/charts/csi-driver-rclone
-    targetRevision: v0.3.0
     path: .
     helm:
       valuesObject:
