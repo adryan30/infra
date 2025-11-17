@@ -31,6 +31,62 @@ spec:
                       cluster: default
                       namespace: homepage
                       app: homepage
+                - BreezeWiki:
+                    href: https://breeze.adryan.me
+                    description: Anti-Fandom Wiki
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: breezewiki
+                      app: breezewiki
+                - Calibre:
+                    href: https://calibre.adryan.me
+                    description: E-Book Management
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: books
+                      app: calibre
+                - Calibre Downloader:
+                    href: https://cdownloader.adryan.me
+                    description: E-Book Downloader
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: books
+                      app: calibre
+                - Storyteller:
+                    href: https://storyteller.adryan.me
+                    description: EPUB 3 Content Layers Alignment Tool
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: books
+                      app: storyteller
+                - Longhorn:
+                    href: https://longhorn.adryan.me
+                    description: Distributed Block Storage for Kubernetes
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: longhorn
+                      app: longhorn
+                - Keycloak:
+                    href: https://auth.adryan.me
+                    description: Identity and Access Management
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: keycloak
+                      app: keycloak
+                - Vault:
+                    href: https://vault.adryan.me
+                    description: Secrets Management
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: vault
+                      app: vault
           widgets:
             - kubernetes:
                 cluster:
