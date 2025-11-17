@@ -38,6 +38,7 @@ spec:
                   capabilities:
                     add:
                       - NET_ADMIN
+                      - CAP_SYS_ADMIN
                 resources:
                   limits:
                     adryan.me/fuse: 1
