@@ -14,8 +14,8 @@ spec:
       data:
         password: "{{ `{{ .password }}` }}"
         pgpass: "sphere-rw:5432:riven:riven:{{`{{ .password }}`}}"
-        jdbc-uri: "jdbc:postgresql://sphere-rw.default:5432/riven?password={{`{{ .password }}`}}&user=riven"
-        uri: "postgresql://riven:{{`{{ .password }}`}}@sphere-rw.default:5432/riven"
+        jdbc-uri: "jdbc:postgresql://sphere-rw.storage.svc.cluster.local:5432/riven?password={{`{{ .password }}`}}&user=riven"
+        uri: "postgresql://riven:{{`{{ .password }}`}}@sphere-rw.storage.svc.cluster.local:5432/riven"
         fqdn-jdbc-uri: "jdbc:postgresql://sphere-rw.storage.svc.cluster.local:5432/riven?password={{`{{ .password }}`}}&user=riven"
         fqdn-uri: "postgresql+psycopg2://riven:{{`{{ .password }}`}}@sphere-rw.storage.svc.cluster.local:5432/riven"
         port: "5432"

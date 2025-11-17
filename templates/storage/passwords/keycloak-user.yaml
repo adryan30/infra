@@ -14,8 +14,8 @@ spec:
       data:
         password: "{{ `{{ .password }}` }}"
         pgpass: "sphere-rw:5432:keycloak:keycloak:{{`{{ .password }}`}}"
-        jdbc-uri: "jdbc:postgresql://sphere-rw.default:5432/keycloak?password={{`{{ .password }}`}}&user=keycloak"
-        uri: "postgresql://keycloak:{{`{{ .password }}`}}@sphere-rw.default:5432/keycloak"
+        jdbc-uri: "jdbc:postgresql://sphere-rw.storage.svc.cluster.local:5432/keycloak?password={{`{{ .password }}`}}&user=keycloak"
+        uri: "postgresql://keycloak:{{`{{ .password }}`}}@sphere-rw.storage.svc.cluster.local:5432/keycloak"
         fqdn-jdbc-uri: "jdbc:postgresql://sphere-rw.storage.svc.cluster.local:5432/keycloak?password={{`{{ .password }}`}}&user=keycloak"
         fqdn-uri: "postgresql://keycloak:{{`{{ .password }}`}}@sphere-rw.storage.svc.cluster.local:5432/keycloak"
         port: "5432"
