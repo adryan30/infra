@@ -20,7 +20,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: streaming
+    namespace: kube-system
 
   syncPolicy:
     managedNamespaceMetadata:
