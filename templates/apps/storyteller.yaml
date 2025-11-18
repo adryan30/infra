@@ -39,6 +39,8 @@ spec:
             accessMode: ReadWriteOnce
             size: 10Gi
             type: persistentVolumeClaim
+          drive:
+            existingClaim: pvc-storyteller
 
   destination:
     server: https://kubernetes.default.svc
