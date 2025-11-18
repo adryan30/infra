@@ -25,6 +25,7 @@ spec:
                 image:
                   repository: registry.gitlab.com/storyteller-platform/storyteller
                   tag: latest
+                  pullPolicy: Always
                 envFrom:
                   - secretRef:
                       name: storyteller-env
