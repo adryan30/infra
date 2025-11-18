@@ -16,7 +16,7 @@ spec:
     volumeHandle: data-id
     nodePublishSecretRef:
       name: rclone-drive
-      namespace: default
+      namespace: kube-system
     volumeAttributes:
       remote: "drive"
       remotePath: "/#Storyteller"
