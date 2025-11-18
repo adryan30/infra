@@ -26,6 +26,8 @@ spec:
                   repository: registry.gitlab.com/storyteller-platform/storyteller
                   tag: latest
                   pullPolicy: Always
+                env:
+                  ENABLE_WEB_READER: true
                 envFrom:
                   - secretRef:
                       name: storyteller-env
