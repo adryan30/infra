@@ -55,6 +55,9 @@ spec:
                   - path: /app/config.yml
                     readOnly: true
                     subPath: config.yml
+                  - path: /app/plex_update.sh
+                    readOnly: true
+                    subPath: plex_update.sh
 
   destination:
     server: https://kubernetes.default.svc
