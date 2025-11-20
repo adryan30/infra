@@ -52,15 +52,10 @@ spec:
             advancedMounts:
               zurg:
                 zurg:
-                  - path: /app/config.yaml
-                    readOnly: false
-                    subPath: config.yaml
-                  - path: /app/update_plex.sh
-                    readOnly: false
-                    subPath: update_plex.sh
+                  - path: /config/zurg
               busybox:
                 busybox:
-                  - path: /zurg/config
+                  - path: /config/zurg
 
   destination:
     server: https://kubernetes.default.svc
