@@ -53,9 +53,12 @@ spec:
                 secretName: zurg-config
                 items:
                   - key: config.yml
-                    path: /app/config.yml
+                    path: config.yml
                   - key: plex_update.sh
-                    path: /app/plex_update.sh
+                    path: plex_update.sh
+            globalMounts:
+              - path: /app
+                readOnly: false
 
   destination:
     server: https://kubernetes.default.svc
