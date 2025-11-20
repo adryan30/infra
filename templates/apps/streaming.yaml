@@ -52,7 +52,12 @@ spec:
             advancedMounts:
               zurg:
                 zurg:
-                  - path: /config
+                  - path: /app/config.yaml
+                    readOnly: false
+                    subPath: config.yaml
+                  - path: /app/update_plex.sh
+                    readOnly: false
+                    subPath: update_plex.sh
               busybox:
                 busybox:
                   - path: /zurg/config
