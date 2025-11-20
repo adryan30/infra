@@ -23,7 +23,7 @@ spec:
             containers:
               zurg:
                 image:
-                  repository: crocodilestick/streaming-web-automated
+                  repository: ghcr.io/debridmediamanager/zurg-testing
                   tag: latest
           busybox:
             strategy: Recreate
@@ -32,6 +32,12 @@ spec:
                 image:
                   repository: busybox
                   tag: latest
+                command:
+                  [
+                    "sh",
+                    "-c",
+                    'echo "The app is running!" && tail -f /dev/null',
+                  ]
         service:
           zurg:
             controller: zurg
