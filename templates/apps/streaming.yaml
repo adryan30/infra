@@ -53,6 +53,9 @@ spec:
               zurg:
                 zurg:
                   - path: /config
+              busybox:
+                busybox:
+                  - path: /zurg/config
 
   destination:
     server: https://kubernetes.default.svc
