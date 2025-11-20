@@ -44,6 +44,11 @@ spec:
             ports:
               http:
                 port: 9999
+          busybox:
+            controller: busybox
+            ports:
+              http:
+                port: 9999
         persistence:
           zurg-config:
             enabled: true
