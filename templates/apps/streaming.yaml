@@ -47,15 +47,15 @@ spec:
         persistence:
           zurg-config:
             enabled: true
-            type: secret
-            name: zurg-config
-            advancedMounts:
-              zurg:
-                zurg:
-                  - path: /config/zurg
-              busybox:
-                busybox:
-                  - path: /config/zurg
+            type: custom
+            volumeSpec:
+              secret:
+                secretName: zurg-config
+                items:
+                  - key: config.yml
+                    path: app/config.yml
+                  - key: plex_update.sh
+                    path: app/plex_update.sh
 
   destination:
     server: https://kubernetes.default.svc
