@@ -1,0 +1,17 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: rclone-zurg
+provisioner: rclone.csi.veloxpakdeck.io
+parameters:
+  remote: "zurg"
+  remotePath: "/"
+  configData: |
+    [zurg]
+    type = webdav
+    url = http://streaming-zurg.streaming.svc.cluster.local:9999/dav
+    vendor = other
+    pacer_min_sleep = 0
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
