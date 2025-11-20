@@ -63,7 +63,14 @@ spec:
                   - path: /app/plex_update.sh
                     readOnly: true
                     subPath: plex_update.sh
-
+         busybox-test:
+            enabled: true
+            type: persistentVolumeClaim
+            existingClaim: zurg-test
+            advancedMounts:
+              busybox:
+                busybox:
+                  - path: /zurg
   destination:
     server: https://kubernetes.default.svc
     namespace: streaming
