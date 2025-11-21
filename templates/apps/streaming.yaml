@@ -26,6 +26,8 @@ spec:
                   repository: spoked/riven
                   tag: latest
                   pullPolicy: Always
+                securityContext:
+                  fsGroup: 1000  
                 env:
                   PUID: 0
                   PGID: 0
