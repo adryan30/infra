@@ -25,6 +25,11 @@ spec:
                 image:
                   repository: spoked/riven
                   tag: latest
+                environment:
+                  PUID: 1000
+                  PGID: 1000
+                  TZ: America/Bahia
+                  RIVEN_FORCE_ENV: true
                 envFrom:
                   - secretRef:
                       name: riven-db-credentials
