@@ -111,7 +111,7 @@ spec:
             type: persistentVolumeClaim
             existingClaim: zurg
             globalMounts:
-              - path: /zurg
+              - path: /rclone
           riven-data:
             enabled: true
             type: persistentVolumeClaim
