@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   annotations:
     pv.kubernetes.io/provisioned-by: rclone.csi.veloxpack.io
-  name: zurg-test
+  name: zurg
   namespace: streaming
 spec:
   capacity:
@@ -27,7 +27,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: zurg-test
+  name: zurg
   namespace: streaming
 spec:
   accessModes:
