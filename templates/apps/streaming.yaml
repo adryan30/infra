@@ -99,6 +99,7 @@ spec:
             enabled: true
             type: persistentVolumeClaim
             size: 1Gi
+            accessMode: ReadWriteMany
             advancedMounts:
               riven:
                 riven-frontend:
@@ -113,6 +114,7 @@ spec:
             enabled: true
             type: persistentVolumeClaim
             size: 10Gi
+            accessMode: ReadWriteMany
             globalMounts:
               - path: /riven/data
 
