@@ -67,3 +67,7 @@ spec:
   owner: zilean
   cluster:
     name: sphere
+  schemas:
+    - name: zilean
+      owner: zilean
+      ensure: absent
