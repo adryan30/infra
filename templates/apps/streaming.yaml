@@ -87,7 +87,7 @@ spec:
             accessMode: ReadWriteMany
             advancedMounts:
               riven:
-                riven-frontend:
+                frontend:
                   - path: /config
           zurg-mount:
             enabled: true
