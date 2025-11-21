@@ -27,8 +27,8 @@ spec:
                   tag: latest
                   pullPolicy: Always
                 env:
-                  # PUID: 1000
-                  # PGID: 1000
+                  PUID: 0
+                  PGID: 0
                   TZ: America/Bahia
                   RIVEN_FORCE_ENV: true
                 envFrom:
