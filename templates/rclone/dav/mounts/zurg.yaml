@@ -35,5 +35,5 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  volumeName: zurg-test
+  volumeName: zurg
   storageClassName: ""
