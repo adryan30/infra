@@ -66,6 +66,7 @@ spec:
                 env:
                   DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE: false
                   Zilean__EnableDashboard: true
+                  Zilean_Dmm_ScrapeSchedule: "* * * * *"
                 envFrom:
                   - secretRef:
                       name: zilean-db-credentials
