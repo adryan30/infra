@@ -63,12 +63,6 @@ spec:
                   repository: ipromknight/zilean
                   tag: latest
                   pullPolicy: Always
-                command:
-                  [
-                    "sh",
-                    "-c",
-                    'echo "The app is running!" && tail -f /dev/null',
-                  ]
                 env:
                   DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE: false
                 envFrom:
