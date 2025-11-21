@@ -25,6 +25,7 @@ spec:
                 image:
                   repository: spoked/riven
                   tag: latest
+                  pullPolicy: Always
                 environment:
                   PUID: 1000
                   PGID: 1000
