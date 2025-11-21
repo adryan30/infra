@@ -46,10 +46,12 @@ spec:
                   PGID: 1000
                   TZ: America/Bahia
                   RIVEN_FORCE_ENV: true
+                  ORIGIN: https://riven.adryan.me
+                  BACKEND_URL: http://streaming-riven.streaming.svc.cluster.local:8080
+                  DIALECT: postgres
                 envFrom:
                   - secretRef:
                       name: riven-db-credentials
-
           busybox:
             strategy: Recreate
             containers:
@@ -69,7 +71,7 @@ spec:
             ports:
               http:
                 port: 9999
-          riven-backend:
+          riven:
             controller: riven
             ports:
               backend:
