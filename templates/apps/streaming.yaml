@@ -63,6 +63,8 @@ spec:
                   repository: ipromknight/zilean
                   tag: latest
                   pullPolicy: Always
+                env:
+                  DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE: false
                 envFrom:
                   - secretRef:
                       name: zilean-db-credentials
