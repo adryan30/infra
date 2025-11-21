@@ -23,6 +23,11 @@ spec:
         login: true
         passwordSecret:
           name: sphere-riven
+      - name: zilean
+        createdb: false
+        login: true
+        passwordSecret:
+          name: sphere-zilean
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
