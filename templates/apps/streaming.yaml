@@ -25,6 +25,31 @@ spec:
                 image:
                   repository: ghcr.io/debridmediamanager/zurg-testing
                   tag: latest
+          riven:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              backend:
+                image:
+                  repository: spoked/riven
+                  tag: latest
+                envFrom:
+                  - secretRef:
+                      name: riven-db-credentials
+              frontend:
+                image:
+                  repository: spoked/riven-frontend
+                  tag: latest
+                env:
+                  PUID: 1000
+                  PGID: 1000
+                  TZ: America/Bahia
+                  RIVEN_FORCE_ENV: true
+                envFrom:
+                  - secretRef:
+                      name: riven-db-credentials
+
           busybox:
             strategy: Recreate
             containers:
@@ -44,6 +69,13 @@ spec:
             ports:
               http:
                 port: 9999
+          riven-backend:
+            controller: riven
+            ports:
+              backend:
+                port: 8080
+              frontend:
+                port: 3000
           busybox:
             controller: busybox
             ports:
@@ -63,12 +95,27 @@ spec:
                   - path: /app/plex_update.sh
                     readOnly: true
                     subPath: plex_update.sh
+          riven-config:
+            enabled: true
+            type: persistentVolumeClaim
+            size: 1Gi
+            advancedMounts:
+              riven:
+                riven-frontend:
+                  - path: /config
           zurg-mount:
             enabled: true
             type: persistentVolumeClaim
             existingClaim: zurg
             globalMounts:
               - path: /zurg
+          riven-data:
+            enabled: true
+            type: persistentVolumeClaim
+            size: 10Gi
+            globalMounts:
+              - path: /riven/data
+
   destination:
     server: https://kubernetes.default.svc
     namespace: streaming
