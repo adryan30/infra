@@ -20,7 +20,7 @@ spec:
       configData: |
         [zurg]
         type = webdav
-        url = http://streaming-zurg.streaming.svc.cluster.local:9999/dav
+        url = http://zurg.streaming.svc.cluster.local:9999/dav
         vendor = other
         pacer_min_sleep = 0
 ---

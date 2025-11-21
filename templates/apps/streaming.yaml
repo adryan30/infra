@@ -16,15 +16,6 @@ spec:
     helm:
       valuesObject:
         controllers:
-          zurg:
-            strategy: RollingUpdate
-            annotations:
-              reloader.stakater.com/auto: "true"
-            containers:
-              zurg:
-                image:
-                  repository: ghcr.io/debridmediamanager/zurg-testing
-                  tag: latest
           riven:
             strategy: RollingUpdate
             annotations:
@@ -70,11 +61,6 @@ spec:
                     'echo "The app is running!" && tail -f /dev/null',
                   ]
         service:
-          zurg:
-            controller: zurg
-            ports:
-              http:
-                port: 9999
           riven:
             controller: riven
             ports:
@@ -88,19 +74,6 @@ spec:
               http:
                 port: 9999
         persistence:
-          zurg-config:
-            enabled: true
-            type: secret
-            name: zurg-config
-            advancedMounts:
-              zurg:
-                zurg:
-                  - path: /app/config.yml
-                    readOnly: true
-                    subPath: config.yml
-                  - path: /app/plex_update.sh
-                    readOnly: true
-                    subPath: plex_update.sh
           riven-config:
             enabled: true
             type: persistentVolumeClaim
