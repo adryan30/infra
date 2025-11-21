@@ -53,6 +53,19 @@ spec:
                 envFrom:
                   - secretRef:
                       name: riven-db-credentials
+          zilean:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              zilean:
+                image:
+                  repository: ipromknight/zilean
+                  tag: latest
+                  pullPolicy: Always
+                envFrom:
+                  - secretRef:
+                      name: zilean-db-credentials
           busybox:
             strategy: Recreate
             containers:
@@ -74,6 +87,11 @@ spec:
                 port: 8080
               frontend:
                 port: 3000
+          zilean:
+            controller: zilean
+            ports:
+              http:
+                port: 8181
           busybox:
             controller: busybox
             ports:
@@ -89,6 +107,15 @@ spec:
               riven:
                 frontend:
                   - path: /riven/config
+          zilean-config:
+            enabled: true
+            type: persistentVolumeClaim
+            size: 1Gi
+            accessMode: ReadWriteMany
+            advancedMounts:
+              zilean:
+                zilean:
+                  - path: /app/data
           zurg-mount:
             enabled: true
             type: persistentVolumeClaim
