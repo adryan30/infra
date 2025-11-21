@@ -65,6 +65,7 @@ spec:
                   pullPolicy: Always
                 env:
                   DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE: false
+                  Zilean__EnableDashboard: true
                 envFrom:
                   - secretRef:
                       name: zilean-db-credentials
