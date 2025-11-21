@@ -119,6 +119,13 @@ spec:
             accessMode: ReadWriteMany
             globalMounts:
               - path: /riven/data
+          riven-library:
+            enabled: true
+            type: persistentVolumeClaim
+            size: 10Gi
+            accessMode: ReadWriteMany
+            globalMounts:
+              - path: /library
 
   destination:
     server: https://kubernetes.default.svc
