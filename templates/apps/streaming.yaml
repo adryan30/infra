@@ -70,6 +70,17 @@ spec:
                 envFrom:
                   - secretRef:
                       name: zilean-db-credentials
+          overseerr:
+            strategy: RollingUpdate
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/overseerr
+                  tag: latest
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: "America/Bahia"
           busybox:
             strategy: Recreate
             containers:
@@ -96,6 +107,11 @@ spec:
             ports:
               http:
                 port: 8181
+          overseerr:
+            controller: overseerr
+            ports:
+              http:
+                port: 5055
           busybox:
             controller: busybox
             ports:
@@ -120,6 +136,14 @@ spec:
               zilean:
                 zilean:
                   - path: /app/data
+          overseerr-config:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+            advancedMounts:
+              overseerr:
+                main:
+                  - path: /config
           zurg-mount:
             enabled: true
             type: persistentVolumeClaim
