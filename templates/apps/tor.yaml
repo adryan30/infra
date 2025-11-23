@@ -2,4 +2,4 @@ apiVersion: tor.k8s.torproject.org/v1alpha2
 kind: Tor
 metadata:
   name: tor
-  namespace: kube-system
+  namespace: streaming
