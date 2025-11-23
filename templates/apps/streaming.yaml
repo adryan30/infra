@@ -81,6 +81,18 @@ spec:
                   PUID: "1000"
                   PGID: "1000"
                   TZ: "America/Bahia"
+          prowlarr:
+            strategy: RollingUpdate
+            containers:
+              main:
+                image:
+                  repository: lscr.io/linuxserver/prowlarr
+                  tag: latest
+                env:
+                  PUID: "1000"
+                  PGID: "1000"
+                  TZ: "America/Bahia"
+                  PROWLARR__AUTH__METHOD: EXTERNAL
           busybox:
             strategy: Recreate
             containers:
@@ -112,6 +124,11 @@ spec:
             ports:
               http:
                 port: 5055
+          prowlarr:
+            controller: prowlarr
+            ports:
+              http:
+                port: 9696
           busybox:
             controller: busybox
             ports:
@@ -142,6 +159,14 @@ spec:
             type: persistentVolumeClaim
             advancedMounts:
               seerr:
+                main:
+                  - path: /config
+          prowlarr-config:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+            advancedMounts:
+              prowlarr:
                 main:
                   - path: /config
           zurg-mount:
