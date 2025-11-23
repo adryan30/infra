@@ -3,6 +3,7 @@ kind: Tor
 metadata:
   name: tor
   namespace: streaming
+spec:
   metrics:
     enable: true
     address: 0.0.0.0
