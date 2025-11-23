@@ -50,6 +50,18 @@ spec:
             accessMode: ReadWriteOnce
             size: 10Gi
             type: persistentVolumeClaim
+          riven:
+            enabled: true
+            type: persistentVolumeClaim
+            existingClaim: streaming-riven-library
+            globalMounts:
+              - path: /library
+          zurg-mount:
+            enabled: true
+            type: persistentVolumeClaim
+            existingClaim: zurg
+            globalMounts:
+              - path: /rclone
 
   destination:
     server: https://kubernetes.default.svc
