@@ -70,12 +70,12 @@ spec:
                 envFrom:
                   - secretRef:
                       name: zilean-db-credentials
-          overseerr:
+          seerr:
             strategy: RollingUpdate
             containers:
               main:
                 image:
-                  repository: lscr.io/linuxserver/overseerr
+                  repository: ghcr.io/fallenbagel/jellyseerr
                   tag: latest
                 env:
                   PUID: "1000"
@@ -107,8 +107,8 @@ spec:
             ports:
               http:
                 port: 8181
-          overseerr:
-            controller: overseerr
+          seerr:
+            controller: seerr
             ports:
               http:
                 port: 5055
@@ -136,12 +136,12 @@ spec:
               zilean:
                 zilean:
                   - path: /app/data
-          overseerr-config:
+          seerr-config:
             accessMode: ReadWriteOnce
             size: 1Gi
             type: persistentVolumeClaim
             advancedMounts:
-              overseerr:
+              seerr:
                 main:
                   - path: /config
           zurg-mount:
