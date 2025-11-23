@@ -17,6 +17,7 @@ spec:
               [
                 "longhorn.adryan.me",
                 "grafana.adryan.me",
+                "prometheus.adryan.me",
                 "kiali.adryan.me",
                 "cdownloader.adryan.me",
                 "riven.adryan.me",
