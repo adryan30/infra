@@ -27,8 +27,8 @@ spec:
                   tag: latest
                   pullPolicy: Always
                 env:
-                  PGID: 1000
-                  PUID: 1000
+                  PGID: 0
+                  PUID: 0
                   TZ: America/Bahia
         service:
           jellyfin:
