@@ -28,6 +28,8 @@ spec:
                   pullPolicy: Always
                 env:
                   TZ: America/Bahia
+                  PLEX_UID: 0
+                  PLEX_GID: 0
                 envFrom:
                   - secretRef:
                       name: plex-key
