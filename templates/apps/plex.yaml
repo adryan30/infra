@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: plex
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: plex
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.4.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          plex:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              plex:
+                image:
+                  repository: plexinc/pms-docker
+                  tag: latest
+                  pullPolicy: Always
+                env:
+                  TZ: America/Bahia
+                envFrom:
+                  - secretRef:
+                      name: plex-key
+        service:
+          plex:
+            controller: plex
+            ports:
+              http:
+                port: 32400
+        persistence:
+          config:
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            type: persistentVolumeClaim
+          transcode:
+            accessMode: ReadWriteOnce
+            size: 10Gi
+            type: persistentVolumeClaim
+          media:
+            accessMode: ReadWriteOnce
+            size: 10Gi
+            type: persistentVolumeClaim
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: streaming
+
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
