@@ -7,8 +7,6 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
   labels:
     name: zurg
-  annotations:
-    argocd.argoproj.io/skip-reconcile: "true" 
 spec:
   project: default
   source:
