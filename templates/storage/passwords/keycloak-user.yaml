@@ -7,6 +7,7 @@ spec:
   refreshInterval: "24h"
   target:
     name: sphere-keycloak
+    type: kubernetes.io/basic-auth
     template:
       metadata:
         labels:
