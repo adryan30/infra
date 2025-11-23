@@ -93,6 +93,18 @@ spec:
                   PGID: "1000"
                   TZ: "America/Bahia"
                   PROWLARR__AUTH__METHOD: EXTERNAL
+              gluetun:
+                dependsOn: main
+                image:
+                  repository: ghcr.io/qdm12/gluetun
+                  tag: latest
+                env:
+                  VPN_TYPE: wireguard
+                  VPN_INTERFACE: wg0
+                securityContext:
+                  capabilities:
+                    add:
+                      - NET_ADMIN
           busybox:
             strategy: Recreate
             containers:
@@ -169,6 +181,12 @@ spec:
               prowlarr:
                 main:
                   - path: /config
+          gluetun-data:
+            type: emptyDir
+            advancedMounts:
+              prowlarr:
+                gluetun:
+                  - path: /tmp/gluetun
           zurg-mount:
             enabled: true
             type: persistentVolumeClaim
