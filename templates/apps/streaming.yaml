@@ -93,6 +93,15 @@ spec:
                   PGID: "1000"
                   TZ: "America/Bahia"
                   PROWLARR__AUTH__METHOD: EXTERNAL
+          byparr:
+            strategy: RollingUpdate
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/thephaseless/byparr
+                  tag: latest
+                env:
+                  PROXY_SERVER: socks5://tor-tor-svc:9050
           busybox:
             strategy: Recreate
             containers:
@@ -129,6 +138,11 @@ spec:
             ports:
               http:
                 port: 9696
+          byparr:
+            controller: byparr
+            ports:
+              http:
+                port: 8191
           busybox:
             controller: busybox
             ports:
