@@ -39,7 +39,7 @@ spec:
         persistence:
           config:
             accessMode: ReadWriteOnce
-            size: 1Gi
+            size: 10Gi
             type: persistentVolumeClaim
           riven:
             enabled: true
