@@ -76,6 +76,12 @@ spec:
             type: persistentVolumeClaim
             globalMounts:
               - path: /calibre-library
+          plugins:
+            accessMode: ReadWriteOnce
+            size: 10Gi
+            type: persistentVolumeClaim
+            globalMounts:
+              - path: /config/.config/calibre/plugins
 
   destination:
     server: https://kubernetes.default.svc
