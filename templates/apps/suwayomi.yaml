@@ -27,8 +27,6 @@ spec:
                   tag: preview
                 env:
                   TZ: America/Bahia
-                  FLARESOLVERR_ENABLED: true
-                  FLARESOLVERR_URL: "http://streaming-byparr.streaming.svc.cluster.local:8191"
         service:
           main:
             controller: main
