@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: komga
+  name: suwayomi
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:
-    name: komga
+    name: suwayomi
 spec:
   project: default
   source:
@@ -23,27 +23,28 @@ spec:
             containers:
               main:
                 image:
-                  repository: gotson/komga
-                  tag: latest
+                  repository: ghcr.io/suwayomi/suwayomi-server
+                  tag: preview
                 env:
                   TZ: America/Bahia
+                  FLARESOLVERR_ENABLED: true
+                  FLARESOLVERR_URL: "http://streaming-byparr.streaming.svc.cluster.local:8191"
         service:
           main:
             controller: main
             ports:
               http:
-                port: 25600
+                port: 4567
         persistence:
-          config:
-            enabled: true
-            type: persistentVolumeClaim
-            size: 1Gi
-            accessMode: ReadWriteOnce
           data:
             enabled: true
             type: persistentVolumeClaim
             size: 1Gi
             accessMode: ReadWriteMany
+            advancedMounts:
+              main:
+                main:
+                  - path: /home/suwayomi/.local/share/Tachidesk
 
   destination:
     server: https://kubernetes.default.svc
