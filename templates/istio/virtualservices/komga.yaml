@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: plex
+  namespace: istio-ingress
+  labels:
+    app: argocd
+spec:
+  hosts:
+    - "komga.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 25600
+            host: komga.books.svc.cluster.local

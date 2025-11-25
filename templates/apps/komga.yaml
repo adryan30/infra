@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: breezewiki
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: breezewiki
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.4.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: gotson/komga
+                  tag: latest
+                env:
+                  TZ: America/Bahia
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 25600
+        persistence:
+          config:
+            enabled: true
+            type: persistentVolumeClaim
+            size: 1Gi
+            accessMode: ReadWriteOnce
+          data:
+            enabled: true
+            type: persistentVolumeClaim
+            size: 10Gi
+            accessMode: ReadWriteMany
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: books
+
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
