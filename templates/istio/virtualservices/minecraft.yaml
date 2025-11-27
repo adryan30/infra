@@ -10,7 +10,7 @@ spec:
     - "mine.adryan.me"
   gateways:
     - public
-  http:
+  tcp:
     - match:
         - uri:
             prefix: /
