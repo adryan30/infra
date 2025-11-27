@@ -2,6 +2,7 @@ apiVersion: shulkermc.io/v1alpha1
 kind: ProxyFleet
 metadata:
   name: atium-public
+  namespace: shulker-system
 spec:
   clusterRef:
     name: atium

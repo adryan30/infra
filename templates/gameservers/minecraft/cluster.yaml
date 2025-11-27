@@ -2,4 +2,5 @@ apiVersion: shulkermc.io/v1alpha1
 kind: MinecraftCluster
 metadata:
   name: atium
+  namespace: shulker-system
 spec: {}
