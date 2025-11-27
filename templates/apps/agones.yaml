@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: agones
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: agones
+spec:
+  project: default
+  source:
+    repoURL: https://agones.dev/chart/stable
+    targetRevision: 1.53.0
+    chart: agones
+    helm:
+      valuesObject:
+        agones:
+          allocator:
+            install: true
+            service:
+              serviceType: ClusterIP
+        gameservers:
+          namespaces:
+            - shulker-system
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: agones-system
+
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
