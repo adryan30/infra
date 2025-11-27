@@ -15,4 +15,5 @@ spec:
       version:
         channel: Velocity
         name: latest
-      config: {}
+      config:
+        proxyProtocol: true
