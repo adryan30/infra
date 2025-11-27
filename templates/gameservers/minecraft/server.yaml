@@ -1,0 +1,19 @@
+apiVersion: shulkermc.io/v1alpha1
+kind: MinecraftServerFleet
+metadata:
+  name: atium-fleets
+  namespace: shulker-system
+spec:
+  clusterRef:
+    name: atium
+  replicas: 1
+  template:
+    spec:
+      clusterRef:
+        name: atium
+      tags:
+        - gameplay
+      version:
+        channel: Paper
+        name: "1.21.10"
+      config: {}

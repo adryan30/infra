@@ -7,7 +7,6 @@ spec:
   refreshInterval: "24h"
   target:
     name: sphere-riven
-    type: kubernetes.io/basic-auth
     template:
       metadata:
         labels:
