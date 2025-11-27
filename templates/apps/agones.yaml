@@ -20,6 +20,7 @@ spec:
             install: true
             service:
               serviceType: NodePort
+          ping:
             http:
               serviceType: NodePort
             udp:
