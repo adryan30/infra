@@ -21,6 +21,7 @@ spec:
           type: "PAPER"
           ops: adryan29
           onlineMode: false
+          serviceType: LoadBalancer
         persistence:
           storageClass: "longhorn-low"
           dataDir:
