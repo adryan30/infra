@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: minecraft
+  namespace: istio-ingress
+  labels:
+    app: minecraft
+spec:
+  hosts:
+    - "mine.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 25565
+            host: minecraft.minecraft.svc.cluster.local
