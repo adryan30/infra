@@ -25,6 +25,9 @@ spec:
     namespace: shulker-system
 
   syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
     automated:
       enabled: true
       prune: true
