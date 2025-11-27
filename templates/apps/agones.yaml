@@ -19,11 +19,11 @@ spec:
           allocator:
             install: true
             service:
-              serviceType: ClusterIP
+              serviceType: NodePort
             http:
-              serviceType: ClusterIP
+              serviceType: NodePort
             udp:
-              serviceType: ClusterIP
+              serviceType: NodePort
         gameservers:
           namespaces:
             - shulker-system
