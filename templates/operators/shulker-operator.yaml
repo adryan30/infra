@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/jeremylvln/Shulker.git
     path: ./kube/helm
-    targetRevision: HEAD
+    targetRevision: v0.13.0
     helm:
       valuesObject:
         metrics:
