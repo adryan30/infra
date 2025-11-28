@@ -27,6 +27,8 @@ spec:
           dataDir:
             enabled: true
             size: 2Gi
+        extraEnv:
+          SPIGET_RESOURCES: 6269
 
   destination:
     server: https://kubernetes.default.svc
