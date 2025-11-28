@@ -22,6 +22,17 @@ spec:
           ops: adryan29
           onlineMode: false
           serviceType: LoadBalancer
+          pluginUrls:
+            - "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot"
+            - "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot"
+          extraPorts:
+            - name: geyser
+              containerPort: 19132
+              protocol: UDP
+              service:
+                enabled: true
+                type: LoadBalancer
+                port: 19132
         persistence:
           storageClass: "longhorn-low"
           dataDir:
