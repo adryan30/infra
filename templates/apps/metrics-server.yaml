@@ -15,7 +15,7 @@ spec:
     chart: metrics-server
     helm:
       valuesObject:
-        replicas: 2
+        replicas: 1
 
   destination:
     server: https://kubernetes.default.svc
