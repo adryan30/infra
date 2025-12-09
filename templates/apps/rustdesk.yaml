@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rustdesk
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: rustdesk
+spec:
+  project: default
+  source:
+    repoURL: https://schich.tel/helm-charts
+    targetRevision: 0.2.3
+    chart: rustdesk-server-oss
+    helm:
+      valuesObject:
+        service:
+          type: LoadBalancer
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rustdesk
+
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
