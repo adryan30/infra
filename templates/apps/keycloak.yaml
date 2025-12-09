@@ -38,6 +38,12 @@ spec:
           enabled: false
         cache:
           stack: ispn
+        server:
+          resources:
+            requests:
+              memory: 1Gi
+            limits:
+              memory: 2Gi
 
   destination:
     server: https://kubernetes.default.svc

@@ -17,6 +17,11 @@ spec:
       valuesObject:
         podAnnotations:
           reloader.stakater.com/auto: "true"
+        resources:
+          requests:
+            memory: 1Gi
+          limits:
+            memory: 2Gi
         minecraftServer:
           eula: "TRUE"
           version: "1.21.10"
