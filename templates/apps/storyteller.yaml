@@ -33,9 +33,11 @@ spec:
                       name: storyteller-env
                 resources:
                   requests:
+                    cpu: 500m
                     memory: 2Gi
                   limits:
-                    memory: 4Gi
+                    cpu: 4000m
+                    memory: 24Gi
         service:
           main:
             controller: main
