@@ -13,12 +13,6 @@ spec:
     repoURL: https://pkgs.tailscale.com/helmcharts
     targetRevision: 1.94.1
     chart: tailscale-operator
-    helm:
-      valuesObject:
-        controllers:
-          oauth:
-            clientId: testing
-            clientSecret: testing
 
   destination:
     server: https://kubernetes.default.svc
