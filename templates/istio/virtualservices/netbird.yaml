@@ -53,6 +53,14 @@ spec:
             host: netbird-management.netbird.svc.cluster.local
     - match:
         - uri:
+            prefix: /management.ManagementService/
+      route:
+        - destination:
+            port:
+              number: 80
+            host: netbird-management.netbird.svc.cluster.local
+    - match:
+        - uri:
             prefix: /oauth2/
       route:
         - destination:
