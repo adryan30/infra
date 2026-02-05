@@ -19,6 +19,7 @@ spec:
           authority: https://auth.adryan.me/realms/master
           audience: netbird-dashboard
           clientId: netbird-dashboard
+          supportedScopes: profile email offline_access 
         netbird:
           managementApiEndpoint: http://netbird-management.netbird.svc.cluster.local:80/api
           managementGrpcApiEndpoint: http://netbird-management.netbird.svc.cluster.local:80/management.ManagementService/
