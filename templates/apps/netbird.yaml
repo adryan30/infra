@@ -25,6 +25,15 @@ spec:
             hosts:
               api:
                 host: netbird.adryan.me
+          nodeSelector:
+            kubernetes.io/hostname: shardblade-001
+        signal:
+          nodeSelector:
+            kubernetes.io/hostname: shardblade-001
+        relay:
+          nodeSelector:
+            kubernetes.io/hostname: shardblade-001
+
 
   destination:
     server: https://kubernetes.default.svc
