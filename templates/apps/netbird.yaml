@@ -20,6 +20,7 @@ spec:
         auth:
           authority: https://auth.adryan.me/realms/master
           audience: netbird-dashboard
+          clientId: netbird-dashboard
         management:
           ingress:
             hosts:
