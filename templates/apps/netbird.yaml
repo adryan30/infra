@@ -28,16 +28,33 @@ spec:
           authority: https://auth.adryan.me/realms/master
           audience: account
         management:
-          ingress:
-            hosts:
-              api:
-                host: netbird.adryan.me
+          resources:
+            limits:
+              cpu: 0
+              memory: 0
+            requests:
+              cpu: 0
+              memory: 0
           nodeSelector:
             kubernetes.io/hostname: shardblade-002
         signal:
+          resources:
+            limits:
+              cpu: 0
+              memory: 0
+            requests:
+              cpu: 0
+              memory: 0
           nodeSelector:
             kubernetes.io/hostname: shardblade-002
         relay:
+          resources:
+            limits:
+              cpu: 0
+              memory: 0
+            requests:
+              cpu: 0
+              memory: 0
           nodeSelector:
             kubernetes.io/hostname: shardblade-002
 
