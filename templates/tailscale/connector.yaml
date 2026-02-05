@@ -5,6 +5,7 @@ metadata:
 spec:
   replicas: 1
   hostnamePrefix: shardblade
+  exitNode: true
   subnetRouter:
     advertiseRoutes:
       - "10.43.0.0/16"
