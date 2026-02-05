@@ -21,7 +21,7 @@ spec:
   syncPolicy:
     managedNamespaceMetadata:
       labels:
-        istio-injection: enabled
+        istio-injection: false
     automated:
       enabled: true
       prune: true
