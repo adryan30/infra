@@ -21,8 +21,8 @@ spec:
           clientId: netbird-dashboard
           supportedScopes: profile email offline_access 
         netbird:
-          managementApiEndpoint: http://netbird-management.netbird.svc.cluster.local:80/api
-          managementGrpcApiEndpoint: http://netbird-management.netbird.svc.cluster.local:80/management.ManagementService/
+          managementApiEndpoint: https://netbird.adryan.me/api
+          managementGrpcApiEndpoint: https://netbird.adryan.me/management.ManagementService/
 
 
   destination:
