@@ -16,7 +16,10 @@ spec:
     helm:
       valuesObject:
         idp:
-          managerType: none
+          managerType: keycloak
+        auth:
+          authority: https://auth.adryan.me/realms/master
+          audience: netbird-dashboard
         management:
           ingress:
             hosts:
