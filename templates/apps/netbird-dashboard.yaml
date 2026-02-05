@@ -16,7 +16,7 @@ spec:
     helm:
       valuesObject:
         auth:
-          autority: https://auth.adryan.me/realms/master
+          authority: https://auth.adryan.me/realms/master
           audience: netbird-dashboard
           clientId: netbird-dashboard
         netbird:
