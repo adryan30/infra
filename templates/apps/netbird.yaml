@@ -26,7 +26,7 @@ spec:
           tokenEndpoint: https://auth.adryan.me/realms/master/protocol/openid-connect/token
         auth:
           authority: https://auth.adryan.me/realms/master
-          audience: netbird-dashboard
+          audience: account
         management:
           ingress:
             hosts:
