@@ -1,0 +1,10 @@
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: shardblade-pods
+spec:
+  replicas: 1
+  hostnamePrefix: shardblade
+  subnetRouter:
+    advertiseRoutes:
+      - "10.43.0.0/16"
