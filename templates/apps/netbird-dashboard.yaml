@@ -11,17 +11,18 @@ spec:
   project: default
   source:
     repoURL: https://charts.jaconi.io
-    targetRevision: 0.15.0
-    chart: netbird
+    targetRevision: 1.2.0
+    chart: netbird-dashboard
     helm:
       valuesObject:
-        idp:
-          managerType: none
-        management:
-          ingress:
-            hosts:
-              api:
-                host: netbird.adryan.me
+        auth:
+          autority: https://auth.adryan.me/realms/master
+          audience: netbird-dashboard
+          clientId: netbird-dashboard
+        netbird:
+          managementApiEndpoint: http://netbird-management.netbird.svc.cluster.local:80/api
+          managementGrpcApiEndpoint: http://netbird-management.netbird.svc.cluster.local:80/management.ManagementService/
+          
 
   destination:
     server: https://kubernetes.default.svc

@@ -1,0 +1,75 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: netbird
+  namespace: istio-ingress
+  labels:
+    app: netbird
+spec:
+  hosts:
+    - "netbird.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /relay/
+      route:
+        - destination:
+            port:
+              number: 80
+            host: netbird-relay.netbird.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /ws-proxy/signal/
+      route:
+        - destination:
+            port:
+              number: 80
+            host: netbird-signal.netbird.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /signalexchange.SignalExchange/
+      route:
+        - destination:
+            port:
+              number: 10000
+            host: netbird-signal.netbird.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /api/
+      route:
+        - destination:
+            port:
+              number: 80
+            host: netbird-management.netbird.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /ws-proxy/management/
+      route:
+        - destination:
+            port:
+              number: 80
+            host: netbird-management.netbird.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /oauth2/
+      route:
+        - destination:
+            port:
+              number: 80
+            host: netbird-management.netbird.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 80
+            host: netbird-dashboard.netbird.svc.cluster.local
+
+
+
+# netbird-management.netbird.svc.cluster.local
+# netbird-relay.netbird.svc.cluster.local
+# netbird-signal.netbird.svc.cluster.local
