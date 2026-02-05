@@ -1,61 +1,61 @@
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: netbird
-#   namespace: argocd
-#   finalizers:
-#     - resources-finalizer.argocd.argoproj.io
-#   labels:
-#     name: netbird
-# spec:
-#   project: default
-#   source:
-#     repoURL: https://charts.jaconi.io
-#     targetRevision: 0.15.0
-#     chart: netbird
-#     helm:
-#       valuesObject:
-#         idp:
-#           managerType: keycloak
-#         auth:
-#           authority: https://auth.adryan.me/realms/master
-#           audience: netbird-dashboard
-#         management:
-#           ingress:
-#             hosts:
-#               api:
-#                 host: netbird.adryan.me
-#           nodeSelector:
-#             kubernetes.io/hostname: shardblade-001
-#         signal:
-#           nodeSelector:
-#             kubernetes.io/hostname: shardblade-001
-#         relay:
-#           nodeSelector:
-#             kubernetes.io/hostname: shardblade-001
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: netbird
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: netbird
+spec:
+  project: default
+  source:
+    repoURL: https://charts.jaconi.io
+    targetRevision: 0.15.0
+    chart: netbird
+    helm:
+      valuesObject:
+        idp:
+          managerType: keycloak
+        auth:
+          authority: https://auth.adryan.me/realms/master
+          audience: netbird-dashboard
+        management:
+          ingress:
+            hosts:
+              api:
+                host: netbird.adryan.me
+          nodeSelector:
+            kubernetes.io/hostname: shardblade-002
+        signal:
+          nodeSelector:
+            kubernetes.io/hostname: shardblade-002
+        relay:
+          nodeSelector:
+            kubernetes.io/hostname: shardblade-002
 
 
-#   destination:
-#     server: https://kubernetes.default.svc
-#     namespace: netbird
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: netbird
 
-#   syncPolicy:
-#     managedNamespaceMetadata:
-#       labels:
-#         istio-injection: enabled
-#     automated:
-#       enabled: true
-#       prune: true
-#       selfHeal: true
-#     syncOptions:
-#       - CreateNamespace=true
-#       - ServerSideApply=true
-#       - RespectIgnoreDifferences=true
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
 
-#     retry:
-#       limit: 5
-#       backoff:
-#         duration: 5s
-#         factor: 2
-#         maxDuration: 3m
-#   revisionHistoryLimit: 3
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
