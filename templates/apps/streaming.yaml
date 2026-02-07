@@ -20,6 +20,7 @@ spec:
             strategy: RollingUpdate
             annotations:
               reloader.stakater.com/auto: "true"
+              sidecar.istio.io/inject: "false"
             containers:
               backend:
                 image:
