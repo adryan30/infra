@@ -48,8 +48,7 @@ spec:
                   VPN_TYPE: wireguard
                   WIREGUARD_ADDRESSES: 10.74.166.254/32
                   SERVER_COUNTRIES: Brazil
-                  FIREWALL: off
-                  FIREWALL_OUTBOUND_SUBNETS: 10.43.0.0/16
+                  # FIREWALL_OUTBOUND_SUBNETS: 0.0.0.0/0
                 envFrom:
                   - secretRef:
                       name: vpn-riven
