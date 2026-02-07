@@ -48,6 +48,7 @@ spec:
                   VPN_TYPE: wireguard
                   WIREGUARD_ADDRESSES: 10.74.166.254/32
                   SERVER_COUNTRIES: Brazil
+                  FIREWALL_DEBUG: "on"
                   # FIREWALL_OUTBOUND_SUBNETS: 0.0.0.0/0
                 envFrom:
                   - secretRef:
