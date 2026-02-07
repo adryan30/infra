@@ -185,6 +185,12 @@ spec:
               riven-frontend:
                 frontend:
                   - path: /riven/config
+          gluetun-data:
+            type: emptyDir
+            advancedMounts:
+              riven:
+                gluetun:
+                  - path: /tmp/gluetun
           zilean-config:
             enabled: true
             type: persistentVolumeClaim
