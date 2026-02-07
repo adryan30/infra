@@ -18,9 +18,10 @@ spec:
         controllers:
           riven:
             strategy: RollingUpdate
+            labels:
+              sidecar.istio.io/inject: "false"
             annotations:
               reloader.stakater.com/auto: "true"
-              sidecar.istio.io/inject: "false"
             containers:
               backend:
                 image:
