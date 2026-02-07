@@ -18,4 +18,4 @@ spec:
         - destination:
             port:
               number: 3000
-            host: streaming-riven.streaming.svc.cluster.local
+            host: streaming-riven-frontend.streaming.svc.cluster.local

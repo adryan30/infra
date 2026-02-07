@@ -38,21 +38,6 @@ spec:
                   capabilities:
                     add:
                       - CAP_SYS_ADMIN
-              frontend:
-                image:
-                  repository: spoked/riven-frontend
-                  tag: latest
-                env:
-                  PUID: 1000
-                  PGID: 1000
-                  TZ: America/Bahia
-                  RIVEN_FORCE_ENV: true
-                  ORIGIN: https://riven.adryan.me
-                  BACKEND_URL: http://streaming-riven.streaming.svc.cluster.local:8080
-                  DIALECT: postgres
-                envFrom:
-                  - secretRef:
-                      name: riven-db-credentials
               gluetun:
                 dependsOn: backend
                 image:
@@ -70,6 +55,26 @@ spec:
                   capabilities:
                     add:
                       - NET_ADMIN
+          riven-frontend:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              frontend:
+                image:
+                  repository: spoked/riven-frontend
+                  tag: latest
+                env:
+                  PUID: 1000
+                  PGID: 1000
+                  TZ: America/Bahia
+                  RIVEN_FORCE_ENV: true
+                  ORIGIN: https://riven.adryan.me
+                  BACKEND_URL: http://streaming-riven.streaming.svc.cluster.local:8080
+                  DIALECT: postgres
+                envFrom:
+                  - secretRef:
+                      name: riven-db-credentials
           zilean:
             strategy: RollingUpdate
             annotations:
@@ -138,6 +143,9 @@ spec:
             ports:
               backend:
                 port: 8080
+          riven-frontend:
+            controller: riven-frontend
+            ports:
               frontend:
                 port: 3000
           zilean:
@@ -172,7 +180,7 @@ spec:
             size: 1Gi
             accessMode: ReadWriteMany
             advancedMounts:
-              riven:
+              riven-frontend:
                 frontend:
                   - path: /riven/config
           zilean-config:
