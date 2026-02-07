@@ -53,22 +53,22 @@ spec:
                 envFrom:
                   - secretRef:
                       name: riven-db-credentials
-              gluetun:
-                dependsOn: backend
-                image:
-                  repository: ghcr.io/qdm12/gluetun
-                  tag: latest
-                env:
-                  VPN_SERVICE_PROVIDER: mullvad
-                  VPN_TYPE: wireguard
-                  SERVER_COUNTRIES: Brazil
-                envFrom:
-                  - secretRef:
-                      name: vpn-riven
-                securityContext:
-                  capabilities:
-                    add:
-                      - NET_ADMIN
+              # gluetun:
+              #   dependsOn: backend
+              #   image:
+              #     repository: ghcr.io/qdm12/gluetun
+              #     tag: latest
+              #   env:
+              #     VPN_SERVICE_PROVIDER: mullvad
+              #     VPN_TYPE: wireguard
+              #     SERVER_COUNTRIES: Brazil
+              #   envFrom:
+              #     - secretRef:
+              #         name: vpn-riven
+              #   securityContext:
+              #     capabilities:
+              #       add:
+              #         - NET_ADMIN
           zilean:
             strategy: RollingUpdate
             annotations:
