@@ -61,7 +61,7 @@ spec:
                 env:
                   VPN_SERVICE_PROVIDER: mullvad
                   VPN_TYPE: wireguard
-                  VPN_INTERFACE: wg0
+                  WIREGUARD_ADDRESSES: 10.74.166.254/32
                   SERVER_COUNTRIES: Brazil
                 envFrom:
                   - secretRef:
