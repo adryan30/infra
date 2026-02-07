@@ -1,70 +1,70 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: suwayomi
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-  labels:
-    name: suwayomi
-spec:
-  project: default
-  source:
-    repoURL: https://bjw-s-labs.github.io/helm-charts
-    targetRevision: 4.4.0
-    chart: app-template
-    helm:
-      valuesObject:
-        controllers:
-          main:
-            strategy: RollingUpdate
-            annotations:
-              reloader.stakater.com/auto: "true"
-            containers:
-              main:
-                image:
-                  repository: ghcr.io/suwayomi/suwayomi-server
-                  tag: preview
-                env:
-                  TZ: America/Bahia
-        service:
-          main:
-            controller: main
-            ports:
-              http:
-                port: 4567
-        persistence:
-          data:
-            enabled: true
-            type: persistentVolumeClaim
-            size: 1Gi
-            accessMode: ReadWriteMany
-            advancedMounts:
-              main:
-                main:
-                  - path: /home/suwayomi/.local/share/Tachidesk
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: suwayomi
+#   namespace: argocd
+#   finalizers:
+#     - resources-finalizer.argocd.argoproj.io
+#   labels:
+#     name: suwayomi
+# spec:
+#   project: default
+#   source:
+#     repoURL: https://bjw-s-labs.github.io/helm-charts
+#     targetRevision: 4.4.0
+#     chart: app-template
+#     helm:
+#       valuesObject:
+#         controllers:
+#           main:
+#             strategy: RollingUpdate
+#             annotations:
+#               reloader.stakater.com/auto: "true"
+#             containers:
+#               main:
+#                 image:
+#                   repository: ghcr.io/suwayomi/suwayomi-server
+#                   tag: preview
+#                 env:
+#                   TZ: America/Bahia
+#         service:
+#           main:
+#             controller: main
+#             ports:
+#               http:
+#                 port: 4567
+#         persistence:
+#           data:
+#             enabled: true
+#             type: persistentVolumeClaim
+#             size: 1Gi
+#             accessMode: ReadWriteMany
+#             advancedMounts:
+#               main:
+#                 main:
+#                   - path: /home/suwayomi/.local/share/Tachidesk
 
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: books
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: books
 
-  syncPolicy:
-    managedNamespaceMetadata:
-      labels:
-        istio-injection: enabled
-    automated:
-      enabled: true
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
-      - RespectIgnoreDifferences=true
+#   syncPolicy:
+#     managedNamespaceMetadata:
+#       labels:
+#         istio-injection: enabled
+#     automated:
+#       enabled: true
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true
+#       - ServerSideApply=true
+#       - RespectIgnoreDifferences=true
 
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-  revisionHistoryLimit: 3
+#     retry:
+#       limit: 5
+#       backoff:
+#         duration: 5s
+#         factor: 2
+#         maxDuration: 3m
+#   revisionHistoryLimit: 3
