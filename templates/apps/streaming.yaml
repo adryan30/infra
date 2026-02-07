@@ -50,6 +50,8 @@ spec:
                   SERVER_COUNTRIES: Brazil
                   FIREWALL_DEBUG: "on"
                   FIREWALL_OUTBOUND_SUBNETS: 94.140.4.11/32
+                  FIREWALL_INPUT_PORTS: 443
+                  FIREWALL_VPN_INPUT_PORTS: 443
                 envFrom:
                   - secretRef:
                       name: vpn-riven
