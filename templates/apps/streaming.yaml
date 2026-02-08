@@ -25,6 +25,7 @@ spec:
               reloader.stakater.com/auto: "true"
             containers:
               backend:
+                dependsOn: gluetun
                 image:
                   repository: spoked/riven
                   tag: latest
@@ -42,7 +43,6 @@ spec:
                     add:
                       - CAP_SYS_ADMIN
               gluetun:
-                dependsOn: backend
                 image:
                   repository: qmcgaw/gluetun
                   tag: pr-2970
