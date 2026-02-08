@@ -17,15 +17,14 @@ spec:
       valuesObject:
         controllers:
           riven:
-            pod:
-              labels:
-                sidecar.istio.io/inject: "false"
+            # pod:
+            #   labels:
+            #     sidecar.istio.io/inject: "false"
             strategy: RollingUpdate
             annotations:
               reloader.stakater.com/auto: "true"
             containers:
               backend:
-                dependsOn: gluetun
                 image:
                   repository: spoked/riven
                   tag: latest
@@ -42,29 +41,29 @@ spec:
                   capabilities:
                     add:
                       - CAP_SYS_ADMIN
-              gluetun:
-                image:
-                  repository: qmcgaw/gluetun
-                  tag: pr-2970
-                env:
-                  VPN_SERVICE_PROVIDER: mullvad
-                  VPN_TYPE: wireguard
-                  WIREGUARD_ADDRESSES: 10.74.166.254/32
-                  SERVER_COUNTRIES: Brazil
-                  FIREWALL_DEBUG: "on"
-                  FIREWALL_OUTBOUND_SUBNETS: 94.140.4.11/32,10.43.0.0/16
-                  FIREWALL_INPUT_PORTS: 443,8096
-                  FIREWALL_VPN_INPUT_PORTS: 443,8096
-                  DNS_UNBLOCK_HOSTNAMES: api.real-debrid.com
-                  DNS_ADDRESS: 1.1.1.1
-                  DNS_KEEP_NAMESERVERS: on
-                envFrom:
-                  - secretRef:
-                      name: vpn-riven
-                securityContext:
-                  capabilities:
-                    add:
-                      - NET_ADMIN
+              # gluetun:
+                # image:
+                #   repository: qmcgaw/gluetun
+                #   tag: pr-2970
+                # env:
+                #   VPN_SERVICE_PROVIDER: mullvad
+                #   VPN_TYPE: wireguard
+                #   WIREGUARD_ADDRESSES: 10.74.166.254/32
+                #   SERVER_COUNTRIES: Brazil
+                #   FIREWALL_DEBUG: "on"
+                #   FIREWALL_OUTBOUND_SUBNETS: 94.140.4.11/32,10.43.0.0/16
+                #   FIREWALL_INPUT_PORTS: 443,8096
+                #   FIREWALL_VPN_INPUT_PORTS: 443,8096
+                #   DNS_UNBLOCK_HOSTNAMES: api.real-debrid.com
+                #   DNS_ADDRESS: 1.1.1.1
+                #   DNS_KEEP_NAMESERVERS: on
+                # envFrom:
+                #   - secretRef:
+                #       name: vpn-riven
+                # securityContext:
+                #   capabilities:
+                #     add:
+                #       - NET_ADMIN
           riven-frontend:
             strategy: RollingUpdate
             annotations:
