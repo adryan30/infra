@@ -56,6 +56,7 @@ spec:
                   FIREWALL_INPUT_PORTS: 443,8096
                   FIREWALL_VPN_INPUT_PORTS: 443,8096
                   DNS_UNBLOCK_HOSTNAMES: api.real-debrid.com
+                  DNS_ADDRESS: 1.1.1.1
                 envFrom:
                   - secretRef:
                       name: vpn-riven
