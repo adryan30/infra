@@ -1,270 +1,270 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: streaming
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-  labels:
-    name: streaming
-spec:
-  project: default
-  source:
-    repoURL: https://bjw-s-labs.github.io/helm-charts
-    targetRevision: 4.4.0
-    chart: app-template
-    helm:
-      valuesObject:
-        controllers:
-          riven:
-            # pod:
-            #   labels:
-            #     sidecar.istio.io/inject: "false"
-            strategy: RollingUpdate
-            annotations:
-              reloader.stakater.com/auto: "true"
-            containers:
-              backend:
-                image:
-                  repository: spoked/riven
-                  tag: latest
-                  pullPolicy: Always
-                env:
-                  PUID: 0
-                  PGID: 0
-                  TZ: America/Bahia
-                  RIVEN_FORCE_ENV: true
-                envFrom:
-                  - secretRef:
-                      name: riven-db-credentials
-                securityContext:
-                  capabilities:
-                    add:
-                      - CAP_SYS_ADMIN
-              # gluetun:
-                # image:
-                #   repository: qmcgaw/gluetun
-                #   tag: pr-2970
-                # env:
-                #   VPN_SERVICE_PROVIDER: mullvad
-                #   VPN_TYPE: wireguard
-                #   WIREGUARD_ADDRESSES: 10.74.166.254/32
-                #   SERVER_COUNTRIES: Brazil
-                #   FIREWALL_DEBUG: "on"
-                #   FIREWALL_OUTBOUND_SUBNETS: 94.140.4.11/32,10.43.0.0/16
-                #   FIREWALL_INPUT_PORTS: 443,8096
-                #   FIREWALL_VPN_INPUT_PORTS: 443,8096
-                #   DNS_UNBLOCK_HOSTNAMES: api.real-debrid.com
-                #   DNS_ADDRESS: 1.1.1.1
-                #   DNS_KEEP_NAMESERVERS: on
-                # envFrom:
-                #   - secretRef:
-                #       name: vpn-riven
-                # securityContext:
-                #   capabilities:
-                #     add:
-                #       - NET_ADMIN
-          riven-frontend:
-            strategy: RollingUpdate
-            annotations:
-              reloader.stakater.com/auto: "true"
-            containers:
-              frontend:
-                image:
-                  repository: spoked/riven-frontend
-                  tag: latest
-                env:
-                  PUID: 1000
-                  PGID: 1000
-                  TZ: America/Bahia
-                  RIVEN_FORCE_ENV: true
-                  ORIGIN: https://riven.adryan.me
-                  BACKEND_URL: http://streaming-riven.streaming.svc.cluster.local:8080
-                  DIALECT: postgres
-                envFrom:
-                  - secretRef:
-                      name: riven-db-credentials
-          zilean:
-            strategy: RollingUpdate
-            annotations:
-              reloader.stakater.com/auto: "true"
-            containers:
-              zilean:
-                image:
-                  repository: ipromknight/zilean
-                  tag: latest
-                  pullPolicy: Always
-                env:
-                  DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE: false
-                  Zilean__EnableDashboard: true
-                  Zilean_Dmm_ScrapeSchedule: "* * * * *"
-                envFrom:
-                  - secretRef:
-                      name: zilean-db-credentials
-          seerr:
-            strategy: RollingUpdate
-            containers:
-              main:
-                image:
-                  repository: ghcr.io/fallenbagel/jellyseerr
-                  tag: latest
-                env:
-                  PUID: "1000"
-                  PGID: "1000"
-                  TZ: "America/Bahia"
-          prowlarr:
-            strategy: RollingUpdate
-            containers:
-              main:
-                image:
-                  repository: lscr.io/linuxserver/prowlarr
-                  tag: latest
-                env:
-                  PUID: "1000"
-                  PGID: "1000"
-                  TZ: "America/Bahia"
-                  PROWLARR__AUTH__METHOD: EXTERNAL
-          byparr:
-            strategy: RollingUpdate
-            containers:
-              main:
-                image:
-                  repository: ghcr.io/thephaseless/byparr
-                  tag: latest
-                env:
-                  PROXY_SERVER: socks5://tor-tor-svc:9050
-          busybox:
-            strategy: Recreate
-            containers:
-              busybox:
-                image:
-                  repository: busybox
-                  tag: latest
-                command:
-                  [
-                    "sh",
-                    "-c",
-                    'echo "The app is running!" && tail -f /dev/null',
-                  ]
-        service:
-          riven:
-            controller: riven
-            ports:
-              backend:
-                port: 8080
-          riven-frontend:
-            controller: riven-frontend
-            ports:
-              frontend:
-                port: 3000
-          zilean:
-            controller: zilean
-            ports:
-              http:
-                port: 8181
-          seerr:
-            controller: seerr
-            ports:
-              http:
-                port: 5055
-          prowlarr:
-            controller: prowlarr
-            ports:
-              http:
-                port: 9696
-          byparr:
-            controller: byparr
-            ports:
-              http:
-                port: 8191
-          busybox:
-            controller: busybox
-            ports:
-              http:
-                port: 9999
-        persistence:
-          riven-config:
-            enabled: true
-            type: persistentVolumeClaim
-            size: 1Gi
-            accessMode: ReadWriteMany
-            advancedMounts:
-              riven-frontend:
-                frontend:
-                  - path: /riven/config
-          gluetun-data:
-            type: emptyDir
-            advancedMounts:
-              riven:
-                gluetun:
-                  - path: /tmp/gluetun
-          zilean-config:
-            enabled: true
-            type: persistentVolumeClaim
-            size: 1Gi
-            accessMode: ReadWriteMany
-            advancedMounts:
-              zilean:
-                zilean:
-                  - path: /app/data
-          seerr-config:
-            accessMode: ReadWriteOnce
-            size: 1Gi
-            type: persistentVolumeClaim
-            advancedMounts:
-              seerr:
-                main:
-                  - path: /config
-          prowlarr-config:
-            accessMode: ReadWriteOnce
-            size: 1Gi
-            type: persistentVolumeClaim
-            advancedMounts:
-              prowlarr:
-                main:
-                  - path: /config
-          zurg-mount:
-            enabled: true
-            type: persistentVolumeClaim
-            existingClaim: zurg
-            globalMounts:
-              - path: /rclone
-          riven-data:
-            enabled: true
-            type: persistentVolumeClaim
-            size: 10Gi
-            accessMode: ReadWriteMany
-            globalMounts:
-              - path: /riven/data
-          riven-library:
-            enabled: true
-            type: persistentVolumeClaim
-            size: 10Gi
-            accessMode: ReadWriteMany
-            globalMounts:
-              - path: /library
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: streaming
+#   namespace: argocd
+#   finalizers:
+#     - resources-finalizer.argocd.argoproj.io
+#   labels:
+#     name: streaming
+# spec:
+#   project: default
+#   source:
+#     repoURL: https://bjw-s-labs.github.io/helm-charts
+#     targetRevision: 4.4.0
+#     chart: app-template
+#     helm:
+#       valuesObject:
+#         controllers:
+#           riven:
+#             # pod:
+#             #   labels:
+#             #     sidecar.istio.io/inject: "false"
+#             strategy: RollingUpdate
+#             annotations:
+#               reloader.stakater.com/auto: "true"
+#             containers:
+#               backend:
+#                 image:
+#                   repository: spoked/riven
+#                   tag: latest
+#                   pullPolicy: Always
+#                 env:
+#                   PUID: 0
+#                   PGID: 0
+#                   TZ: America/Bahia
+#                   RIVEN_FORCE_ENV: true
+#                 envFrom:
+#                   - secretRef:
+#                       name: riven-db-credentials
+#                 securityContext:
+#                   capabilities:
+#                     add:
+#                       - CAP_SYS_ADMIN
+#               # gluetun:
+#                 # image:
+#                 #   repository: qmcgaw/gluetun
+#                 #   tag: pr-2970
+#                 # env:
+#                 #   VPN_SERVICE_PROVIDER: mullvad
+#                 #   VPN_TYPE: wireguard
+#                 #   WIREGUARD_ADDRESSES: 10.74.166.254/32
+#                 #   SERVER_COUNTRIES: Brazil
+#                 #   FIREWALL_DEBUG: "on"
+#                 #   FIREWALL_OUTBOUND_SUBNETS: 94.140.4.11/32,10.43.0.0/16
+#                 #   FIREWALL_INPUT_PORTS: 443,8096
+#                 #   FIREWALL_VPN_INPUT_PORTS: 443,8096
+#                 #   DNS_UNBLOCK_HOSTNAMES: api.real-debrid.com
+#                 #   DNS_ADDRESS: 1.1.1.1
+#                 #   DNS_KEEP_NAMESERVERS: on
+#                 # envFrom:
+#                 #   - secretRef:
+#                 #       name: vpn-riven
+#                 # securityContext:
+#                 #   capabilities:
+#                 #     add:
+#                 #       - NET_ADMIN
+#           riven-frontend:
+#             strategy: RollingUpdate
+#             annotations:
+#               reloader.stakater.com/auto: "true"
+#             containers:
+#               frontend:
+#                 image:
+#                   repository: spoked/riven-frontend
+#                   tag: latest
+#                 env:
+#                   PUID: 1000
+#                   PGID: 1000
+#                   TZ: America/Bahia
+#                   RIVEN_FORCE_ENV: true
+#                   ORIGIN: https://riven.adryan.me
+#                   BACKEND_URL: http://streaming-riven.streaming.svc.cluster.local:8080
+#                   DIALECT: postgres
+#                 envFrom:
+#                   - secretRef:
+#                       name: riven-db-credentials
+#           zilean:
+#             strategy: RollingUpdate
+#             annotations:
+#               reloader.stakater.com/auto: "true"
+#             containers:
+#               zilean:
+#                 image:
+#                   repository: ipromknight/zilean
+#                   tag: latest
+#                   pullPolicy: Always
+#                 env:
+#                   DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE: false
+#                   Zilean__EnableDashboard: true
+#                   Zilean_Dmm_ScrapeSchedule: "* * * * *"
+#                 envFrom:
+#                   - secretRef:
+#                       name: zilean-db-credentials
+#           seerr:
+#             strategy: RollingUpdate
+#             containers:
+#               main:
+#                 image:
+#                   repository: ghcr.io/fallenbagel/jellyseerr
+#                   tag: latest
+#                 env:
+#                   PUID: "1000"
+#                   PGID: "1000"
+#                   TZ: "America/Bahia"
+#           prowlarr:
+#             strategy: RollingUpdate
+#             containers:
+#               main:
+#                 image:
+#                   repository: lscr.io/linuxserver/prowlarr
+#                   tag: latest
+#                 env:
+#                   PUID: "1000"
+#                   PGID: "1000"
+#                   TZ: "America/Bahia"
+#                   PROWLARR__AUTH__METHOD: EXTERNAL
+#           byparr:
+#             strategy: RollingUpdate
+#             containers:
+#               main:
+#                 image:
+#                   repository: ghcr.io/thephaseless/byparr
+#                   tag: latest
+#                 env:
+#                   PROXY_SERVER: socks5://tor-tor-svc:9050
+#           busybox:
+#             strategy: Recreate
+#             containers:
+#               busybox:
+#                 image:
+#                   repository: busybox
+#                   tag: latest
+#                 command:
+#                   [
+#                     "sh",
+#                     "-c",
+#                     'echo "The app is running!" && tail -f /dev/null',
+#                   ]
+#         service:
+#           riven:
+#             controller: riven
+#             ports:
+#               backend:
+#                 port: 8080
+#           riven-frontend:
+#             controller: riven-frontend
+#             ports:
+#               frontend:
+#                 port: 3000
+#           zilean:
+#             controller: zilean
+#             ports:
+#               http:
+#                 port: 8181
+#           seerr:
+#             controller: seerr
+#             ports:
+#               http:
+#                 port: 5055
+#           prowlarr:
+#             controller: prowlarr
+#             ports:
+#               http:
+#                 port: 9696
+#           byparr:
+#             controller: byparr
+#             ports:
+#               http:
+#                 port: 8191
+#           busybox:
+#             controller: busybox
+#             ports:
+#               http:
+#                 port: 9999
+#         persistence:
+#           riven-config:
+#             enabled: true
+#             type: persistentVolumeClaim
+#             size: 1Gi
+#             accessMode: ReadWriteMany
+#             advancedMounts:
+#               riven-frontend:
+#                 frontend:
+#                   - path: /riven/config
+#           gluetun-data:
+#             type: emptyDir
+#             advancedMounts:
+#               riven:
+#                 gluetun:
+#                   - path: /tmp/gluetun
+#           zilean-config:
+#             enabled: true
+#             type: persistentVolumeClaim
+#             size: 1Gi
+#             accessMode: ReadWriteMany
+#             advancedMounts:
+#               zilean:
+#                 zilean:
+#                   - path: /app/data
+#           seerr-config:
+#             accessMode: ReadWriteOnce
+#             size: 1Gi
+#             type: persistentVolumeClaim
+#             advancedMounts:
+#               seerr:
+#                 main:
+#                   - path: /config
+#           prowlarr-config:
+#             accessMode: ReadWriteOnce
+#             size: 1Gi
+#             type: persistentVolumeClaim
+#             advancedMounts:
+#               prowlarr:
+#                 main:
+#                   - path: /config
+#           zurg-mount:
+#             enabled: true
+#             type: persistentVolumeClaim
+#             existingClaim: zurg
+#             globalMounts:
+#               - path: /rclone
+#           riven-data:
+#             enabled: true
+#             type: persistentVolumeClaim
+#             size: 10Gi
+#             accessMode: ReadWriteMany
+#             globalMounts:
+#               - path: /riven/data
+#           riven-library:
+#             enabled: true
+#             type: persistentVolumeClaim
+#             size: 10Gi
+#             accessMode: ReadWriteMany
+#             globalMounts:
+#               - path: /library
 
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: streaming
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: streaming
 
-  syncPolicy:
-    managedNamespaceMetadata:
-      labels:
-        istio-injection: enabled
-    automated:
-      enabled: true
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
-      - RespectIgnoreDifferences=true
+#   syncPolicy:
+#     managedNamespaceMetadata:
+#       labels:
+#         istio-injection: enabled
+#     automated:
+#       enabled: true
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true
+#       - ServerSideApply=true
+#       - RespectIgnoreDifferences=true
 
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-  revisionHistoryLimit: 3
+#     retry:
+#       limit: 5
+#       backoff:
+#         duration: 5s
+#         factor: 2
+#         maxDuration: 3m
+#   revisionHistoryLimit: 3

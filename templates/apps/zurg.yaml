@@ -1,72 +1,72 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: zurg
-  namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-  labels:
-    name: zurg
-spec:
-  project: default
-  source:
-    repoURL: https://bjw-s-labs.github.io/helm-charts
-    targetRevision: 4.4.0
-    chart: app-template
-    helm:
-      valuesObject:
-        controllers:
-          zurg:
-            strategy: RollingUpdate
-            annotations:
-              reloader.stakater.com/auto: "true"
-            containers:
-              zurg:
-                image:
-                  repository: ghcr.io/debridmediamanager/zurg-testing
-                  tag: latest
-        service:
-          zurg:
-            controller: zurg
-            ports:
-              http:
-                port: 9999
-        persistence:
-          zurg-config:
-            enabled: true
-            type: secret
-            name: zurg-config
-            advancedMounts:
-              zurg:
-                zurg:
-                  - path: /app/config.yml
-                    readOnly: true
-                    subPath: config.yml
-                  - path: /app/plex_update.sh
-                    readOnly: true
-                    subPath: plex_update.sh
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: zurg
+#   namespace: argocd
+#   finalizers:
+#     - resources-finalizer.argocd.argoproj.io
+#   labels:
+#     name: zurg
+# spec:
+#   project: default
+#   source:
+#     repoURL: https://bjw-s-labs.github.io/helm-charts
+#     targetRevision: 4.4.0
+#     chart: app-template
+#     helm:
+#       valuesObject:
+#         controllers:
+#           zurg:
+#             strategy: RollingUpdate
+#             annotations:
+#               reloader.stakater.com/auto: "true"
+#             containers:
+#               zurg:
+#                 image:
+#                   repository: ghcr.io/debridmediamanager/zurg-testing
+#                   tag: latest
+#         service:
+#           zurg:
+#             controller: zurg
+#             ports:
+#               http:
+#                 port: 9999
+#         persistence:
+#           zurg-config:
+#             enabled: true
+#             type: secret
+#             name: zurg-config
+#             advancedMounts:
+#               zurg:
+#                 zurg:
+#                   - path: /app/config.yml
+#                     readOnly: true
+#                     subPath: config.yml
+#                   - path: /app/plex_update.sh
+#                     readOnly: true
+#                     subPath: plex_update.sh
 
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: streaming
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: streaming
 
-  syncPolicy:
-    managedNamespaceMetadata:
-      labels:
-        istio-injection: enabled
-    automated:
-      enabled: true
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
-      - RespectIgnoreDifferences=true
+#   syncPolicy:
+#     managedNamespaceMetadata:
+#       labels:
+#         istio-injection: enabled
+#     automated:
+#       enabled: true
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true
+#       - ServerSideApply=true
+#       - RespectIgnoreDifferences=true
 
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-  revisionHistoryLimit: 3
+#     retry:
+#       limit: 5
+#       backoff:
+#         duration: 5s
+#         factor: 2
+#         maxDuration: 3m
+#   revisionHistoryLimit: 3
