@@ -48,7 +48,8 @@ spec:
           storageClass: "longhorn-low"
           dataDir:
             enabled: true
-            size: 2Gi
+            Size: 1Gi
+            existingClaim: minecraft-world
 
   destination:
     server: https://kubernetes.default.svc
