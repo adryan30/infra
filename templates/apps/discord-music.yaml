@@ -1,0 +1,69 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: discord-music
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: discord-music
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.4.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/yojoshb/jmusicbot-docker
+                  tag: latest
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 10416
+        persistence:
+          discord-config:
+            enabled: true
+            type: secret
+            name: discord-config
+            advancedMounts:
+              main:
+                main:
+                  - path: /config/config.txt
+                    readOnly: true
+                    subPath: config.txt
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: discord
+
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: enabled
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 3
