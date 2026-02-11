@@ -25,6 +25,10 @@ spec:
                 image:
                   repository: ghcr.io/yojoshb/jmusicbot-docker
                   tag: latest
+                env:
+                  BOT_GITHUB: noxianwill/MusicBot
+                  BOT_VERSION: v0.4.3-fixed
+
         service:
           main:
             controller: main
