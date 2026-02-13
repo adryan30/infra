@@ -28,7 +28,8 @@ spec:
           version: "latest"
           type: "PAPER"
           ops: adryan29
-          onlineMode: false
+          onlineMode: true
+          motd:  "== Bem vindo ao servidor do Leo! =="
           serviceType: LoadBalancer
           rcon:
             enabled: true
