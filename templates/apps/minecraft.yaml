@@ -29,9 +29,10 @@ spec:
           version: "latest"
           type: "PAPER"
           ops: adryan29
-          onlineMode: true
+          onlineMode: false
           motd:  "== Bem vindo ao servidor do Leo! =="
           serviceType: LoadBalancer
+          whitelist: adryan29,Andrey
           rcon:
             enabled: true
             serviceType: LoadBalancer
@@ -51,8 +52,8 @@ spec:
           storageClass: "longhorn-low"
           dataDir:
             enabled: true
-            Size: 1Gi
-            existingClaim: minecraft-world
+            Size: 5Gi
+            existingClaim: minecraft
 
   destination:
     server: https://kubernetes.default.svc
