@@ -15,7 +15,7 @@ spec:
     chart: minecraft
     helm:
       valuesObject:
-        replicaCount: 0
+        replicaCount: 1
         podAnnotations:
           reloader.stakater.com/auto: "true"
         resources:
