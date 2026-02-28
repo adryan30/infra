@@ -32,7 +32,7 @@ spec:
           onlineMode: true
           motd:  "== Bem vindo ao servidor do Leo! =="
           serviceType: LoadBalancer
-          whitelist: adryan29,Andrey
+          # whitelist: adryan29,Andrey
           rcon:
             enabled: true
             serviceType: LoadBalancer
