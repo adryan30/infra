@@ -15,7 +15,7 @@ spec:
     chart: minecraft
     helm:
       valuesObject:
-        replicaCount: 0
+        replicaCount: 1
         podAnnotations:
           reloader.stakater.com/auto: "true"
         resources:
@@ -26,7 +26,7 @@ spec:
             memory: 2Gi
         minecraftServer:
           eula: "TRUE"
-          version: "latest"
+          version: "1.21.11"
           type: "PAPER"
           ops: adryan29
           onlineMode: false
@@ -37,9 +37,19 @@ spec:
             enabled: true
             serviceType: LoadBalancer
             existingSecret: rcon
+          mcbackup:
+            enabled: true
+            backupInterval: 24h
+            linkLatest: "true"
+            persistance:
+              storageClass: "longhorn-low"
+              backupDir:
+                enabled: true
+                Size: 10Gi
           pluginUrls:
             - "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot"
             - "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot"
+            - "https://cdn.modrinth.com/data/Lu3KuzdV/versions/HD2IvrxS/CoreProtect-CE-23.1.jar"
           extraPorts:
             - name: geyser
               containerPort: 19132
