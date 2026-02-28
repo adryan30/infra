@@ -29,7 +29,7 @@ spec:
           version: "1.21.11"
           type: "PAPER"
           ops: adryan29
-          onlineMode: false
+          onlineMode: true
           motd:  "== Bem vindo ao servidor do Leo! =="
           serviceType: LoadBalancer
           whitelist: adryan29,Andrey
