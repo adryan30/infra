@@ -41,7 +41,7 @@ spec:
             enabled: true
             backupInterval: 24h
             linkLatest: "true"
-            persistance:
+            persistence:
               storageClass: "longhorn-low"
               backupDir:
                 enabled: true
@@ -62,8 +62,7 @@ spec:
           storageClass: "longhorn-low"
           dataDir:
             enabled: true
-            Size: 5Gi
-            existingClaim: minecraft
+            Size: 10Gi
 
   destination:
     server: https://kubernetes.default.svc
