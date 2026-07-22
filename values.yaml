@@ -3,7 +3,7 @@ spec:
     server: https://kubernetes.default.svc
 
 # Workload enablement registry (ADR-0003). Applications and chart-Workload
-# VirtualServices / oauth hosts look up by Workload name.
+# companions (VirtualServices, ExternalSecrets, oauth hosts) look up by name.
 #
 # Platform oauth hosts (non-Workload) stay outside the registry.
 platform:
