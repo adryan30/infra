@@ -1,0 +1,17 @@
+.git/
+.gitignore
+.DS_Store
+.helmignore
+
+# Local Terraform plugin cache (breaks helm template size limits)
+.terraform/
+bootstrap/.terraform/
+bootstrap/kms/.terraform/
+
+# Not chart content
+bootstrap/
+docs/
+tests/
+README.md
+AGENTS.md
+CONTEXT.md

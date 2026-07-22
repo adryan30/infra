@@ -1,3 +1,77 @@
 spec:
   destination:
     server: https://kubernetes.default.svc
+
+# Workload enablement registry (ADR-0003). Applications look up enablement by
+# Workload name. ingress stays empty until the ingress ticket; companion gating
+# follows in later expand steps.
+workloads:
+  breezewiki:
+    enabled: true
+    ingress: []
+  calibre:
+    enabled: true
+    ingress: []
+  cert-manager:
+    enabled: true
+    ingress: []
+  csi-driver-rclone:
+    enabled: true
+    ingress: []
+  devices:
+    enabled: true
+    ingress: []
+  discord-music:
+    enabled: false
+    ingress: []
+  homepage:
+    enabled: true
+    ingress: []
+  jellyfin:
+    enabled: false
+    ingress: []
+  keycloak:
+    enabled: true
+    ingress: []
+  longhorn:
+    enabled: true
+    ingress: []
+  metrics-server:
+    enabled: true
+    ingress: []
+  minecraft:
+    enabled: true
+    ingress: []
+  monitoring:
+    enabled: true
+    ingress: []
+  oauth2-proxy:
+    enabled: true
+    ingress: []
+  plex:
+    enabled: false
+    ingress: []
+  reloader:
+    enabled: true
+    ingress: []
+  rustdesk:
+    enabled: true
+    ingress: []
+  storyteller:
+    enabled: true
+    ingress: []
+  streaming:
+    enabled: false
+    ingress: []
+  suwayomi:
+    enabled: false
+    ingress: []
+  tailscale:
+    enabled: true
+    ingress: []
+  vault:
+    enabled: true
+    ingress: []
+  zurg:
+    enabled: false
+    ingress: []
