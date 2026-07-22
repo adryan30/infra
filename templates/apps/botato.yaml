@@ -32,6 +32,7 @@ spec:
                 env:
                   NODE_ENV: production
                   TZ: America/Bahia
+                  DISCORD_GUILD_ID: "861118279019397130"
                   MUSIC_NODE_HOST: botato-lavalink
                   MUSIC_NODE_PORT: "2333"
                 envFrom:
