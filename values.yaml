@@ -2,8 +2,9 @@ spec:
   destination:
     server: https://kubernetes.default.svc
 
-# Workload enablement registry (ADR-0003). Applications and companions look up
-# enablement by Workload name. ingress stays empty until the ingress ticket.
+# Workload enablement registry (ADR-0003). Applications look up enablement by
+# Workload name. ingress stays empty until the ingress ticket; companion gating
+# follows in later expand steps.
 workloads:
   breezewiki:
     enabled: true
