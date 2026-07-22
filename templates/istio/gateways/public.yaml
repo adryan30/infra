@@ -13,6 +13,10 @@ spec:
         protocol: HTTP
       hosts:
         - "*"
+      # Force HTTPS so apps behind TLS termination (e.g. Vault OIDC UI)
+      # do not build http:// redirect_uris that auth roles reject.
+      tls:
+        httpsRedirect: true
     - port:
         number: 443
         name: https
