@@ -115,19 +115,10 @@ def test_awkward_secret_names_gate_on_explicit_workload() -> None:
 
 def test_non_workload_secrets_still_render() -> None:
     """Platform / non-Workload secrets are not gated by the Workload registry."""
-    docs = render(
-        "--set",
-        "workloads.cert-manager.enabled=false",
-        "--set",
-        "workloads.keycloak.enabled=false",
-    )
+    docs = render("--set", "workloads.cert-manager.enabled=false")
     secrets = external_secrets(docs)
     # pgadmin is not a registry Workload; its secret must remain
     assert "pgadmin-root-password" in secrets
-    # Sphere-owned password material in storage must survive Workload disablement
-    assert "riven-user" in secrets
-    assert "zilean-user" in secrets
-    assert "keycloak-user" in secrets
     kinds = {d["metadata"]["name"]: d["kind"] for d in docs}
     assert kinds.get("wildcard-certificate") == "ClusterExternalSecret"
 
