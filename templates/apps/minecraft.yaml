@@ -16,6 +16,8 @@ spec:
     chart: minecraft
     helm:
       valuesObject:
+        # Chart-local scale-to-zero — not Workload disablement (ADR-0003 / CONTEXT).
+        # Disable minecraft via workloads.minecraft.enabled in values.yaml.
         replicaCount: 0
         podAnnotations:
           reloader.stakater.com/auto: "true"

@@ -5,6 +5,8 @@ spec:
 # Workload enablement registry (ADR-0003). Applications and chart-Workload
 # companions (VirtualServices, ExternalSecrets, oauth hosts, mounts,
 # consumer-side Sphere credential projections) look up by name.
+# This registry is the only Workload disable path — not comment-out or
+# chart-local replicaCount: 0 (scale-to-zero parks replicas; Workload stays on).
 #
 # Platform oauth hosts (non-Workload) stay outside the registry.
 platform:
