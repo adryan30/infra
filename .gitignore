@@ -1,0 +1,7 @@
+# Terraform bootstrap secrets & local state — never commit
+bootstrap/*.tfstate*
+bootstrap/*.tfvars
+!bootstrap/*.tfvars.example
+bootstrap/.terraform/
+
+.DS_Store
