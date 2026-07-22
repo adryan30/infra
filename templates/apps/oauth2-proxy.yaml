@@ -1,3 +1,4 @@
+{{- if eq (include "workload.enabled" (dict "enabled" true)) "true" }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -6,7 +7,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "2"
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+    {{- include "workload.finalizers" . | nindent 4 }}
   labels:
     name: oauth2-proxy
     app: oauth2-proxy
@@ -53,21 +54,9 @@ spec:
         #   oidc-issuer-url: <ISSUER_URL>
 
   destination:
-    server: https://kubernetes.default.svc
+    server: {{ include "workload.destinationServer" . }}
     namespace: keycloak
 
-  syncPolicy:
-    automated:
-      enabled: true
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-  revisionHistoryLimit: 3
+  {{- include "workload.syncPolicy" (dict "profile" "platform") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}

@@ -1,10 +1,11 @@
+{{- if eq (include "workload.enabled" (dict "enabled" true)) "true" }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: tailscale
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+    {{- include "workload.finalizers" . | nindent 4 }}
   labels:
     name: tailscale
 spec:
@@ -15,25 +16,9 @@ spec:
     chart: tailscale-operator
 
   destination:
-    server: https://kubernetes.default.svc
+    server: {{ include "workload.destinationServer" . }}
     namespace: tailscale
 
-  syncPolicy:
-    managedNamespaceMetadata:
-      labels:
-        istio-injection: disabled
-    automated:
-      enabled: true
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
-      - RespectIgnoreDifferences=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-  revisionHistoryLimit: 3
+  {{- include "workload.syncPolicy" (dict "profile" "workload" "istioInjection" "disabled") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}

@@ -1,10 +1,11 @@
+{{- if eq (include "workload.enabled" (dict "enabled" true)) "true" }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: keycloak
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+    {{- include "workload.finalizers" . | nindent 4 }}
   labels:
     name: keycloak
 spec:
@@ -46,25 +47,13 @@ spec:
               memory: 2Gi
 
   destination:
-    server: https://kubernetes.default.svc
+    server: {{ include "workload.destinationServer" . }}
     namespace: keycloak
 
   info:
     - name: "Homepage:"
       value: "https://auth.adryan.me"
 
-  syncPolicy:
-    automated:
-      enabled: true
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
-  revisionHistoryLimit: 3
+  {{- include "workload.syncPolicy" (dict "profile" "platform") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}
