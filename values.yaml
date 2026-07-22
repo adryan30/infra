@@ -2,16 +2,39 @@ spec:
   destination:
     server: https://kubernetes.default.svc
 
-# Workload enablement registry (ADR-0003). Applications look up enablement by
-# Workload name. ingress stays empty until the ingress ticket; companion gating
-# follows in later expand steps.
+# Workload enablement registry (ADR-0003). Applications and chart-Workload
+# VirtualServices / oauth hosts look up by Workload name.
+#
+# Platform oauth hosts (non-Workload) stay outside the registry.
+platform:
+  oauthHosts:
+    - kiali.adryan.me
+
 workloads:
   breezewiki:
     enabled: true
-    ingress: []
+    ingress:
+      - name: breezewiki
+        host: breeze.adryan.me
+        oauth: false
+        backend:
+          host: breezewiki.breezewiki.svc.cluster.local
+          port: 10416
   calibre:
     enabled: true
-    ingress: []
+    ingress:
+      - name: calibre
+        host: calibre.adryan.me
+        oauth: false
+        backend:
+          host: calibre-main.books.svc.cluster.local
+          port: 8083
+      - name: calibre-downloader
+        host: cdownloader.adryan.me
+        oauth: true
+        backend:
+          host: calibre-downloader.books.svc.cluster.local
+          port: 8084
   cert-manager:
     enabled: true
     ingress: []
@@ -26,16 +49,40 @@ workloads:
     ingress: []
   homepage:
     enabled: true
-    ingress: []
+    ingress:
+      - name: homepage
+        host: home.adryan.me
+        oauth: false
+        backend:
+          host: homepage.homepage.svc.cluster.local
+          port: 3000
   jellyfin:
     enabled: false
-    ingress: []
+    ingress:
+      - name: jellyfin
+        host: jellyfin.adryan.me
+        oauth: false
+        backend:
+          host: jellyfin.streaming.svc.cluster.local
+          port: 8096
   keycloak:
     enabled: true
-    ingress: []
+    ingress:
+      - name: keycloak
+        host: auth.adryan.me
+        oauth: false
+        backend:
+          host: keycloak.keycloak.svc.cluster.local
+          port: 8080
   longhorn:
     enabled: true
-    ingress: []
+    ingress:
+      - name: longhorn
+        host: longhorn.adryan.me
+        oauth: true
+        backend:
+          host: longhorn-frontend.longhorn.svc.cluster.local
+          port: 80
   metrics-server:
     enabled: true
     ingress: []
@@ -44,13 +91,31 @@ workloads:
     ingress: []
   monitoring:
     enabled: true
-    ingress: []
+    ingress:
+      - name: grafana
+        host: grafana.adryan.me
+        oauth: true
+        backend:
+          host: monitoring-grafana.monitoring.svc.cluster.local
+          port: 80
+      - name: prometheus
+        host: prometheus.adryan.me
+        oauth: true
+        backend:
+          host: monitoring-prometheus.monitoring.svc.cluster.local
+          port: 9090
   oauth2-proxy:
     enabled: true
     ingress: []
   plex:
     enabled: false
-    ingress: []
+    ingress:
+      - name: plex
+        host: plex.adryan.me
+        oauth: false
+        backend:
+          host: plex.streaming.svc.cluster.local
+          port: 32400
   reloader:
     enabled: true
     ingress: []
@@ -59,19 +124,55 @@ workloads:
     ingress: []
   storyteller:
     enabled: true
-    ingress: []
+    ingress:
+      - name: storyteller
+        host: storyteller.adryan.me
+        oauth: false
+        backend:
+          host: storyteller.books.svc.cluster.local
+          port: 8001
   streaming:
     enabled: false
-    ingress: []
+    ingress:
+      - name: riven
+        host: riven.adryan.me
+        oauth: true
+        backend:
+          host: streaming-riven-frontend.streaming.svc.cluster.local
+          port: 3000
+      - name: prowlarr
+        host: prowlarr.adryan.me
+        oauth: true
+        backend:
+          host: streaming-prowlarr.streaming.svc.cluster.local
+          port: 9696
+      - name: seerr
+        host: seerr.adryan.me
+        oauth: false
+        backend:
+          host: streaming-seerr.streaming.svc.cluster.local
+          port: 5055
   suwayomi:
     enabled: false
-    ingress: []
+    ingress:
+      - name: suwayomi
+        host: suwayomi.adryan.me
+        oauth: false
+        backend:
+          host: suwayomi.books.svc.cluster.local
+          port: 4567
   tailscale:
     enabled: true
     ingress: []
   vault:
     enabled: true
-    ingress: []
+    ingress:
+      - name: vault
+        host: vault.adryan.me
+        oauth: false
+        backend:
+          host: vault.vault.svc.cluster.local
+          port: 8200
   zurg:
     enabled: false
     ingress: []

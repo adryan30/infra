@@ -1,0 +1,1 @@
+{{- include "workload.virtualServices" (dict "root" . "name" "streaming") }}

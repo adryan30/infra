@@ -14,12 +14,17 @@ spec:
     - to:
         - operation:
             hosts:
-              [
-                "longhorn.adryan.me",
-                "grafana.adryan.me",
-                "prometheus.adryan.me",
-                "kiali.adryan.me",
-                "cdownloader.adryan.me",
-                "riven.adryan.me",
-                "prowlarr.adryan.me",
-              ]
+              {{- /* Platform (non-Workload) oauth hosts — outside the registry. */}}
+              {{- range .Values.platform.oauthHosts }}
+              - {{ . | quote }}
+              {{- end }}
+              {{- /* Workload oauth hosts: enabled ∧ ingress.oauth. */}}
+              {{- range $name, $wl := .Values.workloads }}
+              {{- if and $wl.enabled $wl.ingress }}
+              {{- range $ing := $wl.ingress }}
+              {{- if $ing.oauth }}
+              - {{ $ing.host | quote }}
+              {{- end }}
+              {{- end }}
+              {{- end }}
+              {{- end }}
