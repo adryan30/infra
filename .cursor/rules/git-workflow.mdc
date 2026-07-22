@@ -1,0 +1,12 @@
+---
+description: Never commit to main — Argo CD auto-syncs the live cluster from it
+alwaysApply: true
+---
+
+# Git: branch + PR only
+
+`main` is live. Argo CD auto-syncs this repo’s App-of-apps chart from the default branch; commits on `main` can change the cluster immediately.
+
+- Do not commit or push to `main`.
+- Use a feature branch, push it, and open a PR (`gh pr create`).
+- Full workflow: `docs/agents/git-workflow.md`.
