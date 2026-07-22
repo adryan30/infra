@@ -17,12 +17,15 @@ spec:
     helm:
       valuesObject:
         server:
+          # sealedcode/uninitcode=204: sealed Vault stays Alive so kubelet does not
+          # CrashLoop and re-seal forever. Readiness already used this pattern.
+          # Prefer auto-unseal long-term; until then do not treat sealed as dead.
           readinessProbe:
             enabled: true
             path: "/v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204"
           livenessProbe:
             enabled: true
-            path: "/v1/sys/health?standbyok=true"
+            path: "/v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204"
             initialDelaySeconds: 60
         ui:
           enabled: true
