@@ -23,7 +23,8 @@ spec:
               {{- if and $wl.enabled $wl.ingress }}
               {{- range $ing := $wl.ingress }}
               {{- if $ing.oauth }}
-              - {{ $ing.host | quote }}
+              {{- $oauthHost := required (printf "workload oauth: ingress for Workload %q needs host when oauth is true" $name) $ing.host }}
+              - {{ $oauthHost | quote }}
               {{- end }}
               {{- end }}
               {{- end }}

@@ -55,6 +55,23 @@ def test_multi_host_workload_renders_ingress_virtual_services() -> None:
     assert "prometheus" in vss
     assert vss["prometheus"]["spec"]["hosts"] == ["prometheus.adryan.me"]
 
+    disabled = virtual_services(render("--set", "workloads.calibre.enabled=false"))
+    assert "calibre" not in disabled
+    assert "calibre-downloader" not in disabled
+
+
+def test_single_host_workload_renders_from_registry() -> None:
+    """Single-host Workload VirtualServices take host/backend from the registry."""
+    vss = virtual_services(render())
+    assert "homepage" in vss
+    assert vss["homepage"]["spec"]["hosts"] == ["home.adryan.me"]
+    assert vss["homepage"]["spec"]["http"][0]["route"][0]["destination"] == {
+        "host": "homepage.homepage.svc.cluster.local",
+        "port": {"number": 3000},
+    }
+    omitted = virtual_services(render("--set", "workloads.homepage.enabled=false"))
+    assert "homepage" not in omitted
+
 
 def test_disabled_workload_omits_ingress_virtual_services() -> None:
     """Disabled Workloads omit their registry-driven VirtualServices."""
@@ -95,6 +112,7 @@ def test_platform_ingress_outside_registry_still_renders() -> None:
 def main() -> int:
     tests = [
         test_multi_host_workload_renders_ingress_virtual_services,
+        test_single_host_workload_renders_from_registry,
         test_disabled_workload_omits_ingress_virtual_services,
         test_oauth_hosts_track_enablement,
         test_platform_ingress_outside_registry_still_renders,
