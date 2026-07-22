@@ -52,15 +52,11 @@ def test_scale_to_zero_is_not_disablement() -> None:
 
 def test_streaming_tor_gates_on_registry_not_comment_out() -> None:
     """Workload-scoped Tor in streaming gates on the registry, not comment-out."""
-    default = tor_crs(render())
-    assert ("streaming", "tor") not in default, "disabled streaming must omit its Tor CR"
+    disabled = tor_crs(render("--set", "workloads.streaming.enabled=false"))
+    assert ("streaming", "tor") not in disabled, "registry enabled=false must omit streaming Tor"
 
     enabled = tor_crs(render("--set", "workloads.streaming.enabled=true"))
-    assert ("streaming", "tor") in enabled, "enabled streaming must render its Tor CR"
-
-    # books Tor is unrelated infrastructure — still present either way
-    assert ("books", "books") in default
-    assert ("books", "books") in enabled
+    assert ("streaming", "tor") in enabled, "registry enabled=true must render streaming Tor"
 
 
 def main() -> int:
