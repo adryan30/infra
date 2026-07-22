@@ -1,4 +1,4 @@
-{{- if eq (include "workload.enabled" (dict "enabled" true)) "true" }}
+{{- if eq (include "workload.enabled" (dict "root" . "name" "longhorn")) "true" }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

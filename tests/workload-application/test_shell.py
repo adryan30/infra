@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Tests for Workload Application shell helpers (ADR-0002).
+"""Tests for Workload Application shell helpers (ADR-0002) and enablement registry (ADR-0003).
 
 Seam: helm-rendered Application CRs under templates/apps/ —
-enabled gate, syncPolicy profiles, destination server.
+registry enablement gate, syncPolicy profiles, destination server.
 """
 
 from __future__ import annotations
@@ -98,6 +98,33 @@ def test_enabled_false_omits_application() -> None:
         assert name not in apps, f"{name} should be omitted when enabled is false"
 
 
+def test_missing_registry_key_fails_render() -> None:
+    """A Workload Application whose name is absent from the registry must fail helm template."""
+    proc = subprocess.run(
+        [
+            "helm",
+            "template",
+            "test",
+            str(ROOT),
+            "--set",
+            "workloads.storyteller=null",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode != 0, "render must fail when a Workload key is missing from the registry"
+    assert "not in the enablement registry" in proc.stderr
+
+
+def test_registry_override_controls_application_presence() -> None:
+    """Applications gate on the values registry, not inline enablement literals."""
+    disabled = applications(render("--set", "workloads.storyteller.enabled=false"))
+    assert "storyteller" not in disabled, "registry enabled=false must omit the Application"
+
+    enabled = applications(render("--set", "workloads.streaming.enabled=true"))
+    assert "streaming" in enabled, "registry enabled=true must render the Application"
+
+
 def main() -> int:
     tests = [
         test_workload_profile_storyteller,
@@ -105,6 +132,8 @@ def main() -> int:
         test_workload_istio_disabled_tailscale,
         test_platform_with_ssa_reloader,
         test_enabled_false_omits_application,
+        test_missing_registry_key_fails_render,
+        test_registry_override_controls_application_presence,
     ]
     failed = 0
     for test in tests:
