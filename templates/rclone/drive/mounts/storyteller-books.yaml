@@ -1,3 +1,4 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "storyteller")) "true" }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -34,3 +35,4 @@ spec:
       storage: 50Gi
   volumeName: pv-storyteller
   storageClassName: ""
+{{- end }}
