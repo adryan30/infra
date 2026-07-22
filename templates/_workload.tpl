@@ -21,6 +21,49 @@ A missing registry key fails the render (fail-closed).
 {{- ternary "true" "false" $entry.enabled -}}
 {{- end -}}
 
+{{/*
+workload.virtualServices
+
+Render VirtualService CRs for a named Workload from its registry ingress list.
+Required: root, name. Omits all documents when the Workload is disabled.
+*/}}
+{{- define "workload.virtualServices" -}}
+{{- $root := required "workload.virtualServices: root is required" .root -}}
+{{- $name := required "workload.virtualServices: name is required" .name -}}
+{{- if eq (include "workload.enabled" (dict "root" $root "name" $name)) "true" -}}
+{{- $entry := index $root.Values.workloads $name -}}
+{{- range $ing := $entry.ingress | default list }}
+{{- $vsName := required (printf "workload.virtualServices: ingress entry for %q needs name" $name) $ing.name -}}
+{{- $host := required (printf "workload.virtualServices: ingress %q needs host" $vsName) $ing.host -}}
+{{- $backend := required (printf "workload.virtualServices: ingress %q needs backend" $vsName) $ing.backend -}}
+{{- $backendHost := required (printf "workload.virtualServices: ingress %q backend needs host" $vsName) $backend.host -}}
+{{- $backendPort := required (printf "workload.virtualServices: ingress %q backend needs port" $vsName) $backend.port }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ $vsName }}
+  namespace: istio-ingress
+  labels:
+    app: {{ $vsName }}
+spec:
+  hosts:
+    - {{ $host | quote }}
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: {{ $backendPort }}
+            host: {{ $backendHost }}
+{{- end }}
+{{- end }}
+{{- end -}}
+
 {{- define "workload.finalizers" -}}
 - resources-finalizer.argocd.argoproj.io
 {{- end -}}
