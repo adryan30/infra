@@ -1,12 +1,14 @@
 ---
-description: Never commit to main — Argo CD auto-syncs the live cluster from it
+description: Branch+PR only; Conventional Commits; main is Argo-synced live
 alwaysApply: true
 ---
 
-# Git: branch + PR only
+# Git: branch + PR, Conventional Commits
 
 `main` is live. Argo CD auto-syncs this repo’s App-of-apps chart from the default branch; commits on `main` can change the cluster immediately.
 
 - Do not commit or push to `main`.
 - Use a feature branch, push it, and open a PR (`gh pr create`).
+- Commit messages and PR titles use Conventional Commits: `type(optional-scope): description` (e.g. `feat(vault): …`, `docs(agents): …`).
+- Merges to `main` are squash-only — keep the PR title conventional.
 - Full workflow: `docs/agents/git-workflow.md`.

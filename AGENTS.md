@@ -14,4 +14,4 @@ Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/ag
 
 ### Git workflow
 
-`main` is live (Argo CD auto-syncs). Never commit or push to `main` — branch + PR only. See `docs/agents/git-workflow.md`.
+`main` is live (Argo CD auto-syncs). Never commit or push to `main` — branch + PR only. Use Conventional Commits. See `docs/agents/git-workflow.md`.
