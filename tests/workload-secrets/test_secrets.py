@@ -47,14 +47,15 @@ def test_disabled_workload_omits_application_and_externalsecrets() -> None:
     assert "plex" not in apps
     assert "plex-key" not in secrets
 
-    assert "discord-music" not in apps
-    assert "discord-config" not in secrets
-
     assert "zurg" not in apps
     assert "zurg-config" not in secrets
 
     assert "streaming" not in apps
     assert "vpn-riven" not in secrets
+
+    botato_off = render("--set", "workloads.botato.enabled=false")
+    assert "botato" not in applications(botato_off)
+    assert "botato-env" not in external_secrets(botato_off)
 
 
 def test_disable_enabled_workload_drops_application_and_secret() -> None:
@@ -72,14 +73,13 @@ def test_reenable_restores_externalsecrets() -> None:
         "--set",
         "workloads.plex.enabled=true",
         "--set",
-        "workloads.discord-music.enabled=true",
-        "--set",
         "workloads.zurg.enabled=true",
     )
     secrets = external_secrets(docs)
     assert "plex-key" in secrets
-    assert "discord-config" in secrets
     assert "zurg-config" in secrets
+    assert "botato-env" in secrets
+    assert "botato" in applications(docs)
 
 
 def test_awkward_secret_names_gate_on_explicit_workload() -> None:

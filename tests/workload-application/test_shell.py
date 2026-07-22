@@ -93,9 +93,9 @@ def test_enabled_false_omits_application() -> None:
         "plex",
         "zurg",
         "suwayomi",
-        "discord-music",
     ):
         assert name not in apps, f"{name} should be omitted when enabled is false"
+    assert "botato" in apps, "botato should render when enabled is true"
 
 
 def test_missing_registry_key_fails_render() -> None:
