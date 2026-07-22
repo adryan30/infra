@@ -1,0 +1,22 @@
+# Copy to terraform.tfvars (gitignored) and fill in locally.
+# Do not commit real credentials or state.
+
+region         = "sa-saopaulo-1"
+tenancy_ocid   = "ocid1.tenancy.oc1..aaaa..."
+# Optional; defaults to tenancy (root compartment).
+# compartment_ocid = "ocid1.compartment.oc1..aaaa..."
+
+# Session token (matches ~/.oci/config after `oci session authenticate`):
+auth                = "SecurityToken"
+config_file_profile = "DEFAULT"
+
+# Or API key instead:
+# auth             = "ApiKey"
+# user_ocid        = "ocid1.user.oc1..aaaa..."
+# fingerprint      = "aa:bb:..."
+# private_key_path = "~/.oci/oci_api_key.pem"
+
+kubeconfig_context = "shardblade-001"
+
+# Required by OCI Identity when creating the dedicated unseal user.
+vault_unseal_user_email = "you@example.com"

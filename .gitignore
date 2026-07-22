@@ -3,5 +3,9 @@ bootstrap/*.tfstate*
 bootstrap/*.tfvars
 !bootstrap/*.tfvars.example
 bootstrap/.terraform/
+bootstrap/kms/*.tfstate*
+bootstrap/kms/*.tfvars
+!bootstrap/kms/*.tfvars.example
+bootstrap/kms/.terraform/
 
 .DS_Store

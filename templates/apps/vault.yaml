@@ -18,8 +18,7 @@ spec:
       valuesObject:
         server:
           # sealedcode/uninitcode=204: sealed Vault stays Alive so kubelet does not
-          # CrashLoop and re-seal forever. Readiness already used this pattern.
-          # Prefer auto-unseal long-term; until then do not treat sealed as dead.
+          # CrashLoop while waiting for unseal / seal migration.
           readinessProbe:
             enabled: true
             path: "/v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204"
@@ -27,6 +26,45 @@ spec:
             enabled: true
             path: "/v1/sys/health?standbyok=true&sealedcode=204&uninitcode=204"
             initialDelaySeconds: 60
+          # OCI KMS auto-unseal material from bootstrap/kms Terraform
+          # (Secret/vault-oci-kms). Nodes span tenancies, so use API-key auth
+          # rather than instance principal.
+          extraVolumes:
+            - type: secret
+              name: vault-oci-kms
+          extraEnvironmentVars:
+            OCI_CONFIG_FILE: /vault/userconfig/vault-oci-kms/config
+          extraSecretEnvironmentVars:
+            - envName: VAULT_OCIKMS_SEAL_KEY_ID
+              secretName: vault-oci-kms
+              secretKey: VAULT_OCIKMS_SEAL_KEY_ID
+            - envName: VAULT_OCIKMS_CRYPTO_ENDPOINT
+              secretName: vault-oci-kms
+              secretKey: VAULT_OCIKMS_CRYPTO_ENDPOINT
+            - envName: VAULT_OCIKMS_MANAGEMENT_ENDPOINT
+              secretName: vault-oci-kms
+              secretKey: VAULT_OCIKMS_MANAGEMENT_ENDPOINT
+          standalone:
+            enabled: true
+            config: |
+              ui = true
+
+              listener "tcp" {
+                tls_disable = 1
+                address = "[::]:8200"
+                cluster_address = "[::]:8201"
+              }
+
+              storage "file" {
+                path = "/vault/data"
+              }
+
+              # Endpoints + key_id come from VAULT_OCIKMS_* env (TF-managed Secret).
+              seal "ocikms" {
+                auth_type_api_key = true
+              }
+
+              disable_mlock = true
         ui:
           enabled: true
 

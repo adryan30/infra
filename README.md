@@ -32,6 +32,29 @@ terraform plan
 terraform apply
 ```
 
+### Vault OCI KMS auto-unseal (`bootstrap/kms`)
+
+Provisions an Always Free software-protected OCI KMS key, a dedicated IAM user/API key, and the `vault/vault-oci-kms` Secret consumed by the Vault Helm chart.
+
+```bash
+cd bootstrap/kms
+cp terraform.tfvars.example terraform.tfvars   # tenancy + OCI auth
+# If using SecurityToken: oci session authenticate --profile DEFAULT
+terraform init
+terraform apply
+```
+
+Then sync Vault (Argo) and migrate once from Shamir:
+
+```bash
+kubectl -n vault delete pod vault-0
+kubectl -n vault exec -it vault-0 -- vault operator unseal -migrate   # paste current Shamir share
+kubectl -n vault delete pod vault-0                                  # prove auto-unseal
+kubectl -n vault exec vault-0 -- vault status                        # Seal Type=ocikms, Sealed=false
+```
+
+Details: [`docs/research/vault-auto-unseal.md`](./docs/research/vault-auto-unseal.md).
+
 Never commit `*.tfvars` or `*.tfstate*` — they are gitignored. Use a kubeconfig context that can reach the cluster (`shardblade-001` by default in `bootstrap/main.tf`).
 
 ## Domain language
