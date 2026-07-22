@@ -14,6 +14,9 @@ platform:
     - kiali.adryan.me
 
 workloads:
+  botato:
+    enabled: true
+    ingress: []
   breezewiki:
     enabled: true
     ingress:
@@ -46,9 +49,6 @@ workloads:
     ingress: []
   devices:
     enabled: true
-    ingress: []
-  discord-music:
-    enabled: false
     ingress: []
   homepage:
     enabled: true

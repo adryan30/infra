@@ -1,0 +1,150 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "botato")) "true" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: botato
+  namespace: argocd
+  finalizers:
+    {{- include "workload.finalizers" . | nindent 4 }}
+  labels:
+    name: botato
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.4.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          bot:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            pod:
+              labels:
+                sidecar.istio.io/inject: "false"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/adryan30/botato
+                  tag: "1.0.0"
+                env:
+                  NODE_ENV: production
+                  TZ: America/Bahia
+                  DISCORD_GUILD_ID: "861118279019397130"
+                  MUSIC_NODE_HOST: botato-lavalink
+                  MUSIC_NODE_PORT: "2333"
+                envFrom:
+                  - secretRef:
+                      name: botato-env
+          lavalink:
+            strategy: RollingUpdate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            pod:
+              labels:
+                sidecar.istio.io/inject: "false"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/lavalink-devs/lavalink
+                  tag: 4.2.2-alpine
+                env:
+                  _JAVA_OPTIONS: -Xmx512M
+                envFrom:
+                  - secretRef:
+                      name: botato-env
+        service:
+          lavalink:
+            controller: lavalink
+            ports:
+              http:
+                port: 2333
+        configMaps:
+          lavalink-config:
+            enabled: true
+            data:
+              application.yml: |-
+                server:
+                  port: 2333
+                  address: 0.0.0.0
+
+                lavalink:
+                  plugins:
+                    - dependency: "dev.lavalink.youtube:youtube-plugin:1.18.1"
+                      snapshot: false
+                  server:
+                    # Overridden by LAVALINK_SERVER_PASSWORD from botato-env.
+                    password: "youshallnotpass"
+                    sources:
+                      youtube: false
+                      bandcamp: true
+                      soundcloud: true
+                      twitch: true
+                      vimeo: true
+                      nico: true
+                      http: true
+                      local: false
+                    bufferDurationMs: 400
+                    frameBufferDurationMs: 5000
+                    opusEncodingQuality: 10
+                    resamplingQuality: LOW
+                    trackStuckThresholdMs: 10000
+                    useSeekGhosting: true
+                    youtubePlaylistLoadLimit: 6
+                    playerUpdateInterval: 5
+                    youtubeSearchEnabled: true
+                    soundcloudSearchEnabled: true
+                    gc-warnings: true
+
+                plugins:
+                  youtube:
+                    enabled: true
+                    allowSearch: true
+                    allowDirectVideoIds: true
+                    allowDirectPlaylistIds: true
+                    clients:
+                      - MUSIC
+                      - ANDROID_VR
+                      - WEB
+                      - WEBEMBEDDED
+                    oauth:
+                      enabled: ${YOUTUBE_OAUTH_ENABLED:false}
+                      refreshToken: "${YOUTUBE_OAUTH_REFRESH_TOKEN:}"
+                      skipInitialization: ${YOUTUBE_OAUTH_SKIP_INITIALIZATION:false}
+                    pot:
+                      token: "${YOUTUBE_PO_TOKEN:}"
+                      visitorData: "${YOUTUBE_VISITOR_DATA:}"
+
+                logging:
+                  level:
+                    root: INFO
+                    lavalink: INFO
+        persistence:
+          lavalink-config:
+            type: configMap
+            identifier: lavalink-config
+            advancedMounts:
+              lavalink:
+                main:
+                  - path: /opt/Lavalink/application.yml
+                    subPath: application.yml
+                    readOnly: true
+          lavalink-plugins:
+            enabled: true
+            type: persistentVolumeClaim
+            size: 1Gi
+            accessMode: ReadWriteOnce
+            advancedMounts:
+              lavalink:
+                main:
+                  - path: /opt/Lavalink/plugins
+
+  destination:
+    server: {{ include "workload.destinationServer" . }}
+    namespace: discord
+
+  {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}
