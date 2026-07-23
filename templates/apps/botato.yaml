@@ -115,6 +115,7 @@ spec:
                       - MUSIC
                       - ANDROID_VR
                       - WEB
+                      - TV
                       - WEBEMBEDDED
                     oauth:
                       enabled: ${YOUTUBE_OAUTH_ENABLED:false}
