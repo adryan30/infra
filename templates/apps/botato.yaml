@@ -28,7 +28,7 @@ spec:
               main:
                 image:
                   repository: ghcr.io/adryan30/botato
-                  tag: "1.1.1"
+                  tag: "1.1.2"
                 env:
                   NODE_ENV: production
                   TZ: America/Bahia
