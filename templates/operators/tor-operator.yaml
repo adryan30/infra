@@ -25,6 +25,14 @@ spec:
     server: https://kubernetes.default.svc
     namespace: kube-system
 
+  # Chart CRDs embed `required: null`; the apiserver drops nulls, so live omits the
+  # key and Argo stays OutOfSync forever (projectconfigs has none and stays Synced).
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      jqPathExpressions:
+        - .. | .required? | select(. == null)
+
   syncPolicy:
     automated:
       enabled: true
