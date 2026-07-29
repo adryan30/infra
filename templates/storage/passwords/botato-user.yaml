@@ -1,0 +1,46 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: botato-user
+  namespace: storage
+spec:
+  refreshInterval: "24h"
+  target:
+    name: sphere-botato
+    creationPolicy: Merge
+    template:
+      metadata:
+        labels:
+          cnpg.io/reload: "true"
+      data:
+        password: "{{ `{{ .password }}` }}"
+        pgpass: "sphere-rw:5432:botato:botato:{{`{{ .password }}`}}"
+        jdbc-uri: "jdbc:postgresql://sphere-rw.storage.svc.cluster.local:5432/botato?password={{`{{ .password }}`}}&user=botato"
+        uri: "postgresql://botato:{{`{{ .password }}`}}@sphere-rw.storage.svc.cluster.local:5432/botato"
+        fqdn-jdbc-uri: "jdbc:postgresql://sphere-rw.storage.svc.cluster.local:5432/botato?password={{`{{ .password }}`}}&user=botato"
+        fqdn-uri: "postgresql://botato:{{`{{ .password }}`}}@sphere-rw.storage.svc.cluster.local:5432/botato"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ClusterGenerator
+          name: "cnpg-passgen"
+---
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: botato-user-pushsecret
+  namespace: storage
+spec:
+  deletionPolicy: Delete
+  refreshInterval: 10s
+  secretStoreRefs:
+    - name: vault
+      kind: ClusterSecretStore
+  selector:
+    secret:
+      name: sphere-botato
+  data:
+    - match:
+        remoteRef:
+          remoteKey: storage/sphere-botato

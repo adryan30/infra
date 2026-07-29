@@ -28,6 +28,11 @@ spec:
         login: true
         passwordSecret:
           name: sphere-zilean
+      - name: botato
+        createdb: false
+        login: true
+        passwordSecret:
+          name: sphere-botato
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
@@ -71,3 +76,17 @@ spec:
     - name: zilean
       owner: zilean
       ensure: absent
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: botato-db
+  namespace: storage
+spec:
+  name: botato
+  owner: botato
+  cluster:
+    name: sphere
+  schemas:
+    - name: botato
+      owner: botato
