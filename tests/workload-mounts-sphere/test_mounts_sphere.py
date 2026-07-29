@@ -240,6 +240,48 @@ def test_sphere_password_secrets_include_cnpg_username() -> None:
     )
 
 
+def test_sphere_password_uri_fields_use_urlquery() -> None:
+    """URI-shaped Sphere password fields must urlquery-encode the password (pack invariant).
+
+    ADO.NET fqdn-uri is not URI-shaped — password stays raw there.
+    """
+    docs = render()
+    uri_keys = ("uri", "jdbc-uri", "fqdn-jdbc-uri")
+    offenders: list[str] = []
+    for name, es in external_secrets(docs).items():
+        if not name.endswith("-user") or es.get("metadata", {}).get("namespace") != "storage":
+            continue
+        data = (es.get("spec", {}).get("target", {}).get("template", {}) or {}).get("data", {}) or {}
+        for key in uri_keys:
+            value = data.get(key, "")
+            if "urlquery" not in value:
+                offenders.append(f"{name}.{key}")
+        fqdn = data.get("fqdn-uri", "")
+        if fqdn.startswith("Host="):
+            if "urlquery" in fqdn:
+                offenders.append(f"{name}.fqdn-uri (ado.net must not urlquery)")
+        elif fqdn and "urlquery" not in fqdn:
+            offenders.append(f"{name}.fqdn-uri")
+    assert not offenders, "Sphere URI password templates missing urlquery: " + ", ".join(offenders)
+
+
+def test_sphere_password_pack_preserves_role_dialects() -> None:
+    """Pack keeps per-role fqdn-uri dialects and zilean shortHost."""
+    docs = render()
+    secrets = external_secrets(docs)
+
+    riven = secrets["riven-user"]["spec"]["target"]["template"]["data"]["fqdn-uri"]
+    assert riven.startswith("postgresql+psycopg2://"), riven
+
+    zilean = secrets["zilean-user"]["spec"]["target"]["template"]["data"]
+    assert zilean["fqdn-uri"].startswith("Host="), zilean["fqdn-uri"]
+    assert "sphere-rw.default" in zilean["uri"], zilean["uri"]
+
+    app = secrets["app-user"]["spec"]["target"]
+    assert app.get("creationPolicy") == "Merge"
+    assert "username" not in (app.get("template", {}) or {}).get("data", {})
+
+
 def main() -> int:
     tests = [
         test_disabled_workload_omits_mounts,
@@ -250,6 +292,8 @@ def main() -> int:
         test_sphere_owned_material_survives_workload_disablement,
         test_sphere_password_generators_create_missing_secrets,
         test_sphere_password_secrets_include_cnpg_username,
+        test_sphere_password_uri_fields_use_urlquery,
+        test_sphere_password_pack_preserves_role_dialects,
     ]
     failed = 0
     for test in tests:
