@@ -9,8 +9,7 @@
   "enabledManagers": [
     "argocd",
     "helm-values",
-    "custom.regex",
-    "github-actions"
+    "custom.regex"
   ],
   "argocd": {
     "managerFilePatterns": [
@@ -35,6 +34,12 @@
     }
   ],
   "packageRules": [
+    {
+      "description": "Floats stay unmanaged",
+      "matchDatasources": ["docker"],
+      "matchCurrentValue": "/^(latest|preview)$/",
+      "enabled": false
+    },
     {
       "description": "Default: propose-only (platform charts, companions, majors)",
       "matchManagers": ["argocd", "helm-values", "custom.regex"],
