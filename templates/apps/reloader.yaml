@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://stakater.github.io/stakater-charts
-    targetRevision: 2.2.5
+    targetRevision: 2.2.14
     chart: reloader
 
   destination:
