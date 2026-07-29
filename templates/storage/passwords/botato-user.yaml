@@ -18,6 +18,10 @@ spec:
         uri: "postgresql://botato:{{`{{ .password }}`}}@sphere-rw.storage.svc.cluster.local:5432/botato"
         fqdn-jdbc-uri: "jdbc:postgresql://sphere-rw.storage.svc.cluster.local:5432/botato?password={{`{{ .password }}`}}&user=botato"
         fqdn-uri: "postgresql://botato:{{`{{ .password }}`}}@sphere-rw.storage.svc.cluster.local:5432/botato"
+        port: "5432"
+        host: "sphere-rw"
+        user: "botato"
+        username: "botato"
   dataFrom:
     - sourceRef:
         generatorRef:

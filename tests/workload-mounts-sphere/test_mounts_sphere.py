@@ -206,6 +206,31 @@ def test_sphere_password_generators_create_missing_secrets() -> None:
     )
 
 
+def test_sphere_password_secrets_include_cnpg_username() -> None:
+    """Managed-role password secrets must include username — CNPG refuses to reconcile without it."""
+    docs = render()
+    sphere = next(c for c in docs if c.get("kind") == "Cluster" and c["metadata"]["name"] == "sphere")
+    password_secrets = {
+        role["passwordSecret"]["name"]
+        for role in sphere.get("spec", {}).get("managed", {}).get("roles", [])
+        if role.get("passwordSecret", {}).get("name")
+    }
+    secrets_by_target = {
+        es.get("spec", {}).get("target", {}).get("name"): es
+        for es in external_secrets(docs).values()
+    }
+    missing: list[str] = []
+    for secret_name in sorted(password_secrets):
+        es = secrets_by_target.get(secret_name)
+        assert es is not None, f"no ExternalSecret targets password secret {secret_name}"
+        keys = set((es.get("spec", {}).get("target", {}).get("template", {}) or {}).get("data", {}) or {})
+        if "password" not in keys or "username" not in keys:
+            missing.append(f"{secret_name} keys={sorted(keys)}")
+    assert not missing, (
+        "Sphere passwordSecret templates must include password and username: " + "; ".join(missing)
+    )
+
+
 def main() -> int:
     tests = [
         test_disabled_workload_omits_mounts,
@@ -215,6 +240,7 @@ def main() -> int:
         test_reenable_restores_consumer_sphere_credentials,
         test_sphere_owned_material_survives_workload_disablement,
         test_sphere_password_generators_create_missing_secrets,
+        test_sphere_password_secrets_include_cnpg_username,
     ]
     failed = 0
     for test in tests:
