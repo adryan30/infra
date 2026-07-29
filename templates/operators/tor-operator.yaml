@@ -13,6 +13,13 @@ spec:
     repoURL: https://bugfest.github.io/tor-controller
     targetRevision: 0.1.17
     chart: tor-controller
+    helm:
+      valuesObject:
+        # gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0 was removed; chart still defaults there.
+        kubeRbacProxy:
+          image:
+            repository: quay.io/brancz/kube-rbac-proxy
+            tag: v0.8.0
 
   destination:
     server: https://kubernetes.default.svc
