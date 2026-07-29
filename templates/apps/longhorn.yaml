@@ -12,12 +12,12 @@ spec:
   project: default
   source:
     repoURL: https://charts.longhorn.io
-    targetRevision: 1.12.0
+    targetRevision: v1.10.0
     chart: longhorn
     helm:
       valuesObject:
         preUpgradeChecker:
-          jobEnabled: false
+          jobEnabled: true
         defaultSettings:
           defaultReplicaCount: "1"
 

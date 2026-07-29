@@ -54,6 +54,13 @@
       "automerge": true,
       "automergeType": "pr",
       "automergeStrategy": "squash"
+    },
+    {
+      "description": "Longhorn requires one minor upgrade at a time; Renovate patches only",
+      "matchManagers": ["argocd"],
+      "matchPackageNames": ["longhorn"],
+      "matchUpdateTypes": ["minor", "major"],
+      "enabled": false
     }
   ]
 }
