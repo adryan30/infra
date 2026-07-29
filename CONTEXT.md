@@ -19,3 +19,15 @@ _Avoid_: app (too vague), service, helm release alone, disabling via comment-out
 **Sphere**:
 The shared CloudNativePG Postgres cluster used by database-backed Workloads. Owns roles, Databases, and password material for those roles; Workloads only consume projected credentials.
 _Avoid_: the database, postgres, CNPG cluster (when you mean this specific one)
+
+**Pin**:
+An explicit image tag, chart `targetRevision`, or other version string recorded in the App-of-apps as desired state. Changing a Pin is a git change; Argo Sync applies it.
+_Avoid_: version (ambiguous), release (ambiguous with upstream projects), auto release
+
+**Float**:
+A mutable image reference (for example `latest` or `preview`) that is not a Pin. Newest content can change without a git commit.
+_Avoid_: unpinned, floating tag (as the concept name)
+
+**Sync**:
+Argo applying the App-of-apps desired state from git onto the cluster. Already automated here; it is not version discovery.
+_Avoid_: deploy, release, auto update (when you mean Sync alone)

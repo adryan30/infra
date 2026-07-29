@@ -1,0 +1,3 @@
+# Renovate for Pin bumps (not cluster mutate)
+
+Desired versions live as Pins in the App-of-apps. Argo Sync already applies git continuously; the gap was version discovery. We use the Renovate GitHub App to open one PR per dependency Pin (shared chart name across Workloads is one Pin): automerge patch/minor only for `ghcr.io/adryan30/botato`, propose-only for Helm `targetRevision` and botato companions (Lavalink image, YouTube plugin). Floats (`latest` / `preview`) stay unmanaged. Rejected Argo CD Image Updater alone (images only; weak for charts) and Dependabot (poor fit for Application `valuesObject` + Helm Pins). Automerge requires the repo `helm-template` CI job and branch protection that requires that check — without the latter, “safely” is incomplete.

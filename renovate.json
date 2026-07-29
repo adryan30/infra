@@ -1,0 +1,58 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    ":semanticCommitScope(deps)"
+  ],
+  "enabledManagers": [
+    "argocd",
+    "helm-values",
+    "custom.regex"
+  ],
+  "argocd": {
+    "managerFilePatterns": [
+      "/^templates\\/(apps|operators|istio)\\/.+\\.ya?ml$/"
+    ]
+  },
+  "helm-values": {
+    "managerFilePatterns": [
+      "/^templates\\/apps\\/botato\\.yaml$/"
+    ]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Lavalink YouTube plugin Pin inside botato application.yml",
+      "managerFilePatterns": ["/^templates\\/apps\\/botato\\.yaml$/"],
+      "matchStrings": [
+        "dependency:\\s*\"dev\\.lavalink\\.youtube:youtube-plugin:(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "dev.lavalink.youtube:youtube-plugin",
+      "datasourceTemplate": "maven"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Floats stay unmanaged",
+      "matchDatasources": ["docker"],
+      "matchCurrentValue": "/^(latest|preview)$/",
+      "enabled": false
+    },
+    {
+      "description": "Default: propose-only (platform charts, companions, majors)",
+      "matchManagers": ["argocd", "helm-values", "custom.regex"],
+      "automerge": false
+    },
+    {
+      "description": "Botato bot image: automerge patch and minor Pins",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/adryan30/botato"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    }
+  ]
+}
