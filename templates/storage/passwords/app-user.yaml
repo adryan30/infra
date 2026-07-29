@@ -7,6 +7,8 @@ spec:
   refreshInterval: "24h"
   target:
     name: sphere-app
+    # Pre-existing secret not owned by this ExternalSecret; Owner cannot adopt it.
+    creationPolicy: Merge
     template:
       metadata:
         labels:

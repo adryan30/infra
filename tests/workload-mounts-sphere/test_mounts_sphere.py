@@ -181,27 +181,36 @@ def test_sphere_owned_material_survives_workload_disablement() -> None:
 
 
 def test_sphere_password_generators_create_missing_secrets() -> None:
-    """cnpg-passgen ExternalSecrets must Own the target secret so new Sphere roles bootstrap.
+    """Managed-role passwordSecrets must Own the target so new Sphere roles bootstrap.
 
     creationPolicy=Merge refuses to create a missing secret and leaves CNPG roles /
     Databases / PushSecrets / consumer Vault pulls permanently broken.
+
+    ExternalSecrets that are not referenced as a managed-role passwordSecret (e.g.
+    sphere-app) may keep Merge when the Secret pre-exists outside ESO ownership.
     """
     docs = render()
+    sphere = next(c for c in docs if c.get("kind") == "Cluster" and c["metadata"]["name"] == "sphere")
+    password_secrets = {
+        role["passwordSecret"]["name"]
+        for role in sphere.get("spec", {}).get("managed", {}).get("roles", [])
+        if role.get("passwordSecret", {}).get("name")
+    }
+    secrets_by_target = {
+        es.get("spec", {}).get("target", {}).get("name"): (name, es)
+        for name, es in external_secrets(docs).items()
+    }
     offenders: list[str] = []
-    for name, es in external_secrets(docs).items():
-        data_from = es.get("spec", {}).get("dataFrom") or []
-        uses_passgen = any(
-            ((d.get("sourceRef") or {}).get("generatorRef") or {}).get("name") == "cnpg-passgen"
-            for d in data_from
-        )
-        if not uses_passgen:
-            continue
+    for secret_name in sorted(password_secrets):
+        entry = secrets_by_target.get(secret_name)
+        assert entry is not None, f"no ExternalSecret targets password secret {secret_name}"
+        name, es = entry
         # ESO default is Owner when omitted.
         policy = es.get("spec", {}).get("target", {}).get("creationPolicy", "Owner")
         if policy != "Owner":
-            offenders.append(f"{name}={policy}")
+            offenders.append(f"{name} target={secret_name} policy={policy}")
     assert not offenders, (
-        "Sphere password ExternalSecrets must use creationPolicy Owner "
+        "Sphere managed-role password ExternalSecrets must use creationPolicy Owner "
         f"(or omit it); Merge cannot bootstrap new roles: {offenders}"
     )
 
