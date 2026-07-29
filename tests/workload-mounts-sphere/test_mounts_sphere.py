@@ -148,6 +148,8 @@ def test_sphere_owned_material_survives_workload_disablement() -> None:
         "workloads.streaming.enabled=false",
         "--set",
         "workloads.keycloak.enabled=false",
+        "--set",
+        "workloads.botato.enabled=false",
     )
     secrets = external_secrets(docs)
     pushes = push_secrets(docs)
@@ -158,20 +160,50 @@ def test_sphere_owned_material_survives_workload_disablement() -> None:
     assert "riven-user" in secrets
     assert "zilean-user" in secrets
     assert "keycloak-user" in secrets
+    assert "botato-user" in secrets
     assert "riven-user-pushsecret" in pushes
     assert "zilean-user-pushsecret" in pushes
     assert "keycloak-user-pushsecret" in pushes
+    assert "botato-user-pushsecret" in pushes
 
     # Sphere Cluster + Databases stay
     assert "sphere" in sphere_clusters
     assert "riven-db" in dbs
     assert "zilean-db" in dbs
     assert "keycloak-db" in dbs
+    assert "botato-db" in dbs
 
     # Consumer projections still omitted
     assert "riven-db-credentials" not in secrets
     assert "zilean-db-credentials" not in secrets
     assert "sphere-keycloak" not in secrets
+    assert "botato-env" not in secrets
+
+
+def test_sphere_password_generators_create_missing_secrets() -> None:
+    """cnpg-passgen ExternalSecrets must Own the target secret so new Sphere roles bootstrap.
+
+    creationPolicy=Merge refuses to create a missing secret and leaves CNPG roles /
+    Databases / PushSecrets / consumer Vault pulls permanently broken.
+    """
+    docs = render()
+    offenders: list[str] = []
+    for name, es in external_secrets(docs).items():
+        data_from = es.get("spec", {}).get("dataFrom") or []
+        uses_passgen = any(
+            ((d.get("sourceRef") or {}).get("generatorRef") or {}).get("name") == "cnpg-passgen"
+            for d in data_from
+        )
+        if not uses_passgen:
+            continue
+        # ESO default is Owner when omitted.
+        policy = es.get("spec", {}).get("target", {}).get("creationPolicy", "Owner")
+        if policy != "Owner":
+            offenders.append(f"{name}={policy}")
+    assert not offenders, (
+        "Sphere password ExternalSecrets must use creationPolicy Owner "
+        f"(or omit it); Merge cannot bootstrap new roles: {offenders}"
+    )
 
 
 def main() -> int:
@@ -182,6 +214,7 @@ def main() -> int:
         test_disabled_workload_omits_consumer_sphere_credentials,
         test_reenable_restores_consumer_sphere_credentials,
         test_sphere_owned_material_survives_workload_disablement,
+        test_sphere_password_generators_create_missing_secrets,
     ]
     failed = 0
     for test in tests:
