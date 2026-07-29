@@ -8,7 +8,6 @@
   ],
   "enabledManagers": [
     "argocd",
-    "helm-values",
     "custom.regex"
   ],
   "argocd": {
@@ -16,12 +15,16 @@
       "/^templates\\/(apps|operators|istio)\\/.+\\.ya?ml$/"
     ]
   },
-  "helm-values": {
-    "managerFilePatterns": [
-      "/^templates\\/apps\\/botato\\.yaml$/"
-    ]
-  },
   "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Docker image Pins inside botato valuesObject (file is a Helm template, so helm-values cannot parse it)",
+      "managerFilePatterns": ["/^templates\\/apps\\/botato\\.yaml$/"],
+      "matchStrings": [
+        "repository:\\s+(?<depName>\\S+)\\s+tag:\\s+[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "datasourceTemplate": "docker"
+    },
     {
       "customType": "regex",
       "description": "Lavalink YouTube plugin Pin inside botato application.yml",
@@ -43,7 +46,7 @@
     },
     {
       "description": "Default: propose-only (platform charts, companions, majors)",
-      "matchManagers": ["argocd", "helm-values", "custom.regex"],
+      "matchManagers": ["argocd", "custom.regex"],
       "automerge": false
     },
     {
