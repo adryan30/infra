@@ -30,7 +30,8 @@
         "dependency:\\s*\"dev\\.lavalink\\.youtube:youtube-plugin:(?<currentValue>[^\"]+)\""
       ],
       "depNameTemplate": "dev.lavalink.youtube:youtube-plugin",
-      "datasourceTemplate": "maven"
+      "datasourceTemplate": "maven",
+      "registryUrlTemplate": "https://maven.lavalink.dev/releases"
     }
   ],
   "packageRules": [
