@@ -5,6 +5,8 @@ certificate:
   enabled: true
 
 configs:
+  cm:
+    statusbadge.enabled: "true"
   params:
     server.insecure: true
 
