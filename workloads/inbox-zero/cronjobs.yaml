@@ -1,0 +1,425 @@
+# Quoted curl Authorization header — upstream chart leaves it unquoted and YAML
+# parses `Authorization: Bearer` as a map. Synced as a second source of the
+# inbox-zero Application (see templates/apps/inbox-zero.yaml).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-scheduled-actions
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: http://inbox-zero-web:80/api/cron/scheduled-actions
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-automation-jobs
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: http://inbox-zero-web:80/api/cron/automation-jobs
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-reasoning-retention
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: http://inbox-zero-web:80/api/cron/reasoning-retention
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-draft-cleanup
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: "0 4 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: http://inbox-zero-web:80/api/cron/draft-cleanup
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-follow-up-reminders
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: http://inbox-zero-web:80/api/follow-up-reminders
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-digest
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: "*/30 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: http://inbox-zero-web:80/api/resend/digest/all
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-inbox-health
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: "0 8 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: http://inbox-zero-web:80/api/resend/inbox-health/all
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-meeting-briefs
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: http://inbox-zero-web:80/api/meeting-briefs
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-watch-renewal
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: http://inbox-zero-web:80/api/watch/all
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
