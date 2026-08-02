@@ -1,4 +1,3 @@
-{{- if eq (include "workload.enabled" (dict "root" . "name" "inbox-zero")) "true" }}
 # Upstream chart sets HOSTNAME=0.0.0.0 for listen; Next.js builds request.url from that
 # (trustHostHeader=false), so OAuth callback redirects become https://0.0.0.0:3000/...
 # Rewrite Location on the inbound sidecar until upstream binds listen separately from URL host.
@@ -6,7 +5,10 @@ apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
   name: inbox-zero-fix-location
-  namespace: inbox-zero
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: web
+    app.kubernetes.io/part-of: inbox-zero
 spec:
   workloadSelector:
     labels:
@@ -40,4 +42,3 @@ spec:
                     response_handle:headers():replace("location", fixed)
                   end
                 end
-{{- end }}
