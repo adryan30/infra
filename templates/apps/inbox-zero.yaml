@@ -1,0 +1,99 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "inbox-zero")) "true" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: inbox-zero
+  namespace: argocd
+  finalizers:
+    {{- include "workload.finalizers" . | nindent 4 }}
+  labels:
+    name: inbox-zero
+spec:
+  project: default
+  source:
+    # Pin: git SHA of elie222/inbox-zero (chart + image short SHA stay in lockstep).
+    repoURL: https://github.com/elie222/inbox-zero
+    targetRevision: f753be575534b887af1aa48955af58a619dea3e6
+    path: charts/inbox-zero
+    helm:
+      valuesObject:
+        image:
+          repository: ghcr.io/elie222/inbox-zero
+          tag: "f753be5"
+          pullPolicy: IfNotPresent
+        podAnnotations:
+          reloader.stakater.com/auto: "true"
+        ingress:
+          enabled: false
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_BASE_URL: https://inbox.adryan.me
+          NEXT_PUBLIC_BYPASS_PREMIUM_CHECKS: "true"
+          NEXT_PUBLIC_EMAIL_SEND_ENABLED: "true"
+          NEXT_PUBLIC_AI_MODEL_SETTINGS_DISABLED: "true"
+          # Google feature surfaces (scopes declared in GCP Data Access).
+          NEXT_PUBLIC_CONTACTS_ENABLED: "true"
+          NEXT_PUBLIC_MEETING_BRIEFS_ENABLED: "true"
+          NEXT_PUBLIC_BOOKING_LINKS_ENABLED: "true"
+          NEXT_PUBLIC_SMART_FILING_ENABLED: "true"
+          NEXT_PUBLIC_DIGEST_ENABLED: "true"
+          NEXT_PUBLIC_FOLLOW_UP_REMINDERS_ENABLED: "true"
+          DEFAULT_LLMS: google:gemini-2.5-flash
+          ECONOMY_LLMS: google:gemini-2.5-flash
+          CHAT_LLMS: google:gemini-2.5-flash
+          NANO_LLMS: google:gemini-2.5-flash
+          DRAFT_LLMS: google:gemini-2.5-flash
+          QUEUE_BACKEND: bullmq
+        # App + Redis auth live in Vault (kv/inbox-zero/app). Chart skips its Secret.
+        existingSecret: inbox-zero-secret
+        secretEnv: {}
+        postgresql:
+          enabled: false
+        externalDatabase:
+          enabled: true
+          existingSecret:
+            name: inbox-zero-db
+            databaseUrlKey: DATABASE_URL
+            directUrlKey: DIRECT_URL
+        redis:
+          enabled: true
+          persistence:
+            enabled: true
+            size: 2Gi
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+        redisHttp:
+          enabled: true
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+        worker:
+          enabled: true
+        cron:
+          enabled: true
+        web:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+
+  destination:
+    server: {{ include "workload.destinationServer" . }}
+    namespace: inbox-zero
+
+  info:
+    - name: "Homepage:"
+      value: "https://inbox.adryan.me"
+
+  {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}

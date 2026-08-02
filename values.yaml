@@ -59,6 +59,15 @@ workloads:
         backend:
           host: homepage.homepage.svc.cluster.local
           port: 3000
+  inbox-zero:
+    enabled: true
+    ingress:
+      - name: inbox-zero
+        host: inbox.adryan.me
+        oauth: false
+        backend:
+          host: inbox-zero-web.inbox-zero.svc.cluster.local
+          port: 80
   jellyfin:
     enabled: false
     ingress:
