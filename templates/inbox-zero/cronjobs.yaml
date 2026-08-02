@@ -1,0 +1,68 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "inbox-zero")) "true" }}
+{{- /*
+  Upstream charts/inbox-zero CronJobs leave the curl Authorization header unquoted, so
+  YAML turns `Authorization: Bearer ...` into a map and apply fails. Keep chart cron
+  disabled and ship the same schedules here with a quoted command string.
+*/ -}}
+{{- $jobs := dict
+  "scheduled-actions"     (dict "schedule" "* * * * *"      "path" "/api/cron/scheduled-actions")
+  "automation-jobs"       (dict "schedule" "*/15 * * * *"   "path" "/api/cron/automation-jobs")
+  "reasoning-retention"   (dict "schedule" "0 3 * * *"      "path" "/api/cron/reasoning-retention")
+  "draft-cleanup"         (dict "schedule" "0 4 * * *"      "path" "/api/cron/draft-cleanup")
+  "follow-up-reminders"   (dict "schedule" "0 * * * *"      "path" "/api/follow-up-reminders")
+  "digest"                (dict "schedule" "*/30 * * * *"   "path" "/api/resend/digest/all")
+  "inbox-health"          (dict "schedule" "0 8 * * *"      "path" "/api/resend/inbox-health/all")
+  "meeting-briefs"        (dict "schedule" "*/15 * * * *"   "path" "/api/meeting-briefs")
+  "watch-renewal"         (dict "schedule" "0 */6 * * *"    "path" "/api/watch/all")
+-}}
+{{- range $name, $job := $jobs }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: inbox-zero-{{ $name }}
+  namespace: inbox-zero
+  labels:
+    app.kubernetes.io/name: inbox-zero
+    app.kubernetes.io/component: cron
+    app.kubernetes.io/part-of: inbox-zero
+spec:
+  schedule: {{ $job.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: inbox-zero
+            app.kubernetes.io/component: cron
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl
+              image: curlimages/curl:8.17.0
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: CRON_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: inbox-zero-secret
+                      key: CRON_SECRET
+                - name: URL
+                  value: {{ printf "http://inbox-zero-web:80%s" $job.path | quote }}
+              command:
+                - sh
+                - -ec
+                - 'curl --fail --silent --show-error --location "$URL" -H "Authorization: Bearer $CRON_SECRET"'
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+{{- end }}
+{{- end }}

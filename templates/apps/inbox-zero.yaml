@@ -28,6 +28,7 @@ spec:
         env:
           NODE_ENV: production
           NEXT_PUBLIC_BASE_URL: https://inbox.adryan.me
+          BETTER_AUTH_URL: https://inbox.adryan.me
           NEXT_PUBLIC_BYPASS_PREMIUM_CHECKS: "true"
           NEXT_PUBLIC_EMAIL_SEND_ENABLED: "true"
           NEXT_PUBLIC_AI_MODEL_SETTINGS_DISABLED: "true"
@@ -81,8 +82,11 @@ spec:
               memory: 128Mi
         worker:
           enabled: true
+        # Upstream cronjobs.yaml leaves the curl -H "Authorization: Bearer ..." command
+        # unquoted; YAML parses the colon as a map and Argo cannot apply the CronJobs.
+        # Companions in templates/inbox-zero/cronjobs.yaml (quoted) replace them.
         cron:
-          enabled: true
+          enabled: false
         web:
           resources:
             requests:
