@@ -41,13 +41,13 @@ spec:
             NEXT_PUBLIC_SMART_FILING_ENABLED: "true"
             NEXT_PUBLIC_DIGEST_ENABLED: "true"
             NEXT_PUBLIC_FOLLOW_UP_REMINDERS_ENABLED: "true"
-            DEFAULT_LLMS: google:gemini-2.5-flash
-            ECONOMY_LLMS: google:gemini-2.5-flash
-            CHAT_LLMS: google:gemini-2.5-flash
-            NANO_LLMS: google:gemini-2.5-flash
-            DRAFT_LLMS: google:gemini-2.5-flash
+            DEFAULT_LLMS: openrouter:openrouter/free
+            ECONOMY_LLMS: openrouter:openrouter/free
+            CHAT_LLMS: openrouter:openrouter/free
+            NANO_LLMS: openrouter:openrouter/free
+            DRAFT_LLMS: openrouter:openrouter/free
             QUEUE_BACKEND: bullmq
-          # App + Redis auth live in Vault (kv/inbox-zero/app). Chart skips its Secret.
+          # App + Redis + OpenRouter auth live in Vault (kv/inbox-zero/app). Chart skips its Secret.
           existingSecret: inbox-zero-secret
           secretEnv: {}
           # Upstream migrate Job is a pre-install hook that references SA inbox-zero,
