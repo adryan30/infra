@@ -47,6 +47,11 @@ spec:
         # App + Redis auth live in Vault (kv/inbox-zero/app). Chart skips its Secret.
         existingSecret: inbox-zero-secret
         secretEnv: {}
+        # Upstream migrate Job is a pre-install hook that references SA inbox-zero,
+        # but the ServiceAccount is not a hook — pods fail with SA not found.
+        # Disable the hook; web runs Prisma migrations at startup instead.
+        migrations:
+          enabled: false
         postgresql:
           enabled: false
         externalDatabase:
