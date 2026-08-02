@@ -41,11 +41,11 @@ spec:
             NEXT_PUBLIC_SMART_FILING_ENABLED: "true"
             NEXT_PUBLIC_DIGEST_ENABLED: "true"
             NEXT_PUBLIC_FOLLOW_UP_REMINDERS_ENABLED: "true"
-            DEFAULT_LLMS: openrouter:openrouter/free
-            ECONOMY_LLMS: openrouter:openrouter/free
-            CHAT_LLMS: openrouter:openrouter/free
-            NANO_LLMS: openrouter:openrouter/free
-            DRAFT_LLMS: openrouter:openrouter/free
+            DEFAULT_LLMS: openrouter:deepseek/deepseek-v4-flash-latest
+            ECONOMY_LLMS: openrouter:deepseek/deepseek-v4-flash-latest
+            CHAT_LLMS: openrouter:deepseek/deepseek-v4-flash-latest
+            NANO_LLMS: openrouter:deepseek/deepseek-v4-flash-latest
+            DRAFT_LLMS: openrouter:deepseek/deepseek-v4-flash-latest
             QUEUE_BACKEND: bullmq
           # App + Redis + OpenRouter auth live in Vault (kv/inbox-zero/app). Chart skips its Secret.
           existingSecret: inbox-zero-secret
