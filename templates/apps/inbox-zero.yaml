@@ -10,8 +10,8 @@ metadata:
     name: inbox-zero
 spec:
   project: default
-  # Multi-source: upstream Helm chart + quoted CronJobs from this repo (chart cron
-  # is broken — unquoted Authorization header). CronJobs show under this app in Argo.
+  # Multi-source: upstream Helm chart + Workload pack (ADR-0006) under
+  # workloads/inbox-zero/ (quoted CronJobs; Location EnvoyFilter for 0.0.0.0 redirects).
   sources:
     - repoURL: https://github.com/elie222/inbox-zero
       # Pin: git SHA of elie222/inbox-zero (chart + image short SHA stay in lockstep).

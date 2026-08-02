@@ -1,6 +1,6 @@
 # Quoted curl Authorization header — upstream chart leaves it unquoted and YAML
-# parses `Authorization: Bearer` as a map. Synced as a second source of the
-# inbox-zero Application (see templates/apps/inbox-zero.yaml).
+# parses `Authorization: Bearer` as a map. Part of the inbox-zero Workload pack
+# (ADR-0006); synced as a second source of the inbox-zero Application.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
