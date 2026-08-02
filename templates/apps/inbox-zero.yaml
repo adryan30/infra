@@ -99,6 +99,20 @@ spec:
     server: {{ include "workload.destinationServer" . }}
     namespace: inbox-zero
 
+  # Chart omits StatefulSet defaults the API fills in (volumeMode, PVC retention,
+  # updateStrategy, port protocol). Ignore so SSA does not report perpetual OutOfSync.
+  ignoreDifferences:
+    - group: apps
+      kind: StatefulSet
+      name: inbox-zero-redis
+      jqPathExpressions:
+        - .spec.volumeClaimTemplates
+        - .spec.persistentVolumeClaimRetentionPolicy
+        - .spec.podManagementPolicy
+        - .spec.revisionHistoryLimit
+        - .spec.updateStrategy
+        - .spec.template.spec.containers[].ports[].protocol
+
   info:
     - name: "Homepage:"
       value: "https://inbox.adryan.me"
