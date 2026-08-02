@@ -35,6 +35,27 @@
       "depNameTemplate": "dev.lavalink.youtube:youtube-plugin",
       "datasourceTemplate": "maven",
       "registryUrlTemplate": "https://maven.lavalink.dev/releases"
+    },
+    {
+      "customType": "regex",
+      "description": "Inbox Zero app image Pin inside valuesObject (Helm template)",
+      "managerFilePatterns": ["/^templates\\/apps\\/inbox-zero\\.yaml$/"],
+      "matchStrings": [
+        "repository:\\s+ghcr\\.io/elie222/inbox-zero\\s+tag:\\s+[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "depNameTemplate": "ghcr.io/elie222/inbox-zero",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Inbox Zero chart git SHA Pin (path charts/inbox-zero)",
+      "managerFilePatterns": ["/^templates\\/apps\\/inbox-zero\\.yaml$/"],
+      "matchStrings": [
+        "repoURL: https://github\\.com/elie222/inbox-zero\\n\\s+targetRevision: (?<currentValue>[a-f0-9]{40})"
+      ],
+      "matchStringsStrategy": "recursive",
+      "depNameTemplate": "https://github.com/elie222/inbox-zero",
+      "datasourceTemplate": "git-refs"
     }
   ],
   "packageRules": [
