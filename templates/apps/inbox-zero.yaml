@@ -33,7 +33,7 @@ spec:
             BETTER_AUTH_URL: https://inbox.adryan.me
             NEXT_PUBLIC_BYPASS_PREMIUM_CHECKS: "true"
             NEXT_PUBLIC_EMAIL_SEND_ENABLED: "true"
-            NEXT_PUBLIC_AI_MODEL_SETTINGS_DISABLED: "true"
+            NEXT_PUBLIC_AI_MODEL_SETTINGS_DISABLED: "false"
             # Google feature surfaces (scopes declared in GCP Data Access).
             NEXT_PUBLIC_CONTACTS_ENABLED: "true"
             NEXT_PUBLIC_MEETING_BRIEFS_ENABLED: "true"
