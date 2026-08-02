@@ -1,0 +1,11 @@
+---
+description: Reach Vault via https://vault.adryan.me — never port-forward
+alwaysApply: true
+---
+
+# Vault access
+
+Operator/agent CLI: `VAULT_ADDR=https://vault.adryan.me` and token from Secret `vault-policy-token` in namespace `vault`.
+
+- Do **not** `kubectl port-forward` to Vault for routine `vault kv` work — the public mesh host is the supported path.
+- Full notes: `docs/agents/vault.md`.

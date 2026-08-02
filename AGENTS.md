@@ -15,3 +15,7 @@ Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/ag
 ### Git workflow
 
 `main` is live (Argo CD auto-syncs). Never commit or push to `main` — branch + PR only. Use Conventional Commits. See `docs/agents/git-workflow.md`.
+
+### Vault
+
+Operator/agent CLI access is `https://vault.adryan.me` plus the `vault-policy-token` Secret — not port-forward. See `docs/agents/vault.md`.
