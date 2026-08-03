@@ -126,8 +126,19 @@ spec:
                     "mode": "local",
                     "bind": "lan",
                     "port": 18789,
+                    "trustedProxies": [
+                      "127.0.0.6"
+                    ],
                     "auth": {
-                      "mode": "token"
+                      "mode": "trusted-proxy",
+                      "trustedProxy": {
+                        "userHeader": "x-auth-request-email",
+                        "allowLoopback": true,
+                        "requiredHeaders": [
+                          "x-forwarded-proto",
+                          "x-forwarded-host"
+                        ]
+                      }
                     },
                     "controlUi": {
                       "enabled": true,
