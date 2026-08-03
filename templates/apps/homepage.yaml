@@ -59,6 +59,16 @@ spec:
                       namespace: breezewiki
                       app: breezewiki
                     siteMonitor: https://breeze.adryan.me
+                - OpenClaw:
+                    href: https://claw.adryan.me
+                    description: Personal AI assistant
+                    siteMonitor: https://claw.adryan.me
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: openclaw
+                      app: openclaw
+
                 - Books:
                     - Calibre:
                         icon: sh-calibre-web

@@ -1,0 +1,205 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "openclaw")) "true" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openclaw
+  namespace: argocd
+  finalizers:
+    {{- include "workload.finalizers" . | nindent 4 }}
+  labels:
+    name: openclaw
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.6.2
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            strategy: Recreate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            pod:
+              securityContext:
+                fsGroup: 1000
+                fsGroupChangePolicy: OnRootMismatch
+                seccompProfile:
+                  type: RuntimeDefault
+            initContainers:
+              init-config:
+                image:
+                  repository: busybox
+                  tag: "1.37"
+                command:
+                  - sh
+                  - -c
+                  - |
+                    cp /config/openclaw.json /home/node/.openclaw/openclaw.json
+                    mkdir -p /home/node/.openclaw/workspace
+                    cp /config/AGENTS.md /home/node/.openclaw/workspace/AGENTS.md
+                securityContext:
+                  runAsUser: 1000
+                  runAsGroup: 1000
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/openclaw/openclaw
+                  tag: "2026.6.11-slim"
+                  pullPolicy: IfNotPresent
+                command:
+                  - node
+                  - /app/dist/index.js
+                  - gateway
+                  - run
+                env:
+                  HOME: /home/node
+                  OPENCLAW_CONFIG_DIR: /home/node/.openclaw
+                  NODE_ENV: production
+                  TZ: America/Bahia
+                envFrom:
+                  - secretRef:
+                      name: openclaw-env
+                probes:
+                  liveness:
+                    enabled: true
+                    custom: true
+                    spec:
+                      exec:
+                        command:
+                          - node
+                          - -e
+                          - "require('http').get('http://127.0.0.1:18789/healthz', r => process.exit(r.statusCode < 400 ? 0 : 1)).on('error', () => process.exit(1))"
+                      initialDelaySeconds: 60
+                      periodSeconds: 30
+                      timeoutSeconds: 10
+                  readiness:
+                    enabled: true
+                    custom: true
+                    spec:
+                      exec:
+                        command:
+                          - node
+                          - -e
+                          - "require('http').get('http://127.0.0.1:18789/readyz', r => process.exit(r.statusCode < 400 ? 0 : 1)).on('error', () => process.exit(1))"
+                      initialDelaySeconds: 15
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                resources:
+                  requests:
+                    cpu: 250m
+                    memory: 512Mi
+                  limits:
+                    cpu: "1"
+                    memory: 2Gi
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 1000
+                  runAsGroup: 1000
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 18789
+        configMaps:
+          config:
+            enabled: true
+            data:
+              openclaw.json: |
+                {
+                  "gateway": {
+                    "mode": "local",
+                    "bind": "lan",
+                    "port": 18789,
+                    "auth": {
+                      "mode": "token"
+                    },
+                    "controlUi": {
+                      "enabled": true,
+                      "allowedOrigins": [
+                        "https://claw.adryan.me"
+                      ]
+                    }
+                  },
+                  "agents": {
+                    "defaults": {
+                      "workspace": "/home/node/.openclaw/workspace",
+                      "model": {
+                        "primary": "openrouter/deepseek/deepseek-chat-v3.1"
+                      },
+                      "userTimezone": "America/Bahia"
+                    },
+                    "list": [
+                      {
+                        "id": "default",
+                        "name": "OpenClaw Assistant",
+                        "workspace": "/home/node/.openclaw/workspace"
+                      }
+                    ]
+                  },
+                  "cron": {
+                    "enabled": false
+                  }
+                }
+              AGENTS.md: |
+                # OpenClaw Assistant
+
+                You are a helpful AI assistant running on Shardblade.
+
+                Before proposing or building a custom system, feature, workflow, tool,
+                integration, or automation, briefly check for open-source projects,
+                maintained libraries, existing OpenClaw plugins, or free platforms that
+                already solve it well enough. Prefer those when adequate. Build custom
+                only when existing options are unsuitable or the user explicitly asks
+                for custom. Avoid paid-service recommendations unless the user
+                explicitly approves spend.
+        persistence:
+          home:
+            enabled: true
+            type: persistentVolumeClaim
+            accessMode: ReadWriteOnce
+            size: 10Gi
+            advancedMounts:
+              main:
+                init-config:
+                  - path: /home/node/.openclaw
+                main:
+                  - path: /home/node/.openclaw
+          config:
+            type: configMap
+            identifier: config
+            defaultMode: 0444
+            advancedMounts:
+              main:
+                init-config:
+                  - path: /config
+          tmp:
+            type: emptyDir
+            advancedMounts:
+              main:
+                main:
+                  - path: /tmp
+
+  destination:
+    server: {{ include "workload.destinationServer" . }}
+    namespace: openclaw
+
+  info:
+    - name: "Homepage:"
+      value: "https://claw.adryan.me"
+
+  {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}
