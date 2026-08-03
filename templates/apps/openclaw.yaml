@@ -134,10 +134,15 @@ spec:
                       "trustedProxy": {
                         "userHeader": "x-auth-request-email",
                         "allowLoopback": true,
-                        "requiredHeaders": [
-                          "x-forwarded-proto",
-                          "x-forwarded-host"
-                        ]
+                        "deviceAutoApprove": {
+                          "enabled": true,
+                          "scopes": [
+                            "operator.read",
+                            "operator.write",
+                            "operator.approvals",
+                            "operator.pairing"
+                          ]
+                        }
                       }
                     },
                     "controlUi": {
