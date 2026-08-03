@@ -119,6 +119,15 @@ workloads:
   oauth2-proxy:
     enabled: true
     ingress: []
+  openclaw:
+    enabled: true
+    ingress:
+      - name: openclaw
+        host: claw.adryan.me
+        oauth: true
+        backend:
+          host: openclaw.openclaw.svc.cluster.local
+          port: 18789
   plex:
     enabled: false
     ingress:
