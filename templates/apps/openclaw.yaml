@@ -63,6 +63,9 @@ spec:
                   OPENCLAW_CONFIG_DIR: /home/node/.openclaw
                   NODE_ENV: production
                   TZ: America/Bahia
+                  # readOnlyRootFilesystem: npm defaults to ~/.npm which is not on the PVC.
+                  NPM_CONFIG_CACHE: /home/node/.npm
+                  npm_config_cache: /home/node/.npm
                 envFrom:
                   - secretRef:
                       name: openclaw-env
@@ -194,6 +197,12 @@ spec:
               main:
                 main:
                   - path: /tmp
+          npm:
+            type: emptyDir
+            advancedMounts:
+              main:
+                main:
+                  - path: /home/node/.npm
 
   destination:
     server: {{ include "workload.destinationServer" . }}
