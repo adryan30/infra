@@ -137,7 +137,10 @@ spec:
                     "defaults": {
                       "workspace": "/home/node/.openclaw/workspace",
                       "model": {
-                        "primary": "openrouter/deepseek/deepseek-chat-v3.1"
+                        "primary": "openrouter/openrouter/auto"
+                      },
+                      "models": {
+                        "openrouter/openrouter/auto": {}
                       },
                       "userTimezone": "America/Bahia"
                     },
