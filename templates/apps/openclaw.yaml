@@ -51,7 +51,7 @@ spec:
               main:
                 image:
                   repository: ghcr.io/openclaw/openclaw
-                  tag: "2026.6.11-slim"
+                  tag: "2026.7.1-slim"
                   pullPolicy: IfNotPresent
                 command:
                   - node
