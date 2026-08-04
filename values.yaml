@@ -44,6 +44,15 @@ workloads:
   cert-manager:
     enabled: true
     ingress: []
+  comet:
+    enabled: true
+    ingress:
+      - name: comet
+        host: comet.adryan.me
+        oauth: false
+        backend:
+          host: comet.comet.svc.cluster.local
+          port: 8000
   csi-driver-rclone:
     enabled: true
     ingress: []
@@ -68,15 +77,6 @@ workloads:
         backend:
           host: inbox-zero-web.inbox-zero.svc.cluster.local
           port: 80
-  jellyfin:
-    enabled: false
-    ingress:
-      - name: jellyfin
-        host: jellyfin.adryan.me
-        oauth: false
-        backend:
-          host: jellyfin.streaming.svc.cluster.local
-          port: 8096
   keycloak:
     enabled: true
     ingress:
@@ -128,15 +128,6 @@ workloads:
         backend:
           host: openclaw.openclaw.svc.cluster.local
           port: 18789
-  plex:
-    enabled: false
-    ingress:
-      - name: plex
-        host: plex.adryan.me
-        oauth: false
-        backend:
-          host: plex.streaming.svc.cluster.local
-          port: 32400
   reloader:
     enabled: true
     ingress: []
@@ -152,27 +143,6 @@ workloads:
         backend:
           host: storyteller.books.svc.cluster.local
           port: 8001
-  streaming:
-    enabled: false
-    ingress:
-      - name: riven
-        host: riven.adryan.me
-        oauth: true
-        backend:
-          host: streaming-riven-frontend.streaming.svc.cluster.local
-          port: 3000
-      - name: prowlarr
-        host: prowlarr.adryan.me
-        oauth: true
-        backend:
-          host: streaming-prowlarr.streaming.svc.cluster.local
-          port: 9696
-      - name: seerr
-        host: seerr.adryan.me
-        oauth: false
-        backend:
-          host: streaming-seerr.streaming.svc.cluster.local
-          port: 5055
   suwayomi:
     enabled: false
     ingress:
@@ -194,6 +164,3 @@ workloads:
         backend:
           host: vault.vault.svc.cluster.local
           port: 8200
-  zurg:
-    enabled: false
-    ingress: []

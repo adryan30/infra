@@ -68,6 +68,15 @@ spec:
                       cluster: default
                       namespace: openclaw
                       app: openclaw
+                - Comet:
+                    href: https://comet.adryan.me
+                    description: Stremio torrent/debrid add-on
+                    siteMonitor: https://comet.adryan.me
+                    widget:
+                      type: kubernetes
+                      cluster: default
+                      namespace: comet
+                      app: comet
 
                 - Books:
                     - Calibre:
