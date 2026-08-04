@@ -45,6 +45,9 @@ spec:
                   # /health is not served until CometNet start finishes, but
                   # start waits for the public URL to answer.
                   COMETNET_SKIP_REACHABILITY_CHECK: "True"
+                  # First boot hangs on large GitHub anime-mapping downloads inside
+                  # lifespan (blocks /health). Re-enable after the app is stable.
+                  ANIME_MAPPING_ENABLED: "False"
                 envFrom:
                   - secretRef:
                       name: comet-env
