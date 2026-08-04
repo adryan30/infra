@@ -23,7 +23,7 @@ spec:
             port:
               number: 8000
             host: comet.comet.svc.cluster.local
-      timeout: 0s
+      timeout: 3600s
     - match:
         - uri:
             prefix: /
