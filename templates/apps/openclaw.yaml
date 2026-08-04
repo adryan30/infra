@@ -133,16 +133,7 @@ spec:
                       "mode": "trusted-proxy",
                       "trustedProxy": {
                         "userHeader": "x-auth-request-email",
-                        "allowLoopback": true,
-                        "deviceAutoApprove": {
-                          "enabled": true,
-                          "scopes": [
-                            "operator.read",
-                            "operator.write",
-                            "operator.approvals",
-                            "operator.pairing"
-                          ]
-                        }
+                        "allowLoopback": true
                       }
                     },
                     "controlUi": {
