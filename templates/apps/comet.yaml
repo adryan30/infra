@@ -18,7 +18,8 @@ spec:
       valuesObject:
         controllers:
           main:
-            strategy: RollingUpdate
+            # Recreate: RWO PVC + CometNet identity keys must stay single-replica.
+            strategy: Recreate
             annotations:
               reloader.stakater.com/auto: "true"
             containers:
@@ -31,6 +32,14 @@ spec:
                   DATABASE_TYPE: postgresql
                   PUBLIC_BASE_URL: https://comet.adryan.me
                   TZ: America/Bahia
+                  # CometNet integrated mode (single instance). Peers use FastAPI
+                  # /cometnet/ws on the HTTP port via COMETNET_ADVERTISE_URL.
+                  COMETNET_ENABLED: "True"
+                  FASTAPI_WORKERS: "1"
+                  COMETNET_ADVERTISE_URL: wss://comet.adryan.me/cometnet/ws
+                  COMETNET_UPNP_ENABLED: "False"
+                  COMETNET_REACHABILITY_RETRIES: "10"
+                  COMETNET_REACHABILITY_RETRY_DELAY: "15"
                 envFrom:
                   - secretRef:
                       name: comet-env
@@ -42,7 +51,7 @@ spec:
                       httpGet:
                         path: /health
                         port: 8000
-                      initialDelaySeconds: 15
+                      initialDelaySeconds: 30
                       periodSeconds: 30
                       timeoutSeconds: 5
                   readiness:
@@ -52,7 +61,7 @@ spec:
                       httpGet:
                         path: /health
                         port: 8000
-                      initialDelaySeconds: 5
+                      initialDelaySeconds: 10
                       periodSeconds: 10
                       timeoutSeconds: 5
                 resources:

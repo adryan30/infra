@@ -1,1 +1,35 @@
-{{- include "workload.virtualServices" (dict "root" . "name" "comet") }}
+{{- if eq (include "workload.enabled" (dict "root" . "name" "comet")) "true" }}
+# Custom VS: long-lived WebSocket for CometNet on /cometnet/ws (Istio default
+# HTTP timeout would drop P2P sessions). HTTP API stays on the same Service port;
+# FastAPI serves the CometNet WS path when COMETNET_ENABLED=True.
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: comet
+  namespace: istio-ingress
+  labels:
+    app: comet
+spec:
+  hosts:
+    - "comet.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /cometnet/ws
+      route:
+        - destination:
+            port:
+              number: 8000
+            host: comet.comet.svc.cluster.local
+      timeout: 0s
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 8000
+            host: comet.comet.svc.cluster.local
+{{- end }}
