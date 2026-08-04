@@ -38,12 +38,24 @@ spec:
                   FASTAPI_WORKERS: "1"
                   COMETNET_ADVERTISE_URL: wss://comet.adryan.me/cometnet/ws
                   COMETNET_UPNP_ENABLED: "False"
-                  COMETNET_REACHABILITY_RETRIES: "10"
-                  COMETNET_REACHABILITY_RETRY_DELAY: "15"
+                  # Self-check against the public mesh URL deadlocks lifespan:
+                  # /health is not served until CometNet start finishes, but
+                  # start waits for the public URL to answer.
+                  COMETNET_SKIP_REACHABILITY_CHECK: "True"
                 envFrom:
                   - secretRef:
                       name: comet-env
                 probes:
+                  startup:
+                    enabled: true
+                    custom: true
+                    spec:
+                      httpGet:
+                        path: /health
+                        port: 8000
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 60
                   liveness:
                     enabled: true
                     custom: true
@@ -51,9 +63,9 @@ spec:
                       httpGet:
                         path: /health
                         port: 8000
-                      initialDelaySeconds: 30
                       periodSeconds: 30
                       timeoutSeconds: 5
+                      failureThreshold: 3
                   readiness:
                     enabled: true
                     custom: true
@@ -61,9 +73,9 @@ spec:
                       httpGet:
                         path: /health
                         port: 8000
-                      initialDelaySeconds: 10
                       periodSeconds: 10
                       timeoutSeconds: 5
+                      failureThreshold: 3
                 resources:
                   requests:
                     cpu: 100m
