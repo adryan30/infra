@@ -33,6 +33,11 @@ spec:
         login: true
         passwordSecret:
           name: sphere-botato
+      - name: comet
+        createdb: false
+        login: true
+        passwordSecret:
+          name: sphere-comet
       - name: inboxzero
         createdb: false
         login: true
@@ -95,6 +100,20 @@ spec:
   schemas:
     - name: botato
       owner: botato
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: comet-db
+  namespace: storage
+spec:
+  name: comet
+  owner: comet
+  cluster:
+    name: sphere
+  schemas:
+    - name: comet
+      owner: comet
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
