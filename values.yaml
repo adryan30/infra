@@ -69,7 +69,7 @@ workloads:
           host: homepage.homepage.svc.cluster.local
           port: 3000
   inbox-zero:
-    enabled: true
+    enabled: false
     ingress:
       - name: inbox-zero
         host: inbox.adryan.me
