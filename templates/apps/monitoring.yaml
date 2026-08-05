@@ -19,6 +19,13 @@ spec:
         global:
           rbac:
             createAggregateClusterRoles: true
+        # Chart 88+ CRDs exceed the 256Ki annotation limit for client-side
+        # apply. Apply them via the chart's upgrade Job (server-side) instead
+        # of rendering CRDs as plain Application resources.
+        crds:
+          upgradeJob:
+            enabled: true
+            forceConflicts: true
         prometheus:
           prometheusSpec:
             podMonitorSelectorNilUsesHelmValues: false
