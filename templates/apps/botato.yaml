@@ -41,7 +41,8 @@ spec:
                   - secretRef:
                       name: botato-env
           lavalink:
-            strategy: RollingUpdate
+            # Recreate: RWO plugins PVC cannot multi-attach across Shardblade nodes.
+            strategy: Recreate
             annotations:
               reloader.stakater.com/auto: "true"
             pod:

@@ -84,6 +84,18 @@ def test_platform_with_ssa_reloader() -> None:
     ]
 
 
+def test_botato_lavalink_recreates_for_rwo_plugins() -> None:
+    """Lavalink Recreate: RWO plugins PVC cannot attach to two pods across nodes."""
+    apps = applications(render())
+    assert "botato" in apps, "botato should render when enabled is true"
+    values = apps["botato"]["spec"]["source"]["helm"]["valuesObject"]
+    plugins = values["persistence"]["lavalink-plugins"]
+    assert plugins["type"] == "persistentVolumeClaim"
+    assert plugins["accessMode"] == "ReadWriteOnce"
+    assert values["controllers"]["lavalink"]["strategy"] == "Recreate"
+    assert values["controllers"]["bot"]["strategy"] == "RollingUpdate"
+
+
 def test_enabled_false_omits_application() -> None:
     """Disabled Workloads (enabled: false) must not appear as Applications."""
     apps = applications(render())
@@ -131,6 +143,7 @@ def main() -> int:
         test_platform_profile_keycloak,
         test_workload_istio_disabled_tailscale,
         test_platform_with_ssa_reloader,
+        test_botato_lavalink_recreates_for_rwo_plugins,
         test_enabled_false_omits_application,
         test_missing_registry_key_fails_render,
         test_registry_override_controls_application_presence,
