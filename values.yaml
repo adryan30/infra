@@ -155,6 +155,9 @@ workloads:
   tailscale:
     enabled: true
     ingress: []
+  teamspeak:
+    enabled: true
+    ingress: []
   vault:
     enabled: true
     ingress:

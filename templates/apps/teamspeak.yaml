@@ -1,0 +1,114 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "teamspeak")) "true" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: teamspeak
+  namespace: argocd
+  finalizers:
+    {{- include "workload.finalizers" . | nindent 4 }}
+  labels:
+    name: teamspeak
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 4.6.2
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            # Recreate: RWO SQLite + identity files cannot multi-attach.
+            strategy: Recreate
+            annotations:
+              reloader.stakater.com/auto: "true"
+            pod:
+              labels:
+                sidecar.istio.io/inject: "false"
+              securityContext:
+                fsGroup: 9987
+                fsGroupChangePolicy: OnRootMismatch
+            containers:
+              main:
+                image:
+                  repository: teamspeaksystems/teamspeak6-server
+                  tag: 6.0.0-beta12.1
+                env:
+                  TZ: America/Bahia
+                  TSSERVER_LICENSE_ACCEPTED: accept
+                  TSSERVER_DEFAULT_PORT: "9987"
+                  TSSERVER_FILE_TRANSFER_PORT: "30033"
+                envFrom:
+                  - secretRef:
+                      name: teamspeak-env
+                probes:
+                  liveness:
+                    enabled: true
+                    custom: true
+                    spec:
+                      tcpSocket:
+                        port: 30033
+                      periodSeconds: 30
+                      timeoutSeconds: 5
+                      failureThreshold: 3
+                  readiness:
+                    enabled: true
+                    custom: true
+                    spec:
+                      tcpSocket:
+                        port: 30033
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3
+                  startup:
+                    enabled: true
+                    custom: true
+                    spec:
+                      tcpSocket:
+                        port: 30033
+                      periodSeconds: 5
+                      timeoutSeconds: 5
+                      failureThreshold: 30
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 128Mi
+                  limits:
+                    memory: 512Mi
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 9987
+                  runAsGroup: 9987
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+        service:
+          main:
+            controller: main
+            type: LoadBalancer
+            externalTrafficPolicy: Local
+            ports:
+              filetransfer:
+                primary: true
+                port: 30033
+                protocol: TCP
+              voice:
+                port: 9987
+                protocol: UDP
+        persistence:
+          data:
+            enabled: true
+            type: persistentVolumeClaim
+            accessMode: ReadWriteOnce
+            size: 5Gi
+            globalMounts:
+              - path: /var/tsserver
+
+  destination:
+    server: {{ include "workload.destinationServer" . }}
+    namespace: teamspeak
+
+  {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}
