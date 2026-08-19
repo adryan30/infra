@@ -84,6 +84,31 @@ def test_platform_with_ssa_reloader() -> None:
     ]
 
 
+def test_teamspeak_loadbalancer_udp_and_recreate() -> None:
+    """Voice is UDP LoadBalancer; Recreate keeps RWO SQLite on one pod; no mesh sidecar."""
+    apps = applications(render())
+    assert "teamspeak" in apps, "teamspeak should render when enabled is true"
+    values = apps["teamspeak"]["spec"]["source"]["helm"]["valuesObject"]
+    assert values["controllers"]["main"]["strategy"] == "Recreate"
+    assert values["controllers"]["main"]["pod"]["labels"]["sidecar.istio.io/inject"] == "false"
+    assert values["controllers"]["main"]["pod"]["nodeSelector"]["kubernetes.io/hostname"] == "shardblade-001"
+    svc = values["service"]["main"]
+    assert svc["type"] == "LoadBalancer"
+    assert svc["ports"]["voice"]["port"] == 9987
+    assert svc["ports"]["voice"]["protocol"] == "UDP"
+    assert svc["ports"]["filetransfer"]["port"] == 30033
+    assert svc["ports"]["filetransfer"]["protocol"] == "TCP"
+    image = values["controllers"]["main"]["containers"]["main"]["image"]
+    assert image["repository"] == "teamspeaksystems/teamspeak6-server"
+    assert image["tag"] != "latest"
+    persistence = values["persistence"]["data"]
+    assert persistence["type"] == "persistentVolumeClaim"
+    assert persistence["accessMode"] == "ReadWriteOnce"
+
+    disabled = applications(render("--set", "workloads.teamspeak.enabled=false"))
+    assert "teamspeak" not in disabled, "registry enabled=false must omit teamspeak"
+
+
 def test_botato_lavalink_recreates_for_rwo_plugins() -> None:
     """Lavalink Recreate: RWO plugins PVC cannot attach to two pods across nodes."""
     apps = applications(render())
@@ -143,6 +168,7 @@ def main() -> int:
         test_platform_profile_keycloak,
         test_workload_istio_disabled_tailscale,
         test_platform_with_ssa_reloader,
+        test_teamspeak_loadbalancer_udp_and_recreate,
         test_botato_lavalink_recreates_for_rwo_plugins,
         test_enabled_false_omits_application,
         test_missing_registry_key_fails_render,

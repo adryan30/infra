@@ -88,6 +88,7 @@ def test_awkward_secret_names_gate_on_explicit_workload() -> None:
     enabled = external_secrets(render())
     assert "storyteller-env" in enabled
     assert "rcon" in enabled
+    assert "teamspeak-env" in enabled
     assert "monitoring-grafana-admin" in enabled
 
     disabled = external_secrets(
@@ -95,10 +96,13 @@ def test_awkward_secret_names_gate_on_explicit_workload() -> None:
             "--set",
             "workloads.minecraft.enabled=false",
             "--set",
+            "workloads.teamspeak.enabled=false",
+            "--set",
             "workloads.monitoring.enabled=false",
         )
     )
     assert "rcon" not in disabled
+    assert "teamspeak-env" not in disabled
     assert "monitoring-grafana-admin" not in disabled
     # Application must drop with the secret
     apps = applications(
@@ -106,10 +110,13 @@ def test_awkward_secret_names_gate_on_explicit_workload() -> None:
             "--set",
             "workloads.minecraft.enabled=false",
             "--set",
+            "workloads.teamspeak.enabled=false",
+            "--set",
             "workloads.monitoring.enabled=false",
         )
     )
     assert "minecraft" not in apps
+    assert "teamspeak" not in apps
     assert "monitoring" not in apps
 
 

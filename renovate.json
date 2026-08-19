@@ -38,6 +38,16 @@
     },
     {
       "customType": "regex",
+      "description": "TeamSpeak 6 server image Pin inside valuesObject (Helm template)",
+      "managerFilePatterns": ["/^templates\\/apps\\/teamspeak\\.yaml$/"],
+      "matchStrings": [
+        "repository:\\s+teamspeaksystems/teamspeak6-server\\s+tag:\\s+[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "depNameTemplate": "teamspeaksystems/teamspeak6-server",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
       "description": "Inbox Zero app image Pin inside valuesObject (Helm template)",
       "managerFilePatterns": ["/^templates\\/apps\\/inbox-zero\\.yaml$/"],
       "matchStrings": [
