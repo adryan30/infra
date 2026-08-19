@@ -91,6 +91,7 @@ def test_teamspeak_loadbalancer_udp_and_recreate() -> None:
     values = apps["teamspeak"]["spec"]["source"]["helm"]["valuesObject"]
     assert values["controllers"]["main"]["strategy"] == "Recreate"
     assert values["controllers"]["main"]["pod"]["labels"]["sidecar.istio.io/inject"] == "false"
+    assert values["controllers"]["main"]["pod"]["nodeSelector"]["kubernetes.io/hostname"] == "shardblade-001"
     svc = values["service"]["main"]
     assert svc["type"] == "LoadBalancer"
     assert svc["ports"]["voice"]["port"] == 9987

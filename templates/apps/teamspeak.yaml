@@ -25,6 +25,12 @@ spec:
             pod:
               labels:
                 sidecar.istio.io/inject: "false"
+              # k3s ServiceLB advertises both node public IPs. Voice is UDP +
+              # externalTrafficPolicy Local, so clients must hit the node that
+              # actually runs the pod. Pin to shardblade-001 to match the
+              # grey-cloud *.adryan.me origin (144.22.177.60).
+              nodeSelector:
+                kubernetes.io/hostname: shardblade-001
               securityContext:
                 fsGroup: 9987
                 fsGroupChangePolicy: OnRootMismatch
@@ -108,6 +114,10 @@ spec:
   destination:
     server: {{ include "workload.destinationServer" . }}
     namespace: teamspeak
+
+  info:
+    - name: "Voice:"
+      value: "ts.adryan.me:9987"
 
   {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
   revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
