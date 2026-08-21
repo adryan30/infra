@@ -35,7 +35,7 @@ spec:
                 "Relay": {
                     "Addresses": ["rels://netbird-relay.adryan.me:443"],
                     "CredentialsTTL": "24h",
-                    "Secret": "$NETBIRD_RELAY_AUTH_SECRET"
+                    "Secret": "{{ `{{.NETBIRD_RELAY_AUTH_SECRET}}` }}"
                 },
                 "Signal": {
                     "Proto": "https",
@@ -50,7 +50,7 @@ spec:
                 },
                 "DisableDefaultPolicy": false,
                 "Datadir": "",
-                "DataStoreEncryptionKey": "$NETBIRD_DATASTORE_ENC_KEY",
+                "DataStoreEncryptionKey": "{{ `{{.NETBIRD_DATASTORE_ENC_KEY}}` }}",
                 "StoreConfig": {
                     "Engine": "sqlite"
                 },
@@ -71,7 +71,7 @@ spec:
                         "Issuer": "https://auth.adryan.me/realms/master",
                         "TokenEndpoint": "https://auth.adryan.me/realms/master/protocol/openid-connect/token",
                         "ClientID": "netbird-backend",
-                        "ClientSecret": "$NETBIRD_IDP_MGMT_CLIENT_SECRET",
+                        "ClientSecret": "{{ `{{.NETBIRD_IDP_MGMT_CLIENT_SECRET}}` }}",
                         "GrantType": "client_credentials"
                     },
                     "ExtraConfig": {
