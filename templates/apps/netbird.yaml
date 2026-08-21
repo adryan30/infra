@@ -74,7 +74,9 @@ spec:
                         "ClientSecret": "$NETBIRD_IDP_MGMT_CLIENT_SECRET",
                         "GrantType": "client_credentials"
                     },
-                    "ExtraConfig": {},
+                    "ExtraConfig": {
+                        "AdminEndpoint": "https://auth.adryan.me/admin/realms/master"
+                    },
                     "Auth0ClientCredentials": null,
                     "AzureClientCredentials": null,
                     "KeycloakClientCredentials": null,
