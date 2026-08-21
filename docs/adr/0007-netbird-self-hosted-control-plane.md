@@ -1,0 +1,10 @@
+# Netbird self-hosted control plane, scoped out of home-network routing
+
+Evaluating Netbird as a possible Tailscale replacement, we scope the `netbird` Workload to the self-hosted control plane only — management, signal, relay, and dashboard via the official `netbirdio/helms` chart — reusing the existing Keycloak as its OIDC provider. The cluster runs on OCI VPSs, not the home network, so the home-LAN subnet-router and exit-node roles ("proxy my home network via VPN") can't run in-cluster: that's a separate peer enrolled manually on a home device, outside GitOps entirely. Netbird doesn't advertise the pod CIDR, avoiding route conflicts with the existing Tailscale `Connector`. Transport is relay-only over the existing Istio gateway (TCP/443); no dedicated UDP/STUN exposure. Selective per-pod egress through the future home exit node (e.g. routing a public-facing workload's outbound calls through a residential IP) is proven feasible via Netbird's `kubernetes-operator` sidecar injection with Istio injection disabled on that pod — the same conflict class Tailscale's Workload already works around — but is deferred until a concrete consumer workload and the home peer both exist.
+
+## Considered Options
+
+- Netbird Cloud (hosted control plane) instead of self-hosting — rejected; the goal is zero recurring cost
+- Run the exit node in-cluster — rejected; the cluster is on OCI, not the home network, so an in-cluster exit node would hand out a datacenter IP, not the residential IP the home-network-proxy goal needs
+- Direct P2P via exposed STUN/TURN UDP ports — rejected; needs a new L4 LoadBalancer Service outside Istio's HTTP(S)-only gateway, disproportionate for a testing-scoped build
+- Build the `kubernetes-operator` sidecar injector now — rejected; no home peer or consumer workload exists yet to use it

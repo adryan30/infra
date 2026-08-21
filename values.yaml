@@ -116,6 +116,33 @@ workloads:
         backend:
           host: monitoring-prometheus.monitoring.svc.cluster.local
           port: 9090
+  netbird:
+    enabled: true
+    ingress:
+      - name: netbird
+        host: netbird.adryan.me
+        oauth: false
+        backend:
+          host: netbird-dashboard.netbird.svc.cluster.local
+          port: 80
+      - name: netbird-api
+        host: netbird-api.adryan.me
+        oauth: false
+        backend:
+          host: netbird-management.netbird.svc.cluster.local
+          port: 80
+      - name: netbird-signal
+        host: netbird-signal.adryan.me
+        oauth: false
+        backend:
+          host: netbird-signal.netbird.svc.cluster.local
+          port: 80
+      - name: netbird-relay
+        host: netbird-relay.adryan.me
+        oauth: false
+        backend:
+          host: netbird-relay.netbird.svc.cluster.local
+          port: 33080
   oauth2-proxy:
     enabled: true
     ingress: []
