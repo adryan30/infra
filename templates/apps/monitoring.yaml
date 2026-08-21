@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
-    targetRevision: 88.1.5
+    targetRevision: 88.5.3
     path: .
     helm:
       valuesObject:
