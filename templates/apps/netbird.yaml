@@ -1,0 +1,147 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "netbird")) "true" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: netbird
+  namespace: argocd
+  finalizers:
+    {{- include "workload.finalizers" . | nindent 4 }}
+  labels:
+    name: netbird
+spec:
+  project: default
+  source:
+    repoURL: https://netbirdio.github.io/helms
+    chart: netbird
+    targetRevision: 1.9.0
+    helm:
+      valuesObject:
+        management:
+          persistentVolume:
+            size: 1Gi
+          envFromSecret:
+            NETBIRD_IDP_MGMT_CLIENT_SECRET: netbird-idp/clientSecret
+            NETBIRD_RELAY_AUTH_SECRET: netbird-relay/secret
+            NETBIRD_DATASTORE_ENC_KEY: netbird-relay/datastoreEncryptionKey
+          configmap: |-
+            {
+                "Stuns": [],
+                "TURNConfig": {
+                    "Turns": [],
+                    "CredentialsTTL": "12h",
+                    "Secret": "",
+                    "TimeBasedCredentials": false
+                },
+                "Relay": {
+                    "Addresses": ["rels://netbird-relay.adryan.me:443"],
+                    "CredentialsTTL": "24h",
+                    "Secret": "$NETBIRD_RELAY_AUTH_SECRET"
+                },
+                "Signal": {
+                    "Proto": "https",
+                    "URI": "netbird-signal.adryan.me:443",
+                    "Username": "",
+                    "Password": null
+                },
+                "ReverseProxy": {
+                    "TrustedHTTPProxies": [],
+                    "TrustedHTTPProxiesCount": 0,
+                    "TrustedPeers": ["0.0.0.0/0"]
+                },
+                "DisableDefaultPolicy": false,
+                "Datadir": "",
+                "DataStoreEncryptionKey": "$NETBIRD_DATASTORE_ENC_KEY",
+                "StoreConfig": {
+                    "Engine": "sqlite"
+                },
+                "HttpConfig": {
+                    "Address": "0.0.0.0:80",
+                    "AuthIssuer": "https://auth.adryan.me/realms/master",
+                    "AuthAudience": "netbird-client",
+                    "AuthKeysLocation": "https://auth.adryan.me/realms/master/protocol/openid-connect/certs",
+                    "AuthUserIDClaim": "sub",
+                    "CertFile": "",
+                    "CertKey": "",
+                    "IdpSignKeyRefreshEnabled": true,
+                    "OIDCConfigEndpoint": "https://auth.adryan.me/realms/master/.well-known/openid-configuration"
+                },
+                "IdpManagerConfig": {
+                    "ManagerType": "keycloak",
+                    "ClientConfig": {
+                        "Issuer": "https://auth.adryan.me/realms/master",
+                        "TokenEndpoint": "https://auth.adryan.me/realms/master/protocol/openid-connect/token",
+                        "ClientID": "netbird-backend",
+                        "ClientSecret": "$NETBIRD_IDP_MGMT_CLIENT_SECRET",
+                        "GrantType": "client_credentials"
+                    },
+                    "ExtraConfig": {},
+                    "Auth0ClientCredentials": null,
+                    "AzureClientCredentials": null,
+                    "KeycloakClientCredentials": null,
+                    "ZitadelClientCredentials": null
+                },
+                "DeviceAuthorizationFlow": {
+                    "Provider": "hosted",
+                    "ProviderConfig": {
+                        "Audience": "netbird-client",
+                        "AuthorizationEndpoint": "",
+                        "Domain": "auth.adryan.me",
+                        "ClientID": "netbird-client",
+                        "ClientSecret": "",
+                        "TokenEndpoint": "https://auth.adryan.me/realms/master/protocol/openid-connect/token",
+                        "DeviceAuthEndpoint": "https://auth.adryan.me/realms/master/protocol/openid-connect/auth/device",
+                        "Scope": "openid profile email offline_access api",
+                        "UseIDToken": true,
+                        "RedirectURLs": null
+                    }
+                },
+                "PKCEAuthorizationFlow": {
+                    "ProviderConfig": {
+                        "Audience": "netbird-client",
+                        "ClientID": "netbird-client",
+                        "ClientSecret": "",
+                        "Domain": "",
+                        "AuthorizationEndpoint": "https://auth.adryan.me/realms/master/protocol/openid-connect/auth",
+                        "TokenEndpoint": "https://auth.adryan.me/realms/master/protocol/openid-connect/token",
+                        "Scope": "openid profile email offline_access api",
+                        "RedirectURLs": ["http://localhost:53000"],
+                        "UseIDToken": true,
+                        "DisablePromptLogin": false,
+                        "LoginFlag": 0
+                    }
+                }
+            }
+
+        relay:
+          env:
+            NB_LISTEN_ADDRESS: ":33080"
+            NB_EXPOSED_ADDRESS: "rels://netbird-relay.adryan.me:443"
+            NB_LOG_LEVEL: "info"
+          envFromSecret:
+            NB_AUTH_SECRET: netbird-relay/secret
+
+        dashboard:
+          env:
+            NETBIRD_MGMT_API_ENDPOINT: "https://netbird-api.adryan.me:443"
+            NETBIRD_MGMT_GRPC_API_ENDPOINT: "https://netbird-api.adryan.me:443"
+            AUTH_AUDIENCE: "netbird-client"
+            AUTH_CLIENT_ID: "netbird-client"
+            AUTH_CLIENT_SECRET: ""
+            AUTH_AUTHORITY: "https://auth.adryan.me/realms/master"
+            USE_AUTH0: "false"
+            AUTH_SUPPORTED_SCOPES: "openid profile email offline_access api"
+            AUTH_REDIRECT_URI: "/nb-auth"
+            AUTH_SILENT_REDIRECT_URI: "/nb-silent-auth"
+            NETBIRD_TOKEN_SOURCE: "accessToken"
+
+  destination:
+    server: {{ include "workload.destinationServer" . }}
+    namespace: netbird
+
+  info:
+    - name: "Homepage:"
+      value: "https://netbird.adryan.me"
+
+  {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}

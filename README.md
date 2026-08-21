@@ -2,7 +2,7 @@
 
 [![App Status](https://argo.adryan.me/api/badge?name=infra&revision=true&showAppName=true)](https://argo.adryan.me/applications/infra)
 
-Public GitOps repository for Shardblade: the **App-of-apps** Helm chart at the repo root (synced by Argo CD) and a small **Bootstrap** Terraform tree under `bootstrap/` (installs Argo and the root Application).
+Public GitOps repository for Shardblade: the **App-of-apps** Helm chart at the repo root (synced by Argo CD) and a small **Bootstrap** Terraform tree under `bootstrap/` (installs Argo and the root Application). Shardblade runs on Oracle Cloud Infrastructure (OCI) Always Free VPSs.
 
 ## Layout
 
