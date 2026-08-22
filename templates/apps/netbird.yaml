@@ -19,6 +19,8 @@ spec:
         management:
           persistentVolume:
             size: 1Gi
+          service:
+            name: http2
           envFromSecret:
             NETBIRD_IDP_MGMT_CLIENT_SECRET: netbird-idp/clientSecret
             NETBIRD_RELAY_AUTH_SECRET: netbird-relay/secret
