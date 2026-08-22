@@ -17,6 +17,11 @@ spec:
     helm:
       valuesObject:
         server:
+          # Pin the Vault binary explicitly so a chart bump can't silently
+          # move us to Vault 2.0.x (chart >=0.33 defaults image.tag to 2.0.x).
+          image:
+            repository: "hashicorp/vault"
+            tag: "1.20.4"
           # sealedcode/uninitcode=204: sealed Vault stays Alive so kubelet does not
           # CrashLoop while waiting for unseal / seal migration.
           readinessProbe:
