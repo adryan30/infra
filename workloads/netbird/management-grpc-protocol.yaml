@@ -1,0 +1,75 @@
+# Upstream chart hardcodes the management pod's container port name to
+# "http" while the Service's targetPort is driven by management.service.name,
+# so renaming that value to get Istio to treat the port as gRPC-capable
+# breaks the name-based targetPort lookup instead (see PR #105/#106).
+# PostSync hook adds appProtocol to the existing port, which Istio also
+# honors for protocol detection, without touching name/targetPort.
+# Part of the netbird Workload pack (ADR-0006).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: netbird-grpc-protocol-patch
+  namespace: netbird
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: netbird-grpc-protocol-patch
+  namespace: netbird
+rules:
+  - apiGroups: [""]
+    resources: ["services"]
+    resourceNames: ["netbird-management"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: netbird-grpc-protocol-patch
+  namespace: netbird
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: netbird-grpc-protocol-patch
+subjects:
+  - kind: ServiceAccount
+    name: netbird-grpc-protocol-patch
+    namespace: netbird
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: netbird-grpc-protocol-patch
+  namespace: netbird
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: netbird-grpc-protocol-patch
+      restartPolicy: OnFailure
+      containers:
+        - name: kubectl
+          image: bitnami/kubectl:1.33
+          imagePullPolicy: IfNotPresent
+          command:
+            - kubectl
+            - patch
+            - service
+            - netbird-management
+            - -n
+            - netbird
+            - --type=strategic
+            - -p
+            - '{"spec":{"ports":[{"port":80,"appProtocol":"kubernetes.io/h2c"}]}}'
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
