@@ -19,6 +19,27 @@ spec:
     helm:
       valuesObject:
         replicaCount: 2
+        # Pinned to shardblade-001: LiveKit's hostNetwork pod (templates/apps/
+        # stoat.yaml) is only reachable same-node — a pod's network namespace
+        # can route to other pods cross-node via the CNI overlay, but not to
+        # another node's raw host IP, confirmed live (kubelet's own port
+        # 10250 was equally unreachable from a pod on the other node). Rather
+        # than move LiveKit (its public IP is already relied on by the
+        # firewall rules and Revolt.toml config), pin the gateway to it
+        # instead — nodeSelector is a hard guarantee, unlike "whichever node
+        # the scheduler happened to pick".
+        nodeSelector:
+          kubernetes.io/hostname: shardblade-001
+        # Lowered from the chart's 100m default: shardblade-001 was at 99%
+        # CPU-request commitment (see #116) — 100m wouldn't have fit,
+        # matching this repo's low-request-uncapped-limit convention instead.
+        resources:
+          requests:
+            cpu: 10m
+            memory: 128Mi
+          limits:
+            cpu: "2"
+            memory: 1Gi
         service:
           ports:
             - name: status-port
