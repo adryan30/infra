@@ -9,7 +9,9 @@ spec:
       path: "kv"
       version: "v2"
       auth:
-        tokenSecretRef:
-          name: "vault-policy-token"
-          key: "token"
-          namespace: "vault"
+        kubernetes:
+          mountPath: "kubernetes"
+          role: "eso"
+          serviceAccountRef:
+            name: "external-secrets-operator"
+            namespace: "operators"
