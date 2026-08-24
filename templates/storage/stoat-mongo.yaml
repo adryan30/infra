@@ -169,6 +169,10 @@ spec:
             requests:
               storage: 5Gi
   # No backup destination configured yet — add one (S3/MinIO target) before this
-  # holds anything the user isn't OK losing.
+  # holds anything the user isn't OK losing. image is required by the CRD schema
+  # even with enabled: false (found live: "spec.backup.image: Required value"
+  # blocked the whole infra app-of-apps sync, not just this resource) — pinned
+  # to match the version in Percona's own v1.23.0 reference cr.yaml.
   backup:
     enabled: false
+    image: percona/percona-backup-mongodb:2.15.0
