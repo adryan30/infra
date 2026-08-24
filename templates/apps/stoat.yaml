@@ -131,7 +131,13 @@ spec:
               # controllers blew the cluster's CPU-request budget and caused
               # FailedScheduling (found live while babysitting the rollout) —
               # same fix templates/apps/comet.yaml already applies.
-              sidecar.istio.io/proxyCPU: 10m
+              # api specifically: 1m not the usual 10m — it's pinned to
+              # shardblade-001 below, which was already at 99% CPU-request
+              # commitment; 1m (main) + 10m (this) didn't fit in the ~8m that
+              # was left and caused a real outage (FailedScheduling, 0
+              # replicas) when this pin first landed. 1m total matches the
+              # main container's own request.
+              sidecar.istio.io/proxyCPU: 1m
               sidecar.istio.io/proxyMemory: 128Mi
             # api is the only controller that calls LiveKit's internal Twirp
             # API directly (join_call -> create_room/update_participant, see
