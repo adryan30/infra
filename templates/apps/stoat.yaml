@@ -317,6 +317,10 @@ spec:
           # skipped since it can't help raw hostNetwork UDP either way.
           livekit:
             strategy: Recreate
+            # Was missing entirely — livekit.yml changes (e.g. the webhook URL
+            # fix) never restarted this pod to pick them up.
+            annotations:
+              reloader.stakater.com/auto: "true"
             pod:
               hostNetwork: true
               dnsPolicy: ClusterFirstWithHostNet
