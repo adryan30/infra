@@ -162,6 +162,24 @@ def test_registry_override_controls_application_presence() -> None:
     assert "streaming" in enabled, "registry enabled=true must render the Application"
 
 
+def test_netbird_operator_shares_netbird_workload_gate() -> None:
+    """netbird-operator (#113) is a second Application under the netbird Workload,
+    gated by the same registry key as the netbird control-plane Application, with
+    a Workload pack (ADR-0006) second source at workloads/netbird."""
+    apps = applications(render())
+    assert "netbird" in apps, "netbird control-plane Application missing from render"
+    assert "netbird-operator" in apps, "netbird-operator Application missing from render"
+
+    app = apps["netbird-operator"]
+    assert app["spec"]["destination"]["namespace"] == "netbird"
+    paths = [s.get("path") for s in app["spec"]["sources"]]
+    assert "workloads/netbird" in paths
+
+    disabled = applications(render("--set", "workloads.netbird.enabled=false"))
+    assert "netbird" not in disabled
+    assert "netbird-operator" not in disabled, "operator Application must drop with the control plane"
+
+
 def main() -> int:
     tests = [
         test_workload_profile_storyteller,
@@ -173,6 +191,7 @@ def main() -> int:
         test_enabled_false_omits_application,
         test_missing_registry_key_fails_render,
         test_registry_override_controls_application_presence,
+        test_netbird_operator_shares_netbird_workload_gate,
     ]
     failed = 0
     for test in tests:

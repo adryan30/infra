@@ -1,0 +1,67 @@
+# Part of the netbird Workload pack (ADR-0006), synced as a second source of
+# the netbird-operator Application. Proves ADR-0007's deferred sidecar-injection
+# wiring (#113): a k8s pod that becomes a Netbird peer and routes its egress
+# through ha-box's exit-node route (0.0.0.0/0, group All — every peer is in
+# that group by default, so no extra route/group wiring is needed here).
+#
+# SetupKey: provisioned by the operator (via its Netbird API PAT) for the
+# SidecarProfile below to enroll the pod. Ephemeral — the peer is removed from
+# Netbird when it disconnects, so redeploys don't accumulate stale peers.
+apiVersion: netbird.io/v1alpha1
+kind: SetupKey
+metadata:
+  name: netbird-egress-test
+  namespace: netbird
+spec:
+  name: netbird-egress-test
+  ephemeral: true
+---
+# SidecarProfile: injects the Netbird sidecar into any pod in this namespace
+# matching the selector below — currently just the egress-test Deployment.
+apiVersion: netbird.io/v1alpha1
+kind: SidecarProfile
+metadata:
+  name: netbird-egress-test
+  namespace: netbird
+spec:
+  setupKeyRef:
+    name: netbird-egress-test
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: netbird-egress-test
+---
+# Minimal pod whose only job is to become a Netbird peer and prove selective
+# per-pod egress. Istio injection disabled on the pod itself — same conflict
+# class the Tailscale Connector workload already works around (two mutating
+# sidecar webhooks racing over one pod).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netbird-egress-test
+  namespace: netbird
+  labels:
+    app.kubernetes.io/name: netbird-egress-test
+    app.kubernetes.io/part-of: netbird
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: netbird-egress-test
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: netbird-egress-test
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: curl
+          image: curlimages/curl:8.17.0
+          imagePullPolicy: IfNotPresent
+          command: ["sleep", "infinity"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
