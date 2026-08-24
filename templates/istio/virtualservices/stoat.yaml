@@ -1,0 +1,104 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "stoat")) "true" }}
+# Custom VS: path-based routing across multiple backend Services (mirrors
+# upstream's own Caddyfile: https://github.com/stoatchat/self-hosted/blob/main/Caddyfile)
+# — the generic single-backend workload.virtualServices helper can't express this,
+# same reasoning as templates/istio/virtualservices/comet.yaml's custom VS.
+# Service names come from templates/apps/stoat.yaml's app-template release
+# (default "stoat-<service-key>"; rabbit/minio/voice-ingress use forceRename to
+# match upstream's docker-compose hostnames instead, but that only matters
+# in-cluster — from outside it's always stoat-<key> here).
+#
+# /.well-known/stoat (federation discovery) is intentionally not routed — not
+# needed for a personal instance.
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: stoat
+  namespace: istio-ingress
+  labels:
+    app: stoat
+spec:
+  hosts:
+    - "stoat.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /api
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            port:
+              number: 14702
+            host: stoat-api.stoat.svc.cluster.local
+    - match:
+        - uri:
+            exact: /ws
+      route:
+        - destination:
+            port:
+              number: 14703
+            host: stoat-events.stoat.svc.cluster.local
+      timeout: 3600s
+    - match:
+        - uri:
+            prefix: /autumn
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            port:
+              number: 14704
+            host: stoat-autumn.stoat.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /january
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            port:
+              number: 14705
+            host: stoat-january.stoat.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /gifbox
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            port:
+              number: 14706
+            host: stoat-gifbox.stoat.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /livekit
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            port:
+              number: 7880
+            host: stoat-livekit.stoat.svc.cluster.local
+      timeout: 3600s
+    - match:
+        - uri:
+            prefix: /ingress
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            port:
+              number: 8500
+            host: stoat-voiceingress.stoat.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 5000
+            host: stoat-web.stoat.svc.cluster.local
+{{- end }}
