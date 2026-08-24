@@ -133,6 +133,19 @@ spec:
               # same fix templates/apps/comet.yaml already applies.
               sidecar.istio.io/proxyCPU: 10m
               sidecar.istio.io/proxyMemory: 128Mi
+            # api is the only controller that calls LiveKit's internal Twirp
+            # API directly (join_call -> create_room/update_participant, see
+            # api.livekit.nodes.worldwide.url in stoat-config.yaml). Same
+            # cross-node hostNetwork-pod unreachability as istio-gateway
+            # (templates/istio/gateway.yaml) hit for the public route — a
+            # pod's network namespace can't route to another node's raw host
+            # IP, so api must be co-located with livekit (shardblade-001)
+            # regardless of which Service/path it uses to reach it. Confirmed
+            # live: "No route to host" from api's own sidecar whenever the
+            # scheduler happened to place it on shardblade-002 instead.
+            pod:
+              nodeSelector:
+                kubernetes.io/hostname: shardblade-001
             containers:
               main:
                 image:
