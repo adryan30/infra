@@ -1,0 +1,443 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "stoat")) "true" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: stoat
+  namespace: argocd
+  finalizers:
+    {{- include "workload.finalizers" . | nindent 4 }}
+  labels:
+    name: stoat
+spec:
+  project: default
+  # No upstream Helm chart (stoatchat/self-hosted only ships docker-compose).
+  # app-template's multi-controller support keeps the whole stack — Stoat's own
+  # 8 Rust services + web + livekit, plus its self-contained Redis/RabbitMQ/MinIO
+  # — under one Application, matching this repo's one-Application-per-Workload
+  # convention (teamspeak.yaml / comet.yaml use the same chart for the same
+  # reason). MongoDB is NOT here — it's operator-managed in templates/storage/
+  # stoat-mongo.yaml, same as Sphere/CNPG for Postgres-backed workloads.
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 5.1.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          # --- Backing stores (self-contained; MongoDB is operator-managed, see above) ---
+          redis:
+            strategy: Recreate
+            pod:
+              labels:
+                sidecar.istio.io/inject: "false"
+            containers:
+              main:
+                image:
+                  repository: valkey/valkey
+                  tag: 9-alpine
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
+          rabbitmq:
+            strategy: Recreate
+            pod:
+              labels:
+                sidecar.istio.io/inject: "false"
+            containers:
+              main:
+                image:
+                  repository: rabbitmq
+                  tag: "4"
+                env:
+                  # Static: matches the [rabbit] username left at its baked-in
+                  # default in stoat-config.yaml's Revolt.toml override.
+                  RABBITMQ_DEFAULT_USER: rabbituser
+                  RABBITMQ_DEFAULT_PASS:
+                    valueFrom:
+                      secretKeyRef:
+                        name: stoat-config
+                        key: RABBIT_PASSWORD
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 128Mi
+                  limits:
+                    memory: 512Mi
+            persistence:
+              data:
+                enabled: true
+                type: persistentVolumeClaim
+                accessMode: ReadWriteOnce
+                size: 2Gi
+                globalMounts:
+                  - path: /var/lib/rabbitmq
+          minio:
+            strategy: Recreate
+            pod:
+              labels:
+                sidecar.istio.io/inject: "false"
+            containers:
+              main:
+                image:
+                  repository: minio/minio
+                  tag: latest
+                args:
+                  - server
+                  - /data
+                env:
+                  MINIO_ROOT_USER:
+                    valueFrom:
+                      secretKeyRef:
+                        name: stoat-config
+                        key: MINIO_ROOT_USER
+                  MINIO_ROOT_PASSWORD:
+                    valueFrom:
+                      secretKeyRef:
+                        name: stoat-config
+                        key: MINIO_ROOT_PASSWORD
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 128Mi
+                  limits:
+                    memory: 512Mi
+            persistence:
+              data:
+                enabled: true
+                type: persistentVolumeClaim
+                accessMode: ReadWriteOnce
+                size: 10Gi
+                globalMounts:
+                  - path: /data
+
+          # --- Stoat backend services (all mount Revolt.toml at container root) ---
+          api:
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/api
+                  tag: v0.15.1
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 128Mi
+                  limits:
+                    memory: 512Mi
+          events:
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/events
+                  tag: v0.15.1
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 128Mi
+                  limits:
+                    memory: 512Mi
+          autumn:
+            annotations:
+              reloader.stakater.com/auto: "true"
+            initContainers:
+              init-buckets:
+                image:
+                  repository: minio/mc
+                  tag: latest
+                command:
+                  - sh
+                  - -c
+                  - |
+                    mc alias set stoat http://minio:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" &&
+                    mc mb --ignore-existing stoat/revolt-uploads
+                env:
+                  MINIO_ROOT_USER:
+                    valueFrom:
+                      secretKeyRef:
+                        name: stoat-config
+                        key: MINIO_ROOT_USER
+                  MINIO_ROOT_PASSWORD:
+                    valueFrom:
+                      secretKeyRef:
+                        name: stoat-config
+                        key: MINIO_ROOT_PASSWORD
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/file-server
+                  tag: v0.15.1
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 128Mi
+                  limits:
+                    memory: 512Mi
+          january:
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/proxy
+                  tag: v0.15.1
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
+          gifbox:
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/gifbox
+                  tag: v0.15.1
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
+          pushd:
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/pushd
+                  tag: v0.15.1
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
+          crond:
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/crond
+                  tag: v0.15.1
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
+          voiceingress:
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/voice-ingress
+                  tag: v0.15.1
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
+
+          # --- LiveKit (voice/video) ---
+          # hostNetwork, not a LoadBalancer Service: a Service can only enumerate
+          # individual ports, not express a range, and the RTC port range here is
+          # 50000-50100 (100 ports) — this is LiveKit's own documented Kubernetes
+          # recommendation for exactly this reason. Pinned to shardblade-001 (same
+          # node teamspeak.yaml pins its voice service to) so livekit.yml's
+          # hardcoded node_ip (144.22.177.60) is actually correct; mesh sidecar
+          # skipped since it can't help raw hostNetwork UDP either way.
+          livekit:
+            strategy: Recreate
+            pod:
+              hostNetwork: true
+              dnsPolicy: ClusterFirstWithHostNet
+              labels:
+                sidecar.istio.io/inject: "false"
+              nodeSelector:
+                kubernetes.io/hostname: shardblade-001
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/livekit-server
+                  tag: v1.9.13
+                args:
+                  - --config
+                  - /livekit.yml
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 128Mi
+                  limits:
+                    memory: 512Mi
+
+          # --- Web frontend ---
+          web:
+            annotations:
+              reloader.stakater.com/auto: "true"
+            containers:
+              main:
+                image:
+                  repository: ghcr.io/stoatchat/for-web
+                  tag: 0c31cf0
+                envFrom:
+                  - secretRef:
+                      name: stoat-config
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 64Mi
+                  limits:
+                    memory: 256Mi
+
+        # Revolt.toml mounted into every controller that needs it; livekit.yml only
+        # into livekit. advancedMounts scopes each key to its specific controllers
+        # rather than dumping both files into every container.
+        persistence:
+          revolt-config:
+            type: secret
+            name: stoat-config
+            advancedMounts:
+              api:
+                main:
+                  - path: /Revolt.toml
+                    subPath: Revolt.toml
+                    readOnly: true
+              events:
+                main:
+                  - path: /Revolt.toml
+                    subPath: Revolt.toml
+                    readOnly: true
+              autumn:
+                main:
+                  - path: /Revolt.toml
+                    subPath: Revolt.toml
+                    readOnly: true
+              january:
+                main:
+                  - path: /Revolt.toml
+                    subPath: Revolt.toml
+                    readOnly: true
+              gifbox:
+                main:
+                  - path: /Revolt.toml
+                    subPath: Revolt.toml
+                    readOnly: true
+              pushd:
+                main:
+                  - path: /Revolt.toml
+                    subPath: Revolt.toml
+                    readOnly: true
+              crond:
+                main:
+                  - path: /Revolt.toml
+                    subPath: Revolt.toml
+                    readOnly: true
+              voiceingress:
+                main:
+                  - path: /Revolt.toml
+                    subPath: Revolt.toml
+                    readOnly: true
+              livekit:
+                main:
+                  - path: /livekit.yml
+                    subPath: livekit.yml
+                    readOnly: true
+
+        service:
+          redis:
+            controller: redis
+            # Matches the baked-in default Revolt.toml's `redis = "redis://redis/"`
+            # and livekit.yml's `redis.address: redis:6379` — no override needed
+            # for either as long as this resolves.
+            forceRename: redis
+            ports:
+              redis:
+                port: 6379
+          rabbitmq:
+            controller: rabbitmq
+            # Name matches upstream's docker-compose service name so the
+            # baked-in default Revolt.toml's `rabbit.host = "rabbit"` resolves
+            # without an override.
+            forceRename: rabbit
+            ports:
+              amqp:
+                port: 5672
+          minio:
+            controller: minio
+            # Same reasoning: baked-in default `files.s3.endpoint =
+            # "http://minio:9000"` resolves without an override.
+            forceRename: minio
+            ports:
+              api:
+                port: 9000
+          api:
+            controller: api
+            ports:
+              http:
+                port: 14702
+          events:
+            controller: events
+            ports:
+              http:
+                port: 14703
+          autumn:
+            controller: autumn
+            ports:
+              http:
+                port: 14704
+          january:
+            controller: january
+            ports:
+              http:
+                port: 14705
+          gifbox:
+            controller: gifbox
+            ports:
+              http:
+                port: 14706
+          livekit:
+            controller: livekit
+            # ClusterIP only, for Istio to reach the HTTP/WS signaling port
+            # internally (see templates/istio/virtualservices/stoat.yaml).
+            # RTC TCP/UDP ports are NOT exposed here — the pod uses hostNetwork
+            # (see controllers.livekit) and binds them directly on the node.
+            ports:
+              http:
+                primary: true
+                port: 7880
+          voiceingress:
+            controller: voiceingress
+            # No forceRename: nothing in Revolt.toml's schema references
+            # voice-ingress by a fixed hostname (unlike rabbit/minio below), so
+            # the default stoat-voiceingress name is fine.
+            ports:
+              http:
+                port: 8500
+          web:
+            controller: web
+            ports:
+              http:
+                port: 5000
+
+  destination:
+    server: {{ include "workload.destinationServer" . }}
+    namespace: stoat
+
+  info:
+    - name: "Homepage:"
+      value: "https://stoat.adryan.me"
+
+  {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}

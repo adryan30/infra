@@ -161,6 +161,13 @@ workloads:
   rustdesk:
     enabled: true
     ingress: []
+  stoat:
+    enabled: true
+    # Path-based routing across multiple backend Services (api/events/autumn/
+    # january/gifbox/livekit/voice-ingress/web) — the generic single-backend
+    # VirtualService helper can't express this. See
+    # templates/istio/virtualservices/stoat.yaml for the hand-written VS.
+    ingress: []
   storyteller:
     enabled: true
     ingress:

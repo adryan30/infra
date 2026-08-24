@@ -1,0 +1,174 @@
+# Stoat's MongoDB, operator-managed via percona-server-mongodb-operator (see
+# templates/operators/percona-mongodb.yaml) instead of a bare container — mirrors
+# how templates/storage/sphere.yaml uses CNPG for Postgres. Single-tenant (unlike
+# Sphere, no second consumer yet to justify sharing). Lives in the storage domain
+# tree, unconditional like sphere.yaml — Workload disablement of `stoat` must not
+# tear down its database.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: stoat-mongo-users
+  namespace: storage
+spec:
+  # Generate once; the operator reads these on reconcile — rotating requires an
+  # operator-driven password change, not just a Secret edit.
+  refreshInterval: "0"
+  target:
+    name: stoat-mongo-users
+    template:
+      data:
+        MONGODB_BACKUP_USER: "backup"
+        MONGODB_BACKUP_PASSWORD: "{{ `{{ .MONGODB_BACKUP_PASSWORD }}` }}"
+        MONGODB_DATABASE_ADMIN_USER: "databaseAdmin"
+        MONGODB_DATABASE_ADMIN_PASSWORD: "{{ `{{ .MONGODB_DATABASE_ADMIN_PASSWORD }}` }}"
+        MONGODB_CLUSTER_ADMIN_USER: "clusterAdmin"
+        MONGODB_CLUSTER_ADMIN_PASSWORD: "{{ `{{ .MONGODB_CLUSTER_ADMIN_PASSWORD }}` }}"
+        MONGODB_CLUSTER_MONITOR_USER: "clusterMonitor"
+        MONGODB_CLUSTER_MONITOR_PASSWORD: "{{ `{{ .MONGODB_CLUSTER_MONITOR_PASSWORD }}` }}"
+        MONGODB_USER_ADMIN_USER: "userAdmin"
+        MONGODB_USER_ADMIN_PASSWORD: "{{ `{{ .MONGODB_USER_ADMIN_PASSWORD }}` }}"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ClusterGenerator
+          name: "general-passgen"
+      rewrite:
+        - regexp:
+            source: "password"
+            target: "MONGODB_BACKUP_PASSWORD"
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ClusterGenerator
+          name: "general-passgen"
+      rewrite:
+        - regexp:
+            source: "password"
+            target: "MONGODB_DATABASE_ADMIN_PASSWORD"
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ClusterGenerator
+          name: "general-passgen"
+      rewrite:
+        - regexp:
+            source: "password"
+            target: "MONGODB_CLUSTER_ADMIN_PASSWORD"
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ClusterGenerator
+          name: "general-passgen"
+      rewrite:
+        - regexp:
+            source: "password"
+            target: "MONGODB_CLUSTER_MONITOR_PASSWORD"
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ClusterGenerator
+          name: "general-passgen"
+      rewrite:
+        - regexp:
+            source: "password"
+            target: "MONGODB_USER_ADMIN_PASSWORD"
+---
+# App user (Stoat's `revolt` db, declared below via spec.users). Password is
+# pushed to Vault so stoat-config.yaml (in the `stoat` namespace) can read the
+# same value back to build the mongodb connection URI — no duplicate source of
+# truth, same pattern as sphere.rolePassword.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: stoat-mongo-app-user
+  namespace: storage
+spec:
+  refreshInterval: "0"
+  target:
+    name: stoat-mongo-app-user
+    template:
+      data:
+        password: "{{ `{{ .password }}` }}"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: ClusterGenerator
+          name: "general-passgen"
+---
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: stoat-mongo-app-user-pushsecret
+  namespace: storage
+spec:
+  deletionPolicy: Delete
+  refreshInterval: 10s
+  secretStoreRefs:
+    - name: vault
+      kind: ClusterSecretStore
+  selector:
+    secret:
+      name: stoat-mongo-app-user
+  data:
+    - match:
+        secretKey: password
+        remoteRef:
+          remoteKey: storage/stoat-mongo-app-user
+          property: password
+---
+apiVersion: psmdb.percona.com/v1
+kind: PerconaServerMongoDB
+metadata:
+  name: stoat
+  namespace: storage
+spec:
+  crVersion: 1.23.0
+  image: percona/percona-server-mongodb:8.0.26-11
+  # 2-node cluster, personal-scale, single-tenant — matches this repo's
+  # teamspeak/comet single-replica bias. Operator's safe default is 3; bumping
+  # replsets[0].size later is a CR field change, not a re-provision.
+  unsafeFlags:
+    replsetSize: true
+  secrets:
+    users: stoat-mongo-users
+  users:
+    - name: revolt
+      db: revolt
+      passwordSecretRef:
+        name: stoat-mongo-app-user
+        key: password
+      roles:
+        - name: readWrite
+          db: revolt
+  replsets:
+    - name: rs0
+      size: 1
+      affinity:
+        antiAffinityTopologyKey: "none"
+      podDisruptionBudget:
+        maxUnavailable: 1
+      expose:
+        enabled: false
+        type: ClusterIP
+      resources:
+        requests:
+          # Matches this repo's low-CPU-request convention (teamspeak/comet/
+          # minecraft all request 1-25m) — both nodes are already CPU-request
+          # saturated (92-97%), so reserve minimally and let it burst against
+          # the (uncapped) limit. Memory is what actually matters for a real
+          # database's WiredTiger cache, not the CPU request.
+          cpu: 25m
+          memory: 512Mi
+        limits:
+          memory: 1Gi
+      volumeSpec:
+        persistentVolumeClaim:
+          resources:
+            requests:
+              storage: 5Gi
+  # No backup destination configured yet — add one (S3/MinIO target) before this
+  # holds anything the user isn't OK losing.
+  backup:
+    enabled: false
