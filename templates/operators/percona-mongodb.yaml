@@ -1,8 +1,24 @@
+# Unlike CNPG/Kiali (installed via the operators namespace's cluster-wide
+# `global-operators` OperatorGroup), Percona's MongoDB operator's CSV only
+# supports OwnNamespace/SingleNamespace install modes — AllNamespaces fails
+# with "UnsupportedOperatorGroup". So this gets its own namespace + a
+# namespace-scoped OperatorGroup instead of reusing the operators namespace.
+# Installed into `storage`, where the PerconaServerMongoDB CR it watches
+# already lives (templates/storage/stoat-mongo.yaml).
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: storage-operators
+  namespace: storage
+spec:
+  targetNamespaces:
+    - storage
+---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: percona-server-mongodb-operator
-  namespace: operators
+  namespace: storage
 spec:
   channel: stable
   name: percona-server-mongodb-operator
