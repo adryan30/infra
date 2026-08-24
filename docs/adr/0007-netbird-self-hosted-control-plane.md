@@ -4,6 +4,8 @@ Evaluating Netbird as a possible Tailscale replacement, we scope the `netbird` W
 
 **Update:** the deferred home peer now exists — a low-power Ubuntu Server box managed by [`adryan30/homelab`](https://github.com/adryan30/homelab), enrolled via Ansible-automated `netbird up` using a setup key from Vault. It plays the **exit-node** role only, not subnet-router: no route into the rest of the home LAN is advertised, just internet-bound egress for peers that opt into it. The concrete consumer this ADR was waiting on is a set of in-cluster k8s pods that will route their outbound traffic through it, which means the `kubernetes-operator` sidecar injection this ADR already scoped out is now buildable — that wiring is tracked as follow-on work in this repo, not `homelab`.
 
+**Update:** the `kubernetes-operator` sidecar injection is now built (#113) — a `netbird-operator` Application (`netbirdio/kubernetes-operator`'s helm chart) plus a `netbird` Workload pack (`SetupKey` + `SidecarProfile` + a minimal egress-test pod) matching the deferred consumer above. The pod's Istio sidecar is disabled the same way the Tailscale `Connector` workload already works around that conflict class. A Netbird API personal access token still has to be minted once via the dashboard and stored at `kv/netbird/operator-api-key` (`token`) before the Application syncs clean — that step needs a logged-in human, not GitOps.
+
 ## Considered Options
 
 - Netbird Cloud (hosted control plane) instead of self-hosting — rejected; the goal is zero recurring cost

@@ -130,6 +130,17 @@ def test_non_workload_secrets_still_render() -> None:
     assert kinds.get("wildcard-certificate") == "ClusterExternalSecret"
 
 
+def test_netbird_operator_secret_gates_on_netbird_workload() -> None:
+    """netbird-operator-api-key (#113) shares the netbird Workload's registry key."""
+    enabled = external_secrets(render())
+    assert "netbird-operator-api-key" in enabled
+    assert "netbird-idp" in enabled, "control-plane secret unaffected by the operator addition"
+
+    disabled = external_secrets(render("--set", "workloads.netbird.enabled=false"))
+    assert "netbird-operator-api-key" not in disabled
+    assert "netbird-idp" not in disabled
+
+
 def main() -> int:
     tests = [
         test_disabled_workload_omits_application_and_externalsecrets,
@@ -137,6 +148,7 @@ def main() -> int:
         test_reenable_restores_externalsecrets,
         test_awkward_secret_names_gate_on_explicit_workload,
         test_non_workload_secrets_still_render,
+        test_netbird_operator_secret_gates_on_netbird_workload,
     ]
     failed = 0
     for test in tests:
