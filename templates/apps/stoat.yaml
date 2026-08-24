@@ -43,6 +43,13 @@ spec:
                     memory: 256Mi
           rabbitmq:
             strategy: Recreate
+            # Consumes stoat-config via env secretKeyRef but wasn't wired to
+            # restart on changes (only the 9 mesh-injected controllers mounting
+            # it as a file were) — found live while babysitting the rollout,
+            # after stoat-config.yaml's refreshInterval fix needed this to
+            # actually pick up the now-stable password.
+            annotations:
+              reloader.stakater.com/auto: "true"
             pod:
               labels:
                 sidecar.istio.io/inject: "false"
@@ -76,6 +83,9 @@ spec:
                   - path: /var/lib/rabbitmq
           minio:
             strategy: Recreate
+            # Same reasoning as rabbitmq above.
+            annotations:
+              reloader.stakater.com/auto: "true"
             pod:
               labels:
                 sidecar.istio.io/inject: "false"
