@@ -117,6 +117,12 @@ spec:
           api:
             annotations:
               reloader.stakater.com/auto: "true"
+              # Istio's default sidecar CPU request (100m) x 9 mesh-injected
+              # controllers blew the cluster's CPU-request budget and caused
+              # FailedScheduling (found live while babysitting the rollout) —
+              # same fix templates/apps/comet.yaml already applies.
+              sidecar.istio.io/proxyCPU: 10m
+              sidecar.istio.io/proxyMemory: 128Mi
             containers:
               main:
                 image:
@@ -131,6 +137,12 @@ spec:
           events:
             annotations:
               reloader.stakater.com/auto: "true"
+              # Istio's default sidecar CPU request (100m) x 9 mesh-injected
+              # controllers blew the cluster's CPU-request budget and caused
+              # FailedScheduling (found live while babysitting the rollout) —
+              # same fix templates/apps/comet.yaml already applies.
+              sidecar.istio.io/proxyCPU: 10m
+              sidecar.istio.io/proxyMemory: 128Mi
             containers:
               main:
                 image:
@@ -145,6 +157,12 @@ spec:
           autumn:
             annotations:
               reloader.stakater.com/auto: "true"
+              # Istio's default sidecar CPU request (100m) x 9 mesh-injected
+              # controllers blew the cluster's CPU-request budget and caused
+              # FailedScheduling (found live while babysitting the rollout) —
+              # same fix templates/apps/comet.yaml already applies.
+              sidecar.istio.io/proxyCPU: 10m
+              sidecar.istio.io/proxyMemory: 128Mi
             initContainers:
               init-buckets:
                 image:
@@ -181,6 +199,12 @@ spec:
           january:
             annotations:
               reloader.stakater.com/auto: "true"
+              # Istio's default sidecar CPU request (100m) x 9 mesh-injected
+              # controllers blew the cluster's CPU-request budget and caused
+              # FailedScheduling (found live while babysitting the rollout) —
+              # same fix templates/apps/comet.yaml already applies.
+              sidecar.istio.io/proxyCPU: 10m
+              sidecar.istio.io/proxyMemory: 128Mi
             containers:
               main:
                 image:
@@ -195,6 +219,12 @@ spec:
           gifbox:
             annotations:
               reloader.stakater.com/auto: "true"
+              # Istio's default sidecar CPU request (100m) x 9 mesh-injected
+              # controllers blew the cluster's CPU-request budget and caused
+              # FailedScheduling (found live while babysitting the rollout) —
+              # same fix templates/apps/comet.yaml already applies.
+              sidecar.istio.io/proxyCPU: 10m
+              sidecar.istio.io/proxyMemory: 128Mi
             containers:
               main:
                 image:
@@ -209,6 +239,12 @@ spec:
           pushd:
             annotations:
               reloader.stakater.com/auto: "true"
+              # Istio's default sidecar CPU request (100m) x 9 mesh-injected
+              # controllers blew the cluster's CPU-request budget and caused
+              # FailedScheduling (found live while babysitting the rollout) —
+              # same fix templates/apps/comet.yaml already applies.
+              sidecar.istio.io/proxyCPU: 10m
+              sidecar.istio.io/proxyMemory: 128Mi
             containers:
               main:
                 image:
@@ -223,6 +259,12 @@ spec:
           crond:
             annotations:
               reloader.stakater.com/auto: "true"
+              # Istio's default sidecar CPU request (100m) x 9 mesh-injected
+              # controllers blew the cluster's CPU-request budget and caused
+              # FailedScheduling (found live while babysitting the rollout) —
+              # same fix templates/apps/comet.yaml already applies.
+              sidecar.istio.io/proxyCPU: 10m
+              sidecar.istio.io/proxyMemory: 128Mi
             containers:
               main:
                 image:
@@ -237,6 +279,12 @@ spec:
           voiceingress:
             annotations:
               reloader.stakater.com/auto: "true"
+              # Istio's default sidecar CPU request (100m) x 9 mesh-injected
+              # controllers blew the cluster's CPU-request budget and caused
+              # FailedScheduling (found live while babysitting the rollout) —
+              # same fix templates/apps/comet.yaml already applies.
+              sidecar.istio.io/proxyCPU: 10m
+              sidecar.istio.io/proxyMemory: 128Mi
             containers:
               main:
                 image:
@@ -285,6 +333,12 @@ spec:
           web:
             annotations:
               reloader.stakater.com/auto: "true"
+              # Istio's default sidecar CPU request (100m) x 9 mesh-injected
+              # controllers blew the cluster's CPU-request budget and caused
+              # FailedScheduling (found live while babysitting the rollout) —
+              # same fix templates/apps/comet.yaml already applies.
+              sidecar.istio.io/proxyCPU: 10m
+              sidecar.istio.io/proxyMemory: 128Mi
             containers:
               main:
                 image:
