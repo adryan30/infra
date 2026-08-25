@@ -18,6 +18,22 @@ spec:
     targetRevision: 1.30.3
     helm:
       valuesObject:
+        # 40m (#132): the chart's 100m default x every mesh-injected pod
+        # (63 istio-proxy sidecars cluster-wide) was the actual dominant
+        # driver of both nodes sitting at 97-98% CPU-request commitment --
+        # bigger than any single platform component's own request (#116).
+        # Confirmed live via `kubectl top pods --containers`: real usage
+        # tops out at 25m (longhorn's instance-manager sidecar, the
+        # busiest one observed), most sidecars sit at 2-10m. 40m keeps
+        # ~60% margin over that observed peak. This is a point-in-time
+        # snapshot, not a full p95 per ADR 0008 (Prometheus itself was
+        # down when this landed, see #135) -- revisit with real sidecar
+        # p95 once retention accumulates.
+        global:
+          proxy:
+            resources:
+              requests:
+                cpu: 40m
         pilot:
           cni:
             enabled: true
