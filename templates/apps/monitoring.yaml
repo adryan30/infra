@@ -30,6 +30,33 @@ spec:
           prometheusSpec:
             podMonitorSelectorNilUsesHelmValues: false
             serviceMonitorSelectorNilUsesHelmValues: false
+        # shardblade-001 and shardblade-002 sit in separate OCI tenancies whose
+        # VCNs both happen to use 10.0.0.0/24 -- the InternalIP the kubelet
+        # Service normally scrapes is unroutable between them (colliding
+        # CIDRs, confirmed via ARP: neither node can resolve the other's
+        # InternalIP). Both nodes' ExternalIP is reachable and already the
+        # peer address flannel's wireguard backend uses (flannel-external-ip:
+        # true in the k3s config), so repoint the kubelet scrape there too.
+        kubelet:
+          serviceMonitor:
+            cAdvisorRelabelings:
+              - action: replace
+                sourceLabels: [__metrics_path__]
+                targetLabel: metrics_path
+              - action: replace
+                sourceLabels: [__meta_kubernetes_node_address_ExternalIP]
+                regex: (.+)
+                targetLabel: __address__
+                replacement: "${1}:10250"
+            probesRelabelings:
+              - action: replace
+                sourceLabels: [__metrics_path__]
+                targetLabel: metrics_path
+              - action: replace
+                sourceLabels: [__meta_kubernetes_node_address_ExternalIP]
+                regex: (.+)
+                targetLabel: __address__
+                replacement: "${1}:10250"
         nameOverride: monitoring
         fullnameOverride: monitoring
         grafana:
