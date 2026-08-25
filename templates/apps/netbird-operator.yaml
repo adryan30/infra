@@ -24,6 +24,10 @@ spec:
             keyFromSecret:
               name: netbird-operator-api-key
               key: NB_API_KEY
+          operator:
+            resources:
+              requests:
+                cpu: 10m
     - repoURL: git@github.com:adryan30/infra.git
       targetRevision: HEAD
       path: workloads/netbird
