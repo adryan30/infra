@@ -142,10 +142,11 @@ spec:
             # api is the only controller that calls LiveKit's internal Twirp
             # API directly (join_call -> create_room/update_participant, see
             # api.livekit.nodes.worldwide.url in stoat-config.yaml). Same
-            # cross-node hostNetwork-pod unreachability as istio-gateway
-            # (templates/istio/gateway.yaml) hit for the public route — a
-            # pod's network namespace can't route to another node's raw host
-            # IP, so api must be co-located with livekit (shardblade-001)
+            # cross-node hostNetwork-pod unreachability istio-gateway's own
+            # nodeSelector used to guard against (removed in #136, see the
+            # tradeoff note in templates/istio/gateway.yaml) — a pod's
+            # network namespace can't route to another node's raw host IP,
+            # so api must be co-located with livekit (shardblade-001)
             # regardless of which Service/path it uses to reach it. Confirmed
             # live: "No route to host" from api's own sidecar whenever the
             # scheduler happened to place it on shardblade-002 instead.
