@@ -19,23 +19,25 @@ spec:
     helm:
       valuesObject:
         replicaCount: 2
-        # Pinned to shardblade-001: LiveKit's hostNetwork pod (templates/apps/
-        # stoat.yaml) is only reachable same-node — a pod's network namespace
-        # can route to other pods cross-node via the CNI overlay, but not to
-        # another node's raw host IP, confirmed live (kubelet's own port
-        # 10250 was equally unreachable from a pod on the other node). Rather
-        # than move LiveKit (its public IP is already relied on by the
-        # firewall rules and Revolt.toml config), pin the gateway to it
-        # instead — nodeSelector is a hard guarantee, unlike "whichever node
-        # the scheduler happened to pick".
-        nodeSelector:
-          kubernetes.io/hostname: shardblade-001
-        # Lowered from the chart's 100m default: shardblade-001 was at 99%
-        # CPU-request commitment (see #116) — 100m wouldn't have fit,
-        # matching this repo's low-request-uncapped-limit convention instead.
+        # No nodeSelector (#136): previously pinned to shardblade-001 so the
+        # gateway would land same-node as LiveKit's hostNetwork pod (see
+        # templates/apps/stoat.yaml) -- a pod can't route to another node's
+        # raw host IP, confirmed live. Dropping the pin is a known interim
+        # tradeoff, decided regardless of #137 (removing Stoat/LiveKit)'s
+        # timing: templates/istio/virtualservices/stoat.yaml routes the
+        # public /livekit prefix through this gateway to
+        # stoat-livekit.stoat.svc.cluster.local, so a gateway replica the
+        # scheduler places on shardblade-002 will fail to reach it until
+        # #137 lands. Revisit if that turns out to bite before #137 ships.
+        # 100m (chart default, top of the 50-100m range decided in #136):
+        # the HPA targets 80% CPU-of-request, so a too-small request makes
+        # any real usage blip read as a huge percentage and flap replicas
+        # between 1 and 2. No Prometheus p95 history exists yet to size this
+        # via ADR 0008 (the retention window doesn't cover this component
+        # yet) -- revisit with real p95 data once it does.
         resources:
           requests:
-            cpu: 10m
+            cpu: 100m
             memory: 128Mi
           limits:
             cpu: "2"
