@@ -33,6 +33,30 @@ spec:
             resources:
               requests:
                 cpu: 500m
+            # Chart default is emptyDir -- every pod restart/reschedule wiped
+            # all retention, resetting the p95 data #135 depends on to zero.
+            # Found while recovering from the #132 incident: Prometheus was
+            # down ~13h with no persisted history to fall back on. Longhorn,
+            # matching monitoring-grafana's existing PVC below (no explicit
+            # storageClassName, inherits the cluster default).
+            #
+            # 8Gi is a starting-point guess, not a measured size (can't
+            # measure this cluster's own TSDB growth without persistent
+            # storage existing first) -- retentionSize below caps usage at
+            # 7GB, under the PVC, so hitting the ceiling degrades to
+            # dropping oldest samples early rather than crash-looping on a
+            # full disk (which would reproduce the #132 failure via disk
+            # exhaustion instead of pod eviction). Revisit both once real
+            # usage over a full 10d retention window is observable.
+            retention: 10d
+            retentionSize: 7GB
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 8Gi
         kube-state-metrics:
           resources:
             requests:
