@@ -16,7 +16,14 @@ spec:
     chart: vault
     helm:
       valuesObject:
+        injector:
+          resources:
+            requests:
+              cpu: 10m
         server:
+          resources:
+            requests:
+              cpu: 120m
           # Pin the Vault binary explicitly so a chart bump can't silently
           # move us to Vault 2.0.x (chart >=0.33 defaults image.tag to 2.0.x).
           image:

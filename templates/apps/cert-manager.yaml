@@ -18,6 +18,17 @@ spec:
       valuesObject:
         crds:
           enabled: true
+        resources:
+          requests:
+            cpu: 5m
+        cainjector:
+          resources:
+            requests:
+              cpu: 5m
+        webhook:
+          resources:
+            requests:
+              cpu: 5m
 
   destination:
     server: {{ include "workload.destinationServer" . }}

@@ -41,6 +41,7 @@ spec:
           stack: ispn
         resources:
           requests:
+            cpu: 25m
             memory: 1Gi
           limits:
             memory: 2Gi
