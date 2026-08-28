@@ -1,0 +1,78 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "home-assistant")) "true" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: home-assistant
+  namespace: argocd
+  finalizers:
+    {{- include "workload.finalizers" . | nindent 4 }}
+  labels:
+    name: home-assistant
+spec:
+  project: default
+  # Multi-source: the container is just a Caddy reverse-proxy — the real
+  # work is becoming a NetBird peer that can reach ha-box, done by the
+  # SetupKey + SidecarProfile in the Workload pack (ADR-0006) under
+  # workloads/home-assistant/, same shape as netbird's own egress-test
+  # (ADR-0007's #113).
+  sources:
+    - repoURL: https://bjw-s-labs.github.io/helm-charts
+      targetRevision: 5.1.0
+      chart: app-template
+      helm:
+        valuesObject:
+          controllers:
+            main:
+              annotations:
+                # Own network namespace is managed by the NetBird sidecar
+                # (below); avoid the same two-sidecar-webhook conflict the
+                # netbird-egress-test pod already works around.
+                sidecar.istio.io/inject: "false"
+              containers:
+                main:
+                  image:
+                    # Matches the Caddy version pinned on ha-box itself
+                    # (adryan30/homelab's roles/home_assistant/defaults).
+                    repository: caddy
+                    tag: 2.11.4-alpine
+                  # Caddy's one-shot reverse-proxy subcommand -- no
+                  # Caddyfile/ConfigMap needed for a single static upstream.
+                  # 100.93.194.252 is ha-box's NetBird IP (`netbird status`
+                  # on the box; also visible as jackdaw.netbird.selfhosted
+                  # on the NetBird dashboard) -- not a k8s Service, so it
+                  # can't be templated from the cluster's own service
+                  # registry. Re-check this if ha-box is ever re-enrolled.
+                  command:
+                    - caddy
+                    - reverse-proxy
+                    - --from
+                    - ":80"
+                    - --to
+                    - "http://100.93.194.252:80"
+                  resources:
+                    requests:
+                      cpu: 10m
+                      memory: 32Mi
+                    limits:
+                      memory: 64Mi
+          service:
+            main:
+              controller: main
+              ports:
+                http:
+                  port: 80
+    - repoURL: git@github.com:adryan30/infra.git
+      targetRevision: HEAD
+      path: workloads/home-assistant
+
+  destination:
+    server: {{ include "workload.destinationServer" . }}
+    namespace: home-assistant
+
+  info:
+    - name: "Homepage:"
+      value: "https://ha.adryan.me"
+
+  {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}

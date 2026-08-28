@@ -1,0 +1,37 @@
+# Part of the home-assistant Workload pack, synced as a second source of the
+# home-assistant Application. Proves out the same pattern as
+# workloads/netbird/egress-test.yaml (ADR-0007's #113), but for ingress
+# instead of egress: this pod becomes a NetBird peer so it can reach
+# adryan30/homelab's ha-box directly over the overlay, and Caddy (the
+# Application's main container) reverse-proxies public traffic to it.
+#
+# SetupKey: provisioned by netbird-operator (via its Netbird API PAT) for
+# the SidecarProfile below to enroll the pod. Ephemeral -- the peer is
+# removed from Netbird when the pod is replaced, so redeploys don't
+# accumulate stale peers.
+apiVersion: netbird.io/v1alpha1
+kind: SetupKey
+metadata:
+  name: home-assistant-proxy
+  namespace: home-assistant
+spec:
+  name: home-assistant-proxy
+  ephemeral: true
+---
+# SidecarProfile: injects the Netbird sidecar into the home-assistant
+# Application's pod (app.kubernetes.io/name is the app-template chart's
+# release-name label -- confirmed empirically against a local `helm
+# template` render, matching how comet's own Service/Deployment names
+# resolve to its bare Application name). Scoped to this Deployment only,
+# never namespace-wide.
+apiVersion: netbird.io/v1alpha1
+kind: SidecarProfile
+metadata:
+  name: home-assistant-proxy
+  namespace: home-assistant
+spec:
+  setupKeyRef:
+    name: home-assistant-proxy
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: home-assistant
