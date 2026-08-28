@@ -16,6 +16,13 @@ spec:
     chart: homepage
     helm:
       valuesObject:
+        # 1m, matching this repo's standard app-Workload convention (ADR
+        # 0008) -- had no override at all, inheriting the chart's own
+        # default. `kubectl top` shows ~0.08m actual usage: a static
+        # internal dashboard, essentially idle.
+        resources:
+          requests:
+            cpu: 1m
         env:
           - name: LOG_TARGETS
             value: "stdout"
