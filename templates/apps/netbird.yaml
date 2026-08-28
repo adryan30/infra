@@ -115,6 +115,22 @@ spec:
             }
 
         relay:
+          image:
+            # The chart's own default tag for this component (empty ->
+            # resolves to netbirdio/relay:0.46.0) is far behind the
+            # unified client/relay versioning NetBird moved to -- 0.46.0
+            # predates the ~0.51.1 minimum relay version NetBird's own
+            # release notes require for compatibility with modern clients.
+            # Confirmed live: relay logs showed every peer connection
+            # failing immediately with "failed to determine message type:
+            # invalid msg type 8" for any peer that had to go through the
+            # relay (P2P-capable peers never hit this, which is why it
+            # went unnoticed until the first peer that structurally can't
+            # do P2P -- a k8s pod behind NAT with no public/routable
+            # address -- showed up). Pinned to match the client version
+            # already running on the home peer (adryan30/homelab's
+            # ha-box, `netbird status` reports daemon 0.77.1).
+            tag: "0.77.1"
           env:
             NB_LISTEN_ADDRESS: ":33080"
             NB_EXPOSED_ADDRESS: "rels://netbird-relay.adryan.me:443"
@@ -149,6 +165,21 @@ spec:
     - group: ""
       kind: Service
       name: netbird-management
+      jqPathExpressions:
+        - .spec.ports[0].appProtocol
+    # Same gap as netbird-management above, different symptom: the chart
+    # doesn't expose appProtocol on the relay Service port either, so
+    # Istio inferred HTTP/1.1 from the "http" port name and applied HTTP
+    # framing to what's actually an opaque WebSocket byte stream carrying
+    # NetBird's own binary relay sub-protocol -- corrupting it (confirmed
+    # live: relay logs showed every relayed peer connection failing with
+    # "failed to determine message type"). appProtocol: tcp forces pure
+    # L4 passthrough. Set once manually (kubectl patch, not chart-owned)
+    # and won't self-heal if the Service is ever recreated -- reapply
+    # then, per the same caveat as netbird-management's entry above.
+    - group: ""
+      kind: Service
+      name: netbird-relay
       jqPathExpressions:
         - .spec.ports[0].appProtocol
 
