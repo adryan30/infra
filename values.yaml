@@ -59,6 +59,15 @@ workloads:
   devices:
     enabled: true
     ingress: []
+  home-assistant:
+    enabled: true
+    ingress:
+      - name: home-assistant
+        host: ha.adryan.me
+        oauth: false
+        backend:
+          host: home-assistant.home-assistant.svc.cluster.local
+          port: 80
   homepage:
     enabled: true
     ingress:
