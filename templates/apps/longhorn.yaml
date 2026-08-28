@@ -20,6 +20,19 @@ spec:
           jobEnabled: true
         defaultSettings:
           defaultReplicaCount: "1"
+          # guaranteedInstanceManagerCPU defaults to 12% of each node's
+          # allocatable CPU per data engine (Longhorn's own setting, not a
+          # standard Helm resources: block -- confirmed live via `kubectl
+          # get settings.longhorn.io guaranteed-instance-manager-cpu`,
+          # value stored as this same JSON-string shape). On this
+          # cluster's 4-core nodes that's 480m per instance-manager pod,
+          # one per node -- never covered by #116/ADR 0008's original
+          # audit, which only looked at templates/apps/*.yaml resources:
+          # blocks. `kubectl top` shows actual usage peaking ~120m.
+          # Longhorn is one of ADR 0008's named critical components (an
+          # outage here is a storage outage), so 6% (~240m, 2x the
+          # observed peak) rather than the standard 1.3-1.5x.
+          guaranteedInstanceManagerCPU: '{"v1":"6","v2":"6"}'
 
   destination:
     server: {{ include "workload.destinationServer" . }}

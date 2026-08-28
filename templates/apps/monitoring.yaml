@@ -32,7 +32,11 @@ spec:
             serviceMonitorSelectorNilUsesHelmValues: false
             resources:
               requests:
-                cpu: 500m
+                # 280m, sized from real p95 per ADR 0008: p95 over
+                # Prometheus's own 10d retention (queried against itself)
+                # was ~195m; 280m keeps ~1.4x margin, the standard
+                # non-critical multiplier. Was 500m, unaudited since #116.
+                cpu: 280m
             # Chart default is emptyDir -- every pod restart/reschedule wiped
             # all retention, resetting the p95 data #135 depends on to zero.
             # Found while recovering from the #132 incident: Prometheus was

@@ -29,15 +29,18 @@ spec:
         # stoat-livekit.stoat.svc.cluster.local, so a gateway replica the
         # scheduler places on shardblade-002 will fail to reach it until
         # #137 lands. Revisit if that turns out to bite before #137 ships.
-        # 100m (chart default, top of the 50-100m range decided in #136):
-        # the HPA targets 80% CPU-of-request, so a too-small request makes
-        # any real usage blip read as a huge percentage and flap replicas
-        # between 1 and 2. No Prometheus p95 history exists yet to size this
-        # via ADR 0008 (the retention window doesn't cover this component
-        # yet) -- revisit with real p95 data once it does.
+        # 30m, sized from real p95 per ADR 0008: quantile_over_time(0.95,
+        # rate(container_cpu_usage_seconds_total{...istio-proxy...}[5m])
+        # [10d:5m]) against Prometheus returned ~6m -- 30m keeps 5x margin
+        # (public ingress edge, so more generous than the standard
+        # 1.3-1.5x). Was 100m (chart default, top of the 50-100m range
+        # decided in #136) while no p95 history existed yet; the HPA
+        # targets 80% CPU-of-request, and 30m still leaves ~4x room over
+        # the observed peak before that threshold, so this shouldn't
+        # reintroduce the #136 flap.
         resources:
           requests:
-            cpu: 100m
+            cpu: 30m
             memory: 128Mi
           limits:
             cpu: "2"

@@ -96,7 +96,13 @@ spec:
                       timeoutSeconds: 5
                 resources:
                   requests:
-                    cpu: 250m
+                    # 1m, matching this repo's standard app-Workload
+                    # convention (ADR 0008) -- `kubectl top` shows ~14m
+                    # actual usage against the old 250m request, and the
+                    # 1-core limit below is untouched, so real bursts
+                    # still get the CPU when the node has it; this only
+                    # stops reserving 250m nobody's using day to day.
+                    cpu: 1m
                     memory: 512Mi
                   limits:
                     cpu: "1"
