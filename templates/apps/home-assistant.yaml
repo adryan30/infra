@@ -23,11 +23,17 @@ spec:
         valuesObject:
           controllers:
             main:
-              annotations:
-                # Own network namespace is managed by the NetBird sidecar
-                # (below); avoid the same two-sidecar-webhook conflict the
-                # netbird-egress-test pod already works around.
-                sidecar.istio.io/inject: "false"
+              pod:
+                annotations:
+                  # `controllers.main.annotations` (no `pod`) lands on the
+                  # Deployment's own metadata, not the pod template -- the
+                  # Istio injector webhook never sees it there (confirmed via
+                  # `helm template` against the real chart). This pod-level
+                  # form is required: own network namespace is managed by
+                  # the NetBird sidecar (below); avoid the same
+                  # two-sidecar-webhook conflict the netbird-egress-test pod
+                  # already works around.
+                  sidecar.istio.io/inject: "false"
               containers:
                 main:
                   image:
