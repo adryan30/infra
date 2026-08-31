@@ -37,6 +37,13 @@ spec:
           # oidcRedirectUri left empty: auto-computes to
           # https://finance.adryan.me/api/auth/oidc/callback (matches the
           # Keycloak client's registered redirect URI).
+          # AI Agents: master switch. The actual LLM provider connection
+          # (OpenRouter deepseek/deepseek-v4-flash-0731) is configured via
+          # Settings -> AI Agents in the app itself — traced through
+          # backend/app/agents/{config,providers/registry}.py: there is no
+          # env var that seeds a default provider, it's a DB-backed
+          # per-connection row, so nothing to wire here beyond turning it on.
+          agentsEnabled: "true"
         backend:
           image:
             tag: "0.14.5"
@@ -50,9 +57,9 @@ spec:
         # per-app-Redis approach as inbox-zero, not the shared platform Redis.
         redis:
           enabled: true
-        # No MCP/agents surface on the first deploy of a finance app.
+        # Built-in MCP tool-use server for AI Agents (config.agentsEnabled above).
         mcpServer:
-          enabled: false
+          enabled: true
 
   destination:
     server: {{ include "workload.destinationServer" . }}
