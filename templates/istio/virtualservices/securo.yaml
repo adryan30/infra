@@ -1,0 +1,35 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "securo")) "true" }}
+# Custom VS: securo's chart splits backend (FastAPI, port 8000) and frontend
+# (React, port 3000) into separate Services behind one host — the generic
+# single-backend workload.virtualServices helper can't express path-based
+# routing across two backends (same reason stoat/comet have hand-written VSes).
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: securo
+  namespace: istio-ingress
+  labels:
+    app: securo
+spec:
+  hosts:
+    - "finance.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /api
+      route:
+        - destination:
+            port:
+              number: 8000
+            host: securo-backend.securo.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 3000
+            host: securo-frontend.securo.svc.cluster.local
+{{- end }}

@@ -43,6 +43,11 @@ spec:
         login: true
         passwordSecret:
           name: sphere-inboxzero
+      - name: securo
+        createdb: false
+        login: true
+        passwordSecret:
+          name: sphere-securo
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
@@ -128,3 +133,17 @@ spec:
   schemas:
     - name: inboxzero
       owner: inboxzero
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: securo-db
+  namespace: storage
+spec:
+  name: securo
+  owner: securo
+  cluster:
+    name: sphere
+  schemas:
+    - name: securo
+      owner: securo

@@ -170,6 +170,20 @@ workloads:
   rustdesk:
     enabled: true
     ingress: []
+  securo:
+    enabled: true
+    ingress:
+      - name: securo
+        host: finance.adryan.me
+        # Public + oauth2-proxy gate in front of securo's own OIDC/local login
+        # (defense in depth for financial data). Drives the oauth2-proxy
+        # AuthorizationPolicy host list; routing itself is the hand-written
+        # dual-backend VirtualService (path-based, api vs frontend) — see
+        # templates/istio/virtualservices/securo.yaml.
+        oauth: true
+        backend:
+          host: securo-frontend.securo.svc.cluster.local
+          port: 3000
   stoat:
     enabled: true
     # Path-based routing across multiple backend Services (api/events/autumn/
