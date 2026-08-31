@@ -1,0 +1,67 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "securo")) "true" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: securo
+  namespace: argocd
+  finalizers:
+    {{- include "workload.finalizers" . | nindent 4 }}
+  labels:
+    name: securo
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/securo-finance/securo
+    # Pin: chart + image tags stay in lockstep (chart tag has a v prefix,
+    # image tags on GHCR don't).
+    targetRevision: v0.14.5
+    path: charts/securo
+    helm:
+      valuesObject:
+        global:
+          domain: finance.adryan.me
+          tls: true
+          # Chart skips its own Secret entirely when set (templates/common/secret.yaml).
+          # One combined Secret for DB + app secrets — see securo-secrets ExternalSecret.
+          existingSecret: securo-secrets
+        config:
+          localAuthEnabled: "true"
+          oidcEnabled: "true"
+          oidcProviderName: "Keycloak"
+          oidcDiscoveryUrl: "https://auth.adryan.me/realms/master/.well-known/openid-configuration"
+          oidcScopes: "openid email profile"
+          oidcAutoRegister: "true"
+          # Link OIDC logins to an existing local-auth account by verified email
+          # rather than rejecting them outright.
+          oidcExistingUserLinkMode: "verified_email"
+          # oidcRedirectUri left empty: auto-computes to
+          # https://finance.adryan.me/api/auth/oidc/callback (matches the
+          # Keycloak client's registered redirect URI).
+        backend:
+          image:
+            tag: "0.14.5"
+        frontend:
+          image:
+            tag: "0.14.5"
+        # Sphere (this repo's shared CNPG cluster) owns the database instead.
+        postgresql:
+          enabled: false
+        # Chart-local dedicated Redis for Celery broker/result backend — same
+        # per-app-Redis approach as inbox-zero, not the shared platform Redis.
+        redis:
+          enabled: true
+        # No MCP/agents surface on the first deploy of a finance app.
+        mcpServer:
+          enabled: false
+
+  destination:
+    server: {{ include "workload.destinationServer" . }}
+    namespace: securo
+
+  info:
+    - name: "Homepage:"
+      value: "https://finance.adryan.me"
+
+  {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}
