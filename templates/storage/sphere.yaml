@@ -147,3 +147,10 @@ spec:
   schemas:
     - name: securo
       owner: securo
+  # securo's migration does `CREATE EXTENSION IF NOT EXISTS vector` (RAG
+  # embeddings) — the securo role has no superuser/CREATE-extension
+  # privilege, so the operator (which does have it) creates it declaratively
+  # instead of widening the role's grants.
+  extensions:
+    - name: vector
+      ensure: present
