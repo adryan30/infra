@@ -1,0 +1,22 @@
+# Alphanumeric-only variant of cnpg-passgen (templates/storage/passwords/generator.yaml).
+# cnpg-passgen's symbolCharacters (~!#^&*()_+) is shared cluster-wide and not
+# something to narrow for one consumer — but any of those symbols, once
+# percent-encoded into a connection URI, puts a literal "%" in the string.
+# Some consumers pass that URI through something that treats "%" as its own
+# escape char (e.g. Python's configparser-based Alembic env.py, which securo's
+# migration Job hits — ValueError: invalid interpolation syntax). Roles that
+# need a URI safe for that kind of consumer use this generator instead via
+# sphere.rolePassword's generatorRef param.
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: ClusterGenerator
+metadata:
+  name: cnpg-passgen-urlsafe
+spec:
+  kind: Password
+  generator:
+    passwordSpec:
+      length: 42
+      digits: 10
+      symbols: 0
+      noUpper: false
+      allowRepeat: true

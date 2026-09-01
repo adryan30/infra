@@ -14,6 +14,12 @@ Optional:
   fqdnHost          — host in fqdn-* keys (default: sphere-rw.storage.svc.cluster.local)
   fqdnUriDialect    — postgresql | psycopg2 | ado.net (default: postgresql)
   includeIdentity   — emit port/host/user/username (default true; app omits)
+  generatorRef      — ClusterGenerator name (default: cnpg-passgen). Use
+                       cnpg-passgen-urlsafe for a consumer whose URI passes
+                       through something that treats "%" as its own escape
+                       char (e.g. Python configparser-based Alembic env.py) —
+                       cnpg-passgen's symbolCharacters percent-encode into a
+                       literal "%" that such a consumer can't parse.
 */}}
 
 {{- define "sphere.rolePassword" -}}
@@ -27,6 +33,7 @@ Optional:
 {{- end -}}
 {{- $includeIdentity := true -}}
 {{- if hasKey . "includeIdentity" -}}{{- $includeIdentity = .includeIdentity -}}{{- end -}}
+{{- $generatorRef := default "cnpg-passgen" .generatorRef -}}
 {{- $secretName := printf "sphere-%s" $role -}}
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
@@ -69,7 +76,7 @@ spec:
         generatorRef:
           apiVersion: generators.external-secrets.io/v1alpha1
           kind: ClusterGenerator
-          name: "cnpg-passgen"
+          name: {{ $generatorRef | quote }}
 ---
 apiVersion: external-secrets.io/v1alpha1
 kind: PushSecret
