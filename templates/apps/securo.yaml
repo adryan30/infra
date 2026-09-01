@@ -60,6 +60,23 @@ spec:
         # Built-in MCP tool-use server for AI Agents (config.agentsEnabled above).
         mcpServer:
           enabled: true
+        # attachments is mounted by backend+worker+beat unconditionally, and
+        # agentKnowledge/agentEmbeddingModels by all four (agentsEnabled)
+        # components — Longhorn RWO can only attach one node at a time, and
+        # this cluster's 2-node scheduler doesn't guarantee co-location (hit
+        # this live: backend/worker landed on shardblade-002 while
+        # beat/mcp-server got shardblade-001, deadlocking on Multi-Attach).
+        # The chart exposes no pod affinity/nodeSelector to pin them
+        # together, so RWX (Longhorn's driver.longhorn.io supports it via an
+        # automatic share-manager, no separate StorageClass needed) is the
+        # chart-native fix, per the chart's own persistence.yaml comment.
+        persistence:
+          attachments:
+            accessMode: ReadWriteMany
+          agentKnowledge:
+            accessMode: ReadWriteMany
+          agentEmbeddingModels:
+            accessMode: ReadWriteMany
 
   destination:
     server: {{ include "workload.destinationServer" . }}
