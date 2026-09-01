@@ -1,1 +1,8 @@
-{{- include "sphere.rolePassword" (dict "role" "securo") }}
+{{- /*
+securo's migration Job passes DATABASE_URL through Alembic's
+configparser-based env.py (config.set_main_option), which raises on a raw
+"%" — cnpg-passgen's percent-encoded symbols hit that every time. Use the
+url-safe generator (templates/storage/passwords/generator-urlsafe.yaml)
+instead of the shared cnpg-passgen.
+*/}}
+{{- include "sphere.rolePassword" (dict "role" "securo" "generatorRef" "cnpg-passgen-urlsafe") }}
