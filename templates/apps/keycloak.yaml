@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: oci://registry-1.docker.io/cloudpirates/keycloak
-    targetRevision: 0.21.31
+    targetRevision: 0.21.34
     path: .
     helm:
       valuesObject:
