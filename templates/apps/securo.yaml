@@ -10,73 +10,80 @@ metadata:
     name: securo
 spec:
   project: default
-  source:
-    repoURL: https://github.com/securo-finance/securo
-    # Pin: chart + image tags stay in lockstep (chart tag has a v prefix,
-    # image tags on GHCR don't).
-    targetRevision: v0.14.5
-    path: charts/securo
-    helm:
-      valuesObject:
-        global:
-          domain: finance.adryan.me
-          tls: true
-          # Chart skips its own Secret entirely when set (templates/common/secret.yaml).
-          # One combined Secret for DB + app secrets — see securo-secrets ExternalSecret.
-          existingSecret: securo-secrets
-        config:
-          localAuthEnabled: "true"
-          oidcEnabled: "true"
-          oidcProviderName: "Keycloak"
-          oidcDiscoveryUrl: "https://auth.adryan.me/realms/master/.well-known/openid-configuration"
-          oidcScopes: "openid email profile"
-          oidcAutoRegister: "true"
-          # Link OIDC logins to an existing local-auth account by verified email
-          # rather than rejecting them outright.
-          oidcExistingUserLinkMode: "verified_email"
-          # oidcRedirectUri left empty: auto-computes to
-          # https://finance.adryan.me/api/auth/oidc/callback (matches the
-          # Keycloak client's registered redirect URI).
-          # AI Agents: master switch. The actual LLM provider connection
-          # (OpenRouter deepseek/deepseek-v4-flash-0731) is configured via
-          # Settings -> AI Agents in the app itself — traced through
-          # backend/app/agents/{config,providers/registry}.py: there is no
-          # env var that seeds a default provider, it's a DB-backed
-          # per-connection row, so nothing to wire here beyond turning it on.
-          agentsEnabled: "true"
-        backend:
-          image:
-            tag: "0.14.5"
-        frontend:
-          image:
-            tag: "0.14.5"
-        # Sphere (this repo's shared CNPG cluster) owns the database instead.
-        postgresql:
-          enabled: false
-        # Chart-local dedicated Redis for Celery broker/result backend — same
-        # per-app-Redis approach as inbox-zero, not the shared platform Redis.
-        redis:
-          enabled: true
-        # Built-in MCP tool-use server for AI Agents (config.agentsEnabled above).
-        mcpServer:
-          enabled: true
-        # attachments is mounted by backend+worker+beat unconditionally, and
-        # agentKnowledge/agentEmbeddingModels by all four (agentsEnabled)
-        # components — Longhorn RWO can only attach one node at a time, and
-        # this cluster's 2-node scheduler doesn't guarantee co-location (hit
-        # this live: backend/worker landed on shardblade-002 while
-        # beat/mcp-server got shardblade-001, deadlocking on Multi-Attach).
-        # The chart exposes no pod affinity/nodeSelector to pin them
-        # together, so RWX (Longhorn's driver.longhorn.io supports it via an
-        # automatic share-manager, no separate StorageClass needed) is the
-        # chart-native fix, per the chart's own persistence.yaml comment.
-        persistence:
-          attachments:
-            accessMode: ReadWriteMany
-          agentKnowledge:
-            accessMode: ReadWriteMany
-          agentEmbeddingModels:
-            accessMode: ReadWriteMany
+  # Multi-source: upstream Helm chart + Workload pack (ADR-0006) under
+  # workloads/securo/ (securo-secret-reload CronJob — see #155: securo's DB
+  # password rotates every 24h and nothing else restarts the app pods that
+  # cache it in env vars).
+  sources:
+    - repoURL: https://github.com/securo-finance/securo
+      # Pin: chart + image tags stay in lockstep (chart tag has a v prefix,
+      # image tags on GHCR don't).
+      targetRevision: v0.14.5
+      path: charts/securo
+      helm:
+        valuesObject:
+          global:
+            domain: finance.adryan.me
+            tls: true
+            # Chart skips its own Secret entirely when set (templates/common/secret.yaml).
+            # One combined Secret for DB + app secrets — see securo-secrets ExternalSecret.
+            existingSecret: securo-secrets
+          config:
+            localAuthEnabled: "true"
+            oidcEnabled: "true"
+            oidcProviderName: "Keycloak"
+            oidcDiscoveryUrl: "https://auth.adryan.me/realms/master/.well-known/openid-configuration"
+            oidcScopes: "openid email profile"
+            oidcAutoRegister: "true"
+            # Link OIDC logins to an existing local-auth account by verified email
+            # rather than rejecting them outright.
+            oidcExistingUserLinkMode: "verified_email"
+            # oidcRedirectUri left empty: auto-computes to
+            # https://finance.adryan.me/api/auth/oidc/callback (matches the
+            # Keycloak client's registered redirect URI).
+            # AI Agents: master switch. The actual LLM provider connection
+            # (OpenRouter deepseek/deepseek-v4-flash-0731) is configured via
+            # Settings -> AI Agents in the app itself — traced through
+            # backend/app/agents/{config,providers/registry}.py: there is no
+            # env var that seeds a default provider, it's a DB-backed
+            # per-connection row, so nothing to wire here beyond turning it on.
+            agentsEnabled: "true"
+          backend:
+            image:
+              tag: "0.14.5"
+          frontend:
+            image:
+              tag: "0.14.5"
+          # Sphere (this repo's shared CNPG cluster) owns the database instead.
+          postgresql:
+            enabled: false
+          # Chart-local dedicated Redis for Celery broker/result backend — same
+          # per-app-Redis approach as inbox-zero, not the shared platform Redis.
+          redis:
+            enabled: true
+          # Built-in MCP tool-use server for AI Agents (config.agentsEnabled above).
+          mcpServer:
+            enabled: true
+          # attachments is mounted by backend+worker+beat unconditionally, and
+          # agentKnowledge/agentEmbeddingModels by all four (agentsEnabled)
+          # components — Longhorn RWO can only attach one node at a time, and
+          # this cluster's 2-node scheduler doesn't guarantee co-location (hit
+          # this live: backend/worker landed on shardblade-002 while
+          # beat/mcp-server got shardblade-001, deadlocking on Multi-Attach).
+          # The chart exposes no pod affinity/nodeSelector to pin them
+          # together, so RWX (Longhorn's driver.longhorn.io supports it via an
+          # automatic share-manager, no separate StorageClass needed) is the
+          # chart-native fix, per the chart's own persistence.yaml comment.
+          persistence:
+            attachments:
+              accessMode: ReadWriteMany
+            agentKnowledge:
+              accessMode: ReadWriteMany
+            agentEmbeddingModels:
+              accessMode: ReadWriteMany
+    - repoURL: git@github.com:adryan30/infra.git
+      targetRevision: HEAD
+      path: workloads/securo
 
   destination:
     server: {{ include "workload.destinationServer" . }}
