@@ -18,7 +18,7 @@ spec:
     - repoURL: https://github.com/securo-finance/securo
       # Pin: chart + image tags stay in lockstep (chart tag has a v prefix,
       # image tags on GHCR don't).
-      targetRevision: v0.14.5
+      targetRevision: v0.15.0
       path: charts/securo
       helm:
         valuesObject:
