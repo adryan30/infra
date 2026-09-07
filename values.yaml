@@ -193,6 +193,18 @@ workloads:
         backend:
           host: securo-frontend.securo.svc.cluster.local
           port: 3000
+  shardblade:
+    enabled: true
+    # Static homepage + privacy policy, existing purely to satisfy Google
+    # OAuth branding verification for the rclone service-account/OAuth
+    # client (shardblade-rclone project) — see templates/apps/shardblade.yaml.
+    ingress:
+      - name: shardblade
+        host: shardblade.adryan.me
+        oauth: false
+        backend:
+          host: shardblade.shardblade.svc.cluster.local
+          port: 8080
   stoat:
     enabled: true
     # Path-based routing across multiple backend Services (api/events/autumn/

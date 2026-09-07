@@ -1,0 +1,121 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "shardblade")) "true" }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shardblade
+  namespace: argocd
+  finalizers:
+    {{- include "workload.finalizers" . | nindent 4 }}
+  labels:
+    name: shardblade
+spec:
+  project: default
+  source:
+    repoURL: https://bjw-s-labs.github.io/helm-charts
+    targetRevision: 5.1.0
+    chart: app-template
+    helm:
+      valuesObject:
+        controllers:
+          main:
+            strategy: RollingUpdate
+            containers:
+              main:
+                image:
+                  repository: nginxinc/nginx-unprivileged
+                  tag: alpine
+                resources:
+                  requests:
+                    cpu: 1m
+                    memory: 16Mi
+                  limits:
+                    memory: 64Mi
+        service:
+          main:
+            controller: main
+            ports:
+              http:
+                port: 8080
+        # Two static pages + the nginx server block that routes them, all as
+        # one ConfigMap — this app exists solely to give Google's OAuth
+        # branding verification a homepage and a privacy policy URL that
+        # respond (see docs/research/rclone-drive-csi-mount.md and the
+        # shardblade-rclone OAuth client). No app logic, no state.
+        configMaps:
+          site:
+            enabled: true
+            data:
+              index.html: |
+                <!doctype html>
+                <html lang="en">
+                <head>
+                  <meta charset="utf-8">
+                  <title>Shardblade</title>
+                  <meta name="viewport" content="width=device-width, initial-scale=1">
+                  <style>
+                    body { font: 16px/1.5 -apple-system, system-ui, sans-serif; max-width: 40rem; margin: 4rem auto; padding: 0 1rem; color: #1a1a1a; }
+                    a { color: #0645ad; }
+                  </style>
+                </head>
+                <body>
+                  <h1>Shardblade</h1>
+                  <p>Shardblade is a personal, single-operator Kubernetes homelab. This page exists to identify the project for services it authenticates against (e.g. Google OAuth).</p>
+                  <p><a href="/privacy-policy">Privacy policy</a></p>
+                </body>
+                </html>
+              privacy-policy.html: |
+                <!doctype html>
+                <html lang="en">
+                <head>
+                  <meta charset="utf-8">
+                  <title>Shardblade — Privacy Policy</title>
+                  <meta name="viewport" content="width=device-width, initial-scale=1">
+                  <style>
+                    body { font: 16px/1.5 -apple-system, system-ui, sans-serif; max-width: 40rem; margin: 4rem auto; padding: 0 1rem; color: #1a1a1a; }
+                  </style>
+                </head>
+                <body>
+                  <h1>Privacy Policy</h1>
+                  <p>Shardblade is a personal, single-operator infrastructure project. It is not a public service and has no users other than its operator.</p>
+                  <p>Where Shardblade's tooling requests access to third-party accounts (for example, a Google account via OAuth), that access is used exclusively to operate the operator's own personal infrastructure — for example, mounting a personal Google Drive folder into the operator's own Kubernetes cluster. No data obtained this way is shared with, sold to, or made accessible to any third party, and no data is used for advertising.</p>
+                  <p>Contact: adryan1990@gmail.com</p>
+                </body>
+                </html>
+              default.conf: |
+                server {
+                    listen 8080;
+                    root /usr/share/nginx/html;
+                    index index.html;
+
+                    location = /privacy-policy {
+                        try_files /privacy-policy.html =404;
+                    }
+
+                    location / {
+                        try_files $uri $uri/ =404;
+                    }
+                }
+        persistence:
+          site:
+            type: configMap
+            identifier: site
+            advancedMounts:
+              main:
+                main:
+                  - path: /usr/share/nginx/html/index.html
+                    subPath: index.html
+                    readOnly: true
+                  - path: /usr/share/nginx/html/privacy-policy.html
+                    subPath: privacy-policy.html
+                    readOnly: true
+                  - path: /etc/nginx/conf.d/default.conf
+                    subPath: default.conf
+                    readOnly: true
+
+  destination:
+    server: {{ include "workload.destinationServer" . }}
+    namespace: shardblade
+
+  {{- include "workload.syncPolicy" (dict "profile" "workload") | nindent 2 }}
+  revisionHistoryLimit: {{ include "workload.revisionHistoryLimit" . }}
+{{- end }}
