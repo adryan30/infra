@@ -54,7 +54,7 @@ spec:
             type: persistentVolumeClaim
             existingClaim: pvc-storyteller-library
             globalMounts:
-              - path: /library
+              - path: /mnt/library
                 readOnly: true
 
   destination:
