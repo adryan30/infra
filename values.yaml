@@ -209,6 +209,15 @@ workloads:
         backend:
           host: storyteller.books.svc.cluster.local
           port: 8001
+  storyteller-beta:
+    enabled: true
+    ingress:
+      - name: storyteller-beta
+        host: storyteller-beta.adryan.me
+        oauth: false
+        backend:
+          host: storyteller-beta.books.svc.cluster.local
+          port: 8001
   suwayomi:
     enabled: false
     ingress:
