@@ -18,7 +18,25 @@ spec:
       valuesObject:
         preUpgradeChecker:
           jobEnabled: true
+        # persistence.defaultClassReplicaCount governs the numberOfReplicas
+        # StorageClass *parameter* baked into the chart-managed "longhorn"
+        # default class -- a StorageClass parameter always wins over the
+        # defaultSettings.defaultReplicaCount Setting below at provisioning
+        # time, and Longhorn's own chart default for it is 3. Leaving this
+        # unset meant every volume through the default class silently got
+        # 3 replicas regardless of the Setting (confirmed: all pre-existing
+        # volumes are 1-replica, apparently fixed by hand in the Longhorn UI
+        # at some point, but each *new* volume reverts to 3 since nothing
+        # here overrides the chart's class parameter). "longhorn-low"
+        # (templates/storage/longhorn-low.yaml) already pins this to 1
+        # explicitly for the same reason.
+        persistence:
+          defaultClassReplicaCount: 1
         defaultSettings:
+          # Fallback for volumes provisioned without a StorageClass
+          # numberOfReplicas parameter (e.g. Longhorn-UI-created or DR
+          # volumes) -- not effective against the default class itself,
+          # see persistence.defaultClassReplicaCount above.
           defaultReplicaCount: "1"
           # guaranteedInstanceManagerCPU defaults to 12% of each node's
           # allocatable CPU per data engine (Longhorn's own setting, not a
