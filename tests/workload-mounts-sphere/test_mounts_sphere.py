@@ -99,8 +99,8 @@ def test_disable_enabled_workload_drops_mounts() -> None:
     pvcs = persistent_volume_claims(docs)
 
     assert "storyteller" not in apps
-    assert "pv-storyteller" not in pvs
-    assert "pvc-storyteller" not in pvcs
+    assert "pv-storyteller-library" not in pvs
+    assert "pvc-storyteller-library" not in pvcs
 
 
 def test_reenable_restores_mounts() -> None:
@@ -112,8 +112,8 @@ def test_reenable_restores_mounts() -> None:
     assert "zurg" in pvcs
 
     enabled = render()
-    assert "pv-storyteller" in persistent_volumes(enabled)
-    assert "pvc-storyteller" in persistent_volume_claims(enabled)
+    assert "pv-storyteller-library" in persistent_volumes(enabled)
+    assert "pvc-storyteller-library" in persistent_volume_claims(enabled)
 
 
 def test_disabled_workload_omits_consumer_sphere_credentials() -> None:
