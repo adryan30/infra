@@ -17,11 +17,14 @@ spec:
     volumeHandle: data-id-storyteller-beta
     readOnly: true
     nodePublishSecretRef:
-      name: rclone-drive
+      name: storyteller-library-drive
       namespace: kube-system
+    # remotePath is empty: the storyteller-library-drive secret's rclone
+    # config pins root_folder_id to the shared "Storyteller" folder directly
+    # (service account has no My Drive of its own — see docs/research/rclone-drive-csi-mount.md).
     volumeAttributes:
       remote: "drive"
-      remotePath: "/#Storyteller"
+      remotePath: ""
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
