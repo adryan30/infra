@@ -1,0 +1,39 @@
+{{- if eq (include "workload.enabled" (dict "root" . "name" "storyteller-beta")) "true" }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: rclone.csi.veloxpack.io
+  name: pv-storyteller-beta
+  namespace: books
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Delete
+  csi:
+    driver: rclone.csi.veloxpack.io
+    volumeHandle: data-id-storyteller-beta
+    readOnly: true
+    nodePublishSecretRef:
+      name: rclone-drive
+      namespace: kube-system
+    volumeAttributes:
+      remote: "drive"
+      remotePath: "/#Storyteller"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-storyteller-beta
+  namespace: books
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 50Gi
+  volumeName: pv-storyteller-beta
+  storageClassName: ""
+{{- end }}
