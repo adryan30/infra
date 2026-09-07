@@ -48,7 +48,7 @@ spec:
         persistence:
           data:
             accessMode: ReadWriteOnce
-            size: 40Gi
+            size: 10Gi
             type: persistentVolumeClaim
 
   destination:
