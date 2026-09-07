@@ -4,7 +4,7 @@ kind: PersistentVolume
 metadata:
   annotations:
     pv.kubernetes.io/provisioned-by: rclone.csi.veloxpack.io
-  name: pv-storyteller-beta
+  name: pv-storyteller-beta-library
   namespace: books
 spec:
   capacity:
@@ -14,7 +14,7 @@ spec:
   persistentVolumeReclaimPolicy: Delete
   csi:
     driver: rclone.csi.veloxpack.io
-    volumeHandle: data-id-storyteller-beta
+    volumeHandle: data-id-storyteller-beta-library
     readOnly: true
     nodePublishSecretRef:
       name: storyteller-library-drive
@@ -29,7 +29,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-storyteller-beta
+  name: pvc-storyteller-beta-library
   namespace: books
 spec:
   accessModes:
@@ -37,6 +37,6 @@ spec:
   resources:
     requests:
       storage: 50Gi
-  volumeName: pv-storyteller-beta
+  volumeName: pv-storyteller-beta-library
   storageClassName: ""
 {{- end }}
