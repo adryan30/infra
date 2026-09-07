@@ -50,6 +50,12 @@ spec:
             accessMode: ReadWriteOnce
             size: 40Gi
             type: persistentVolumeClaim
+          library:
+            type: persistentVolumeClaim
+            existingClaim: pvc-storyteller-library
+            globalMounts:
+              - path: /library
+                readOnly: true
 
   destination:
     server: {{ include "workload.destinationServer" . }}
