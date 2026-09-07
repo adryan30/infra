@@ -24,6 +24,11 @@ spec:
     volumeAttributes:
       remote: "drive"
       remotePath: ""
+      # Storyteller's app process runs as uid/gid 1000, not root. FUSE mounts
+      # are only visible to the mounting user (root, via kubelet) unless
+      # allow_other is set — confirmed live: the app got EPERM/"?" stat
+      # results on /library despite correct 755 perms on the underlying files.
+      allow_other: "true"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
