@@ -1,0 +1,47 @@
+# Chart workaround: the veloxpack rclone CSI node-plugin doesn't republish
+# already-mounted volumes on its own recovery (docs/research/rclone-drive-csi-mount.md
+# §4, upstream veloxpack/csi-driver-rclone#58). When the node-plugin's rclone
+# container gets OOM-killed and kubelet auto-restarts it, any pod that already
+# had /mnt/library mounted is left with a stale FUSE handle ("Transport
+# endpoint is not connected") indefinitely -- NodePublishVolume only re-runs
+# when kubelet schedules a fresh pod, and a container restart within the same
+# pod reuses the same (broken) host-level bind mount. Confirmed live
+# 2026-09-08: this happened with no automatic recovery, requiring a manual
+# `kubectl rollout restart`.
+#
+# The mount-watchdog sidecar (templates/apps/storyteller.yaml) automates that
+# manual step: it shares the same /mnt/library globalMount as the main
+# container, so it observes the exact same staleness, and restarts this
+# Deployment when the mount is unhealthy. Scoped to patch only this one
+# Deployment -- no broader access.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: storyteller-mount-watchdog
+  namespace: books
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: storyteller-mount-watchdog
+  namespace: books
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames:
+      - storyteller
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: storyteller-mount-watchdog
+  namespace: books
+subjects:
+  - kind: ServiceAccount
+    name: storyteller-mount-watchdog
+    namespace: books
+roleRef:
+  kind: Role
+  name: storyteller-mount-watchdog
+  apiGroup: rbac.authorization.k8s.io

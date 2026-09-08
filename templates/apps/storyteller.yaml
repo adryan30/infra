@@ -10,52 +10,93 @@ metadata:
     name: storyteller
 spec:
   project: default
-  source:
-    repoURL: https://bjw-s-labs.github.io/helm-charts
-    targetRevision: 5.1.0
-    chart: app-template
-    helm:
-      valuesObject:
-        controllers:
-          main:
-            strategy: RollingUpdate
-            annotations:
-              reloader.stakater.com/auto: "true"
-            containers:
-              main:
-                image:
-                  repository: registry.gitlab.com/storyteller-platform/storyteller
-                  tag: latest
-                  pullPolicy: Always
-                env:
-                  ENABLE_WEB_READER: true
-                envFrom:
-                  - secretRef:
-                      name: storyteller-env
-                resources:
-                  requests:
-                    cpu: 1m
-                    memory: 2Gi
-                  limits:
-                    cpu: 4000m
-                    memory: 24Gi
-        service:
-          main:
-            controller: main
-            ports:
-              http:
-                port: 8001
-        persistence:
-          data:
-            accessMode: ReadWriteOnce
-            size: 40Gi
-            type: persistentVolumeClaim
-          library:
-            type: persistentVolumeClaim
-            existingClaim: pvc-storyteller-library
-            globalMounts:
-              - path: /mnt/library
-                readOnly: true
+  # Multi-source: upstream chart + Workload pack (ADR-0006) under
+  # workloads/storyteller/ (mount-watchdog RBAC -- see that file's comment
+  # and docs/research/rclone-drive-csi-mount.md §4: the rclone CSI mount can
+  # go stale after the node-plugin OOMs, and nothing else recovers it).
+  sources:
+    - repoURL: https://bjw-s-labs.github.io/helm-charts
+      targetRevision: 5.1.0
+      chart: app-template
+      helm:
+        valuesObject:
+          controllers:
+            main:
+              strategy: RollingUpdate
+              annotations:
+                reloader.stakater.com/auto: "true"
+              serviceAccount:
+                identifier: main
+              containers:
+                main:
+                  image:
+                    repository: registry.gitlab.com/storyteller-platform/storyteller
+                    tag: latest
+                    pullPolicy: Always
+                  env:
+                    ENABLE_WEB_READER: true
+                  envFrom:
+                    - secretRef:
+                        name: storyteller-env
+                  resources:
+                    requests:
+                      cpu: 1m
+                      memory: 2Gi
+                    limits:
+                      cpu: 4000m
+                      memory: 24Gi
+                # Restarts this Deployment when /mnt/library goes stale (see
+                # workloads/storyteller/mount-watchdog-rbac.yaml). Shares the
+                # main container's globalMounts, so it sees the exact same
+                # FUSE handle -- a container restart alone can't fix this
+                # (the stale mount is bound at the pod sandbox, not per
+                # container), so this triggers a full pod recreation instead.
+                mount-watchdog:
+                  image:
+                    repository: alpine/k8s
+                    tag: "1.33.5"
+                  command:
+                    - sh
+                    - -c
+                    - |
+                      set -eu
+                      while true; do
+                        sleep 30
+                        if ! timeout 5 ls /mnt/library >/dev/null 2>&1; then
+                          echo "$(date -u +%FT%TZ) /mnt/library unhealthy, restarting deployment/storyteller"
+                          kubectl rollout restart deployment/storyteller -n books
+                          sleep 600
+                        fi
+                      done
+                  resources:
+                    requests:
+                      cpu: 5m
+                      memory: 16Mi
+                    limits:
+                      memory: 64Mi
+          serviceAccount:
+            main:
+              name: storyteller-mount-watchdog
+          service:
+            main:
+              controller: main
+              ports:
+                http:
+                  port: 8001
+          persistence:
+            data:
+              accessMode: ReadWriteOnce
+              size: 40Gi
+              type: persistentVolumeClaim
+            library:
+              type: persistentVolumeClaim
+              existingClaim: pvc-storyteller-library
+              globalMounts:
+                - path: /mnt/library
+                  readOnly: true
+    - repoURL: git@github.com:adryan30/infra.git
+      targetRevision: HEAD
+      path: workloads/storyteller
 
   destination:
     server: {{ include "workload.destinationServer" . }}
