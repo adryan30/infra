@@ -12,6 +12,21 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Delete
+  # vfs-cache-mode=full: whole files are downloaded to local disk on first
+  # read and served from there after, capped at vfs-cache-max-size (LRU
+  # eviction beyond that) -- keeps recently-read books on disk instead of
+  # re-streaming from the Drive API on every open (default is `off`, no
+  # caching at all -- see docs/research/rclone-drive-csi-mount.md §4/§6).
+  # Read only on this PV (mounted readOnly: true in storyteller.yaml), so
+  # this only affects reads, never buffers writes back to Drive.
+  # spec.mountOptions is mutable on an already-bound PV (confirmed via
+  # server-side dry-run) and is only read by the driver on the next
+  # NodePublishVolume call, so this change alone does not disturb an
+  # already-running pod's live mount -- it takes effect on the next pod
+  # restart.
+  mountOptions:
+    - vfs-cache-mode=full
+    - vfs-cache-max-size=5G
   csi:
     driver: rclone.csi.veloxpack.io
     volumeHandle: data-id-storyteller-library
