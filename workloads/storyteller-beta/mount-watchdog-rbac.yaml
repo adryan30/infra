@@ -1,0 +1,36 @@
+# Chart workaround: same rclone CSI stale-mount recovery as
+# workloads/storyteller/mount-watchdog-rbac.yaml -- see that file's comment
+# and docs/research/rclone-drive-csi-mount.md §4 for the full explanation.
+# storyteller-beta shares the same underlying Drive-backed PV/mount shape, so
+# it gets the same watchdog, scoped to its own Deployment.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: storyteller-beta-mount-watchdog
+  namespace: books
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: storyteller-beta-mount-watchdog
+  namespace: books
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames:
+      - storyteller-beta
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: storyteller-beta-mount-watchdog
+  namespace: books
+subjects:
+  - kind: ServiceAccount
+    name: storyteller-beta-mount-watchdog
+    namespace: books
+roleRef:
+  kind: Role
+  name: storyteller-beta-mount-watchdog
+  apiGroup: rbac.authorization.k8s.io
