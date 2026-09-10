@@ -15,7 +15,7 @@ spec:
   source:
     repoURL: https://istio-release.storage.googleapis.com/charts
     chart: istiod
-    targetRevision: 1.30.3
+    targetRevision: 1.30.4
     helm:
       valuesObject:
         # 40m (#132): the chart's 100m default x every mesh-injected pod
