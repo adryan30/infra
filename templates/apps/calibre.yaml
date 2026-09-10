@@ -34,7 +34,7 @@ spec:
               downloader:
                 dependsOn: main
                 image:
-                  repository: ghcr.io/calibrain/calibre-web-automated-book-downloader
+                  repository: ghcr.io/calibrain/shelfmark
                   tag: latest
                 env:
                   FLASK_PORT: 8084
