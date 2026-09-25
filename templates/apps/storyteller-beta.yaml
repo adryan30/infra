@@ -21,6 +21,15 @@ spec:
       chart: app-template
       helm:
         valuesObject:
+          # app-template defaults automountServiceAccountToken to false.
+          # mount-watchdog runs `kubectl rollout restart` as the
+          # storyteller-beta-mount-watchdog ServiceAccount below -- without
+          # an automounted token it has no in-cluster credentials and
+          # `kubectl` falls back to localhost:8080, so the one recovery
+          # action it exists to perform silently fails. Same bug confirmed
+          # live on storyteller (see templates/apps/storyteller.yaml).
+          defaultPodOptions:
+            automountServiceAccountToken: true
           controllers:
             main:
               strategy: RollingUpdate
