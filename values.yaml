@@ -230,6 +230,15 @@ workloads:
         backend:
           host: storyteller-beta.books.svc.cluster.local
           port: 8001
+  storyteller-watch:
+    enabled: true
+    ingress:
+      - name: storyteller-watch
+        host: storyteller-watch.adryan.me
+        oauth: false
+        backend:
+          host: storyteller-watch.books.svc.cluster.local
+          port: 8080
   suwayomi:
     enabled: false
     ingress:
