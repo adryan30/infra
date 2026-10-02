@@ -216,7 +216,7 @@ spec:
                     files = []
                     for name in os.listdir(CACHE_DIR):
                         p = os.path.join(CACHE_DIR, name)
-                        if os.path.isfile(p) and not name.endswith(".tmp"):
+                        if os.path.isfile(p) and not name.endswith((".tmp", ".src")):
                             st = os.stat(p)
                             files.append((st.st_atime, st.st_size, p))
                     total = sum(f[1] for f in files)
@@ -241,18 +241,51 @@ spec:
                         if os.path.exists(dest):
                             os.utime(dest)
                             return dest
-                        url = BACKEND + source_path
+                        src = dest + ".src"
                         tmp = dest + ".tmp"
-                        subprocess.run(
-                            [FFMPEG, "-v", "error", "-y", "-headers", f"Authorization: {token}\r\n", "-i", url,
-                             "-map", "0:a:0", "-vn", "-sn", "-dn",
-                             "-c:a", "aac", "-b:a", AAC_BITRATE, "-ac", AAC_CHANNELS,
-                             "-movflags", "+faststart", "-f", "mp4", tmp],
-                            check=True, timeout=3600,
-                        )
-                        os.replace(tmp, dest)
+                        try:
+                            download(BACKEND + source_path, token, src)
+                            subprocess.run(
+                                [FFMPEG, "-v", "error", "-xerror", "-y", "-i", src,
+                                 "-map", "0:a:0", "-vn", "-sn", "-dn",
+                                 "-c:a", "aac", "-b:a", AAC_BITRATE, "-ac", AAC_CHANNELS,
+                                 "-movflags", "+faststart", "-f", "mp4", tmp],
+                                check=True, timeout=3600,
+                            )
+                            os.replace(tmp, dest)
+                        finally:
+                            for p in (src, tmp):
+                                if os.path.exists(p):
+                                    os.remove(p)
                         prune_cache()
                         return dest
+
+
+                def download(url: str, token: str, path: str, attempts: int = 5) -> None:
+                    """Fetches url to path completely, resuming with Range after a dropped
+                    connection. Storyteller connections can end early, and ffmpeg reading
+                    over HTTP treats that as end of file and encodes a truncated track."""
+                    total = None
+                    with open(path, "wb") as f:
+                        for attempt in range(attempts):
+                            headers = {"Authorization": token}
+                            if f.tell():
+                                headers["Range"] = f"bytes={f.tell()}-"
+                            try:
+                                req = urllib.request.Request(url, headers=headers)
+                                with urllib.request.urlopen(req, timeout=120) as resp:
+                                    if total is None:
+                                        total = int(resp.headers["Content-Length"]) if resp.headers["Content-Length"] else None
+                                    if f.tell() and resp.status != 206:
+                                        f.seek(0)
+                                        f.truncate()
+                                    shutil.copyfileobj(resp, f, 1024 * 1024)
+                                if total is None or f.tell() >= total:
+                                    return
+                            except (urllib.error.URLError, OSError) as e:
+                                print(f"download {url} attempt {attempt + 1}: {e}", flush=True)
+                            time.sleep(2)
+                    raise IOError(f"incomplete download of {url}: {os.path.getsize(path)} of {total} bytes")
 
 
                 def prepare_in_background(source_path: str, token: str) -> None:
@@ -348,6 +381,7 @@ spec:
                     os.makedirs(CACHE_DIR, exist_ok=True)
                     print(f"storyteller-watch on :{PORT} -> {BACKEND}", flush=True)
                     ThreadingHTTPServer(("", PORT), Handler).serve_forever()
+
         persistence:
           app:
             type: configMap
