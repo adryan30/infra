@@ -16,7 +16,8 @@ spec:
   # heap, OPDS uses a content type Connect IQ rejects, and Garmin can't play
   # Opus. This serves small paged JSON and transcodes audio to 64 kbps mono AAC.
   # Stateless apart from an ephemeral transcode cache; it forwards the
-  # watch's Storyteller bearer token and holds no secrets.
+  # watch's Storyteller bearer token and holds no secrets. Its only write to
+  # Storyteller is the user's reading position (POST /api/v2/books/<id>/positions).
   source:
     repoURL: https://bjw-s-labs.github.io/helm-charts
     targetRevision: 5.1.0
@@ -91,13 +92,20 @@ spec:
                 use other JSON content types, its full book list is too large for the watch,
                 and audio may be in any codec. This serves the few things the watch needs:
 
-                  GET /watch/books?page=N         compact, paged list of books with audio
-                  GET /watch/books/<id>/tracks    ordered audio parts of a book
-                  GET /watch/books/<id>/audio/<n> part n as mono AAC (MP4); ?speed=1.5
-                                                  speeds it up (0.5-2.0, pitch kept)
+                  GET  /watch/books?page=N            compact, paged list of books with audio,
+                                                      currently-reading books first
+                  GET  /watch/books/<id>/tracks       ordered audio parts with chapter titles
+                                                      and durations
+                  GET  /watch/books/<id>/audio/<n>    part n as mono AAC (MP4); ?speed=1.5
+                                                      speeds it up (0.5-2.0, pitch kept)
+                  GET  /watch/books/<id>/prepare      converts the whole book in the
+                                                      background (?from=<n>&speed=)
+                  POST /watch/books/<id>/position     reconciles the watch's position with
+                                                      Storyteller's; the newer one wins
 
                 The client's bearer token is forwarded to Storyteller; this holds no
-                credentials of its own and never writes to Storyteller.
+                credentials of its own. Its only write to Storyteller is the reading
+                position, through the same API the Storyteller apps use.
                 """
 
                 from __future__ import annotations
@@ -159,6 +167,9 @@ spec:
                     return value
 
 
+                STATUS_ORDER = {"Reading": 0, "To read": 1, "Read": 2}
+
+
                 def first_name(people) -> str:
                     if isinstance(people, list) and people and isinstance(people[0], dict):
                         return people[0].get("name") or ""
@@ -175,26 +186,44 @@ spec:
                             has_audiobook = bool(audiobook) and not audiobook.get("missing")
                             has_readaloud = bool(readaloud) and not readaloud.get("missing") and readaloud.get("status") == "ALIGNED"
                             if has_audiobook or has_readaloud:
-                                result.append({"id": b["uuid"], "title": b.get("title") or "Untitled", "author": first_name(b.get("authors"))})
-                        result.sort(key=lambda b: b["title"].lower())
+                                status = (b.get("status") or {}).get("name") or ""
+                                position = b.get("position") or {}
+                                result.append({
+                                    "id": b["uuid"],
+                                    "title": b.get("title") or "Untitled",
+                                    "author": first_name(b.get("authors")),
+                                    "status": status,
+                                    "_rank": STATUS_ORDER.get(status, 1),
+                                    "_touched": position.get("timestamp") or 0,
+                                })
+                        # Reading first (most recently read first), then To read, then Read.
+                        result.sort(key=lambda b: (b["_rank"], -b["_touched"], b["title"].lower()))
+                        for b in result:
+                            del b["_rank"], b["_touched"]
                         return result
 
                     return memoized(("books", token), 120, compute)
 
 
-                def book_sources(book_id: str, token: str) -> list[dict]:
-                    """Audio files of a book in playback order, as Storyteller paths."""
+                def book_info(book_id: str, token: str) -> dict:
+                    """Audio files of a book in playback order, plus the readaloud timeline.
+
+                    sources: [{path, title, duration}] as Storyteller paths.
+                    timeline: for readalouds, the sentence-level text/audio sync used for
+                    positions; None for plain audiobooks.
+                    """
 
                     def compute():
                         base = f"/api/v2/books/{urllib.parse.quote(book_id)}"
                         try:
                             manifest = fetch_json(base + "/listen/manifest.json", token)
                             links = manifest.get("readingOrder") or []
-                            return [
+                            sources = [
                                 {"path": f"{base}/listen/{link['href']}", "title": link.get("title"), "duration": link.get("duration")}
                                 for link in links
                                 if link.get("href")
                             ]
+                            return {"sources": sources, "timeline": None}
                         except UpstreamError as e:
                             if e.status != 404:
                                 raise
@@ -205,13 +234,25 @@ spec:
                             if r.get("href") and (r.get("type") or "").startswith("audio/")
                         )
                         try:
-                            titles = readaloud_titles(base, manifest, token)
+                            timeline = Timeline(base, manifest, hrefs, token)
                         except (UpstreamError, OSError, ValueError) as e:
-                            print(f"chapter titles for {book_id} unavailable: {e}", flush=True)
-                            titles = {}
-                        return [{"path": f"{base}/read/{href}", "title": titles.get(href), "duration": None} for href in hrefs]
+                            print(f"readaloud timeline for {book_id} unavailable: {e}", flush=True)
+                            timeline = None
+                        sources = [
+                            {
+                                "path": f"{base}/read/{href}",
+                                "title": timeline.titles.get(href) if timeline else None,
+                                "duration": timeline.durations[i] if timeline else None,
+                            }
+                            for i, href in enumerate(hrefs)
+                        ]
+                        return {"sources": sources, "timeline": timeline}
 
-                    return memoized(("sources", book_id, token), 6 * 3600, compute)
+                    return memoized(("book", book_id, token), 6 * 3600, compute)
+
+
+                def book_sources(book_id: str, token: str) -> list[dict]:
+                    return book_info(book_id, token)["sources"]
 
 
                 def fetch_text(path: str, token: str) -> str:
@@ -223,64 +264,151 @@ spec:
                         raise UpstreamError(e.code) from None
 
 
-                def readaloud_titles(base: str, manifest: dict, token: str) -> dict[str, str]:
-                    """Names each readaloud audio file after the chapter it starts in.
+                def clock(value: str) -> float:
+                    """SMIL clock value ("31.39s", "1:02.5", "0:01:02.5") in seconds."""
+                    value = value.strip()
+                    if value.endswith("ms"):
+                        return float(value[:-2]) / 1000
+                    if value.endswith("s"):
+                        return float(value[:-1])
+                    seconds = 0.0
+                    for part in value.split(":"):
+                        seconds = seconds * 60 + float(part)
+                    return seconds
+
+
+                class Timeline:
+                    """Sentence-level sync between a readaloud's text and its audio files.
 
                     Storyteller splits readaloud audio into numbered files unrelated to
-                    chapters. Each chapter's media overlay (SMIL) lists the audio it plays,
-                    and the table of contents names the chapters, so walking the reading
-                    order gives every file the chapter where it first appears. Later files
-                    within the same chapter get "(cont.)".
+                    chapters. Each chapter's media overlay (SMIL) pairs every sentence
+                    (xhtml file + fragment id) with an audio clip, and the table of contents
+                    names the chapters. From those this derives chapter titles per audio
+                    file, file durations, and conversions between (file, seconds) and
+                    Storyteller's Readium locators.
                     """
-                    toc_titles: dict[str, str] = {}
 
-                    def walk(entries):
-                        for e in entries or []:
-                            file = (e.get("href") or "").split("#")[0]
-                            if file and e.get("title"):
-                                toc_titles.setdefault(file, e["title"].strip())
-                            walk(e.get("children"))
+                    def __init__(self, base: str, manifest: dict, hrefs: list[str], token: str):
+                        index = {href: i for i, href in enumerate(hrefs)}
+                        toc_titles: dict[str, str] = {}
 
-                    walk(manifest.get("toc"))
+                        def walk(entries):
+                            for e in entries or []:
+                                file = (e.get("href") or "").split("#")[0]
+                                if file and e.get("title"):
+                                    toc_titles.setdefault(file, e["title"].strip())
+                                walk(e.get("children"))
 
-                    smil_hrefs = [
-                        r["href"] for r in manifest.get("resources") or []
-                        if r.get("href") and "smil" in (r.get("type") or "")
-                    ]
+                        walk(manifest.get("toc"))
 
-                    def load(href: str) -> tuple[str | None, list[str]]:
-                        text = fetch_text(f"{base}/read/{href}", token)
-                        folder = posixpath.dirname(href)
-                        textref = re.search(r'epub:textref="([^"#]+)', text)
-                        audio: list[str] = []
-                        for src in re.findall(r'<audio[^>]*\ssrc="([^"]+)"', text):
-                            path = posixpath.normpath(posixpath.join(folder, src))
-                            if not audio or audio[-1] != path:
-                                audio.append(path)
-                        textfile = posixpath.normpath(posixpath.join(folder, textref.group(1))) if textref else None
-                        return textfile, audio
+                        smil_hrefs = [
+                            r["href"] for r in manifest.get("resources") or []
+                            if r.get("href") and "smil" in (r.get("type") or "")
+                        ]
 
-                    with ThreadPoolExecutor(max_workers=8) as pool:
-                        overlays = dict(pool.map(load, smil_hrefs))
+                        def load(href: str) -> tuple[str | None, list[tuple]]:
+                            text = fetch_text(f"{base}/read/{href}", token)
+                            folder = posixpath.dirname(href)
+                            textref = re.search(r'epub:textref="([^"#]+)', text)
+                            pars = []
+                            for par in re.findall(r"<par\b.*?</par>", text, flags=re.S):
+                                t = re.search(r'<text[^>]*\ssrc="([^"]+)"', par)
+                                a = re.search(r'<audio[^>]*\ssrc="([^"]+)"', par)
+                                if not t or not a:
+                                    continue
+                                file, _, frag = t.group(1).partition("#")
+                                audio = posixpath.normpath(posixpath.join(folder, a.group(1)))
+                                if audio not in index:
+                                    continue
+                                b = re.search(r'clipBegin="([^"]+)"', par)
+                                e = re.search(r'clipEnd="([^"]+)"', par)
+                                pars.append((
+                                    posixpath.normpath(posixpath.join(folder, file)), frag, index[audio],
+                                    clock(b.group(1)) if b else 0.0, clock(e.group(1)) if e else 0.0,
+                                ))
+                            textfile = posixpath.normpath(posixpath.join(folder, textref.group(1))) if textref else None
+                            return textfile, pars
 
-                    titles: dict[str, str] = {}
-                    chapter = None
-                    for item in manifest.get("readingOrder") or []:
-                        file = (item.get("href") or "").split("#")[0]
-                        chapter = toc_titles.get(file, chapter)
-                        for audio in overlays.get(file) or []:
-                            if audio not in titles and chapter:
-                                titles[audio] = chapter
+                        with ThreadPoolExecutor(max_workers=8) as pool:
+                            overlays = dict(pool.map(load, smil_hrefs))
 
-                    previous = None
-                    for href in sorted(titles):
-                        if titles[href] == previous:
-                            titles[href] = previous + " (cont.)"
-                        else:
-                            previous = titles[href]
-                    return titles
+                        self.reading_order = [(item.get("href") or "").split("#")[0] for item in manifest.get("readingOrder") or []]
+                        self.pars: list[tuple] = []  # (xhtml, fragment, audio index, begin, end)
+                        self.titles: dict[str, str] = {}
+                        chapter = None
+                        for file in self.reading_order:
+                            chapter = toc_titles.get(file, chapter)
+                            for par in overlays.get(file) or []:
+                                self.pars.append(par)
+                                href = hrefs[par[2]]
+                                if href not in self.titles and chapter:
+                                    self.titles[href] = chapter
+                        previous = None
+                        for href in hrefs:
+                            title = self.titles.get(href)
+                            if title is None:
+                                continue
+                            if title == previous:
+                                self.titles[href] = title + " (cont.)"
+                            else:
+                                previous = title
 
+                        self.durations = [0.0] * len(hrefs)
+                        for par in self.pars:
+                            self.durations[par[2]] = max(self.durations[par[2]], par[4])
+                        self.starts = [0.0] * len(hrefs)
+                        for i in range(1, len(hrefs)):
+                            self.starts[i] = self.starts[i - 1] + self.durations[i - 1]
+                        self.total = sum(self.durations) or 1.0
+                        self.by_fragment = {(p[0], p[1]): i for i, p in enumerate(self.pars)}
+                        self.by_file: dict[str, list[int]] = {}
+                        for i, p in enumerate(self.pars):
+                            self.by_file.setdefault(p[0], []).append(i)
 
+                    def to_locator(self, track: int, seconds: float) -> dict | None:
+                        candidates = [i for i, p in enumerate(self.pars) if p[2] == track]
+                        if not candidates:
+                            candidates = [i for i, p in enumerate(self.pars) if p[2] < track][-1:]
+                        if not candidates:
+                            return None
+                        chosen = candidates[0]
+                        for i in candidates:
+                            if self.pars[i][3] <= seconds:
+                                chosen = i
+                        xhtml, frag, _, _, _ = self.pars[chosen]
+                        in_file = self.by_file[xhtml]
+                        return {
+                            "href": xhtml,
+                            "type": "application/xhtml+xml",
+                            "locations": {
+                                "fragments": [frag],
+                                "progression": in_file.index(chosen) / len(in_file),
+                                "totalProgression": min(1.0, (self.starts[track] + seconds) / self.total),
+                            },
+                        }
+
+                    def from_locator(self, locator: dict) -> tuple[int, float]:
+                        href = (locator.get("href") or "").split("#")[0].lstrip("/")
+                        locations = locator.get("locations") or {}
+                        frags = locations.get("fragments") or []
+                        for frag in frags:
+                            i = self.by_fragment.get((href, frag))
+                            if i is not None:
+                                return self.pars[i][2], self.pars[i][3]
+                        if href in self.by_file:
+                            i = self.by_file[href][0]
+                            return self.pars[i][2], self.pars[i][3]
+                        if href in self.reading_order:
+                            later = self.reading_order[self.reading_order.index(href):]
+                            for file in later:
+                                if file in self.by_file:
+                                    i = self.by_file[file][0]
+                                    return self.pars[i][2], self.pars[i][3]
+                        target = float(locations.get("totalProgression") or 0) * self.total
+                        for track in range(len(self.starts) - 1, -1, -1):
+                            if self.starts[track] <= target:
+                                return track, target - self.starts[track]
+                        return 0, 0.0
 
 
                 def cache_path(source_path: str, speed: float) -> str:
@@ -383,6 +511,89 @@ spec:
                     return round(min(2.0, max(0.5, speed)), 2)
 
 
+                def post_json(path: str, body: object, token: str) -> int:
+                    data = json.dumps(body).encode()
+                    req = urllib.request.Request(BACKEND + path, data=data, method="POST", headers={
+                        "Authorization": token, "Content-Type": "application/json",
+                    })
+                    try:
+                        with urllib.request.urlopen(req, timeout=60) as resp:
+                            return resp.status
+                    except urllib.error.HTTPError as e:
+                        if e.code == 409:
+                            return 409
+                        raise UpstreamError(e.code) from None
+
+
+                def server_position(book_id: str, token: str) -> dict | None:
+                    try:
+                        position = fetch_json(f"/api/v2/books/{urllib.parse.quote(book_id)}/positions", token)
+                    except UpstreamError as e:
+                        if e.status == 404:
+                            return None
+                        raise
+                    return position if isinstance(position, dict) and position.get("locator") else None
+
+
+                def sync_position(book_id: str, watch: dict, token: str) -> dict:
+                    """Reconciles the watch's position with Storyteller's; the newer wins.
+
+                    watch: {track, seconds (at 1x), timestamp (unix seconds, 0 if never set)}.
+                    Returns {source: "server", track, seconds, timestamp} when the watch
+                    should adopt Storyteller's position, otherwise {source: "watch"|"same"}.
+                    """
+                    timeline = book_info(book_id, token)["timeline"]
+                    if timeline is None:
+                        return {"source": "unsupported"}
+                    watch_ts = int(watch.get("timestamp") or 0)
+                    for _ in range(2):
+                        server = server_position(book_id, token)
+                        server_ts = int(server["timestamp"]) // 1000 if server else 0
+                        if server and server_ts > watch_ts:
+                            track, seconds = timeline.from_locator(server["locator"])
+                            return {"source": "server", "track": track, "seconds": int(seconds), "timestamp": server_ts}
+                        if watch_ts == 0 or watch_ts == server_ts:
+                            return {"source": "same"}
+                        locator = timeline.to_locator(int(watch.get("track") or 0), float(watch.get("seconds") or 0))
+                        if locator is None:
+                            return {"source": "same"}
+                        status = post_json(f"/api/v2/books/{urllib.parse.quote(book_id)}/positions",
+                                           {"locator": locator, "timestamp": watch_ts * 1000}, token)
+                        if status != 409:
+                            return {"source": "watch"}
+                    return {"source": "same"}
+
+
+                _book_workers: set[tuple] = set()
+                _book_workers_lock = threading.Lock()
+                _book_slots = threading.Semaphore(2)
+
+
+                def prepare_book(book_id: str, start: int, speed: float, token: str) -> None:
+                    """Converts a whole book in the background, starting at track start, so
+                    the watch's sync mostly downloads files that are already prepared."""
+                    key = (book_id, speed)
+                    with _book_workers_lock:
+                        if key in _book_workers:
+                            return
+                        _book_workers.add(key)
+
+                    def run():
+                        try:
+                            with _book_slots:
+                                sources = book_sources(book_id, token)
+                                order = list(range(start, len(sources))) + list(range(0, min(start, len(sources))))
+                                for i in order:
+                                    prepare(sources[i]["path"], token, speed)
+                        except Exception as e:  # noqa: BLE001
+                            print(f"preparing {book_id} failed: {e}", flush=True)
+                        finally:
+                            with _book_workers_lock:
+                                _book_workers.discard(key)
+
+                    threading.Thread(target=run, daemon=True).start()
+
+
                 class Handler(BaseHTTPRequestHandler):
                     protocol_version = "HTTP/1.1"
 
@@ -410,6 +621,12 @@ spec:
                             m = re.fullmatch(r"/watch/books/([^/]+)/tracks", url.path)
                             if m:
                                 return self.tracks(m.group(1), token)
+                            m = re.fullmatch(r"/watch/books/([^/]+)/prepare", url.path)
+                            if m:
+                                query = urllib.parse.parse_qs(url.query)
+                                start = int((query.get("from") or ["0"])[0])
+                                prepare_book(m.group(1), max(0, start), parse_speed(url.query), token)
+                                return self.send_json(200, {"ok": True})
                             m = re.fullmatch(r"/watch/books/([^/]+)/audio/(\d+)", url.path)
                             if m:
                                 return self.audio(m.group(1), int(m.group(2)), parse_speed(url.query), token)
@@ -419,6 +636,23 @@ spec:
                         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
                             print(f"ffmpeg failed: {e}", flush=True)
                             return self.send_json(502, {"error": "audio conversion failed"})
+
+                    def do_POST(self):
+                        url = urllib.parse.urlsplit(self.path)
+                        token = self.headers.get("Authorization")
+                        if not token:
+                            return self.send_json(401, {"error": "missing Authorization"})
+                        try:
+                            length = int(self.headers.get("Content-Length") or 0)
+                            body = json.loads(self.rfile.read(length) or b"{}")
+                            m = re.fullmatch(r"/watch/books/([^/]+)/position", url.path)
+                            if m and isinstance(body, dict):
+                                return self.send_json(200, sync_position(m.group(1), body, token))
+                            return self.send_json(404, {"error": "not found"})
+                        except UpstreamError as e:
+                            return self.send_json(e.status, {"error": f"storyteller returned {e.status}"})
+                        except ValueError:
+                            return self.send_json(400, {"error": "invalid body"})
 
                     def books(self, query: dict, token: str) -> None:
                         books = audio_books(token)
@@ -442,8 +676,6 @@ spec:
                                 "type": "audio/mp4",
                                 "duration": int(duration) if isinstance(duration, (int, float)) else 0,
                             })
-                        if sources:
-                            prepare_in_background(sources[0]["path"], token)
                         self.send_json(200, {"tracks": tracks})
 
                     def audio(self, book_id: str, index: int, speed: float, token: str) -> None:
