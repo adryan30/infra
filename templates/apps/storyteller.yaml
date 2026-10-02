@@ -16,7 +16,7 @@ spec:
   # go stale after the node-plugin OOMs, and nothing else recovers it).
   sources:
     - repoURL: https://bjw-s-labs.github.io/helm-charts
-      targetRevision: 5.1.0
+      targetRevision: 5.2.1
       chart: app-template
       helm:
         valuesObject:

@@ -19,7 +19,7 @@ spec:
   # stoat-mongo.yaml, same as Sphere/CNPG for Postgres-backed workloads.
   source:
     repoURL: https://bjw-s-labs.github.io/helm-charts
-    targetRevision: 5.1.0
+    targetRevision: 5.2.1
     chart: app-template
     helm:
       valuesObject:
