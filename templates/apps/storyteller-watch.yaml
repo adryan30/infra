@@ -93,7 +93,8 @@ spec:
 
                   GET /watch/books?page=N         compact, paged list of books with audio
                   GET /watch/books/<id>/tracks    ordered audio parts of a book
-                  GET /watch/books/<id>/audio/<n> part n as mono AAC (MP4)
+                  GET /watch/books/<id>/audio/<n> part n as mono AAC (MP4); ?speed=1.5
+                                                  speeds it up (0.5-2.0, pitch kept)
 
                 The client's bearer token is forwarded to Storyteller; this holds no
                 credentials of its own and never writes to Storyteller.
@@ -104,6 +105,7 @@ spec:
                 import hashlib
                 import json
                 import os
+                import posixpath
                 import re
                 import shutil
                 import subprocess
@@ -112,6 +114,7 @@ spec:
                 import urllib.error
                 import urllib.parse
                 import urllib.request
+                from concurrent.futures import ThreadPoolExecutor
                 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
                 BACKEND = os.environ.get("STORYTELLER_URL", "http://storyteller.books.svc.cluster.local:8001").rstrip("/")
@@ -201,15 +204,88 @@ spec:
                             for r in manifest.get("resources") or []
                             if r.get("href") and (r.get("type") or "").startswith("audio/")
                         )
-                        return [{"path": f"{base}/read/{href}", "title": None, "duration": None} for href in hrefs]
+                        try:
+                            titles = readaloud_titles(base, manifest, token)
+                        except (UpstreamError, OSError, ValueError) as e:
+                            print(f"chapter titles for {book_id} unavailable: {e}", flush=True)
+                            titles = {}
+                        return [{"path": f"{base}/read/{href}", "title": titles.get(href), "duration": None} for href in hrefs]
 
-                    return memoized(("sources", book_id, token), 600, compute)
+                    return memoized(("sources", book_id, token), 6 * 3600, compute)
+
+
+                def fetch_text(path: str, token: str) -> str:
+                    req = urllib.request.Request(BACKEND + path, headers={"Authorization": token})
+                    try:
+                        with urllib.request.urlopen(req, timeout=60) as resp:
+                            return resp.read().decode("utf-8", "replace")
+                    except urllib.error.HTTPError as e:
+                        raise UpstreamError(e.code) from None
+
+
+                def readaloud_titles(base: str, manifest: dict, token: str) -> dict[str, str]:
+                    """Names each readaloud audio file after the chapter it starts in.
+
+                    Storyteller splits readaloud audio into numbered files unrelated to
+                    chapters. Each chapter's media overlay (SMIL) lists the audio it plays,
+                    and the table of contents names the chapters, so walking the reading
+                    order gives every file the chapter where it first appears. Later files
+                    within the same chapter get "(cont.)".
+                    """
+                    toc_titles: dict[str, str] = {}
+
+                    def walk(entries):
+                        for e in entries or []:
+                            file = (e.get("href") or "").split("#")[0]
+                            if file and e.get("title"):
+                                toc_titles.setdefault(file, e["title"].strip())
+                            walk(e.get("children"))
+
+                    walk(manifest.get("toc"))
+
+                    smil_hrefs = [
+                        r["href"] for r in manifest.get("resources") or []
+                        if r.get("href") and "smil" in (r.get("type") or "")
+                    ]
+
+                    def load(href: str) -> tuple[str | None, list[str]]:
+                        text = fetch_text(f"{base}/read/{href}", token)
+                        folder = posixpath.dirname(href)
+                        textref = re.search(r'epub:textref="([^"#]+)', text)
+                        audio: list[str] = []
+                        for src in re.findall(r'<audio[^>]*\ssrc="([^"]+)"', text):
+                            path = posixpath.normpath(posixpath.join(folder, src))
+                            if not audio or audio[-1] != path:
+                                audio.append(path)
+                        textfile = posixpath.normpath(posixpath.join(folder, textref.group(1))) if textref else None
+                        return textfile, audio
+
+                    with ThreadPoolExecutor(max_workers=8) as pool:
+                        overlays = dict(pool.map(load, smil_hrefs))
+
+                    titles: dict[str, str] = {}
+                    chapter = None
+                    for item in manifest.get("readingOrder") or []:
+                        file = (item.get("href") or "").split("#")[0]
+                        chapter = toc_titles.get(file, chapter)
+                        for audio in overlays.get(file) or []:
+                            if audio not in titles and chapter:
+                                titles[audio] = chapter
+
+                    previous = None
+                    for href in sorted(titles):
+                        if titles[href] == previous:
+                            titles[href] = previous + " (cont.)"
+                        else:
+                            previous = titles[href]
+                    return titles
 
 
 
 
-                def cache_path(source_path: str) -> str:
-                    return os.path.join(CACHE_DIR, hashlib.sha256(source_path.encode()).hexdigest()[:32])
+                def cache_path(source_path: str, speed: float) -> str:
+                    key = f"{source_path}@{speed:g}"
+                    return os.path.join(CACHE_DIR, hashlib.sha256(key.encode()).hexdigest()[:32])
 
 
                 def prune_cache() -> None:
@@ -227,14 +303,14 @@ spec:
                         total -= size
 
 
-                def prepare(source_path: str, token: str) -> str:
+                def prepare(source_path: str, token: str, speed: float = 1.0) -> str:
                     """Produces a watch-playable file for a Storyteller audio path.
 
                     Every source (MP3, AAC, Opus, ...) is transcoded to a low-bitrate mono
                     AAC MP4 with the index up front: speech stays clear and books shrink to
                     a size the watch's 8 GB media storage and a Wi-Fi sync can handle.
                     """
-                    dest = cache_path(source_path)
+                    dest = cache_path(source_path, speed)
                     with _prepare_locks_lock:
                         lock = _prepare_locks.setdefault(dest, threading.Lock())
                     with lock:
@@ -248,6 +324,7 @@ spec:
                             subprocess.run(
                                 [FFMPEG, "-v", "error", "-xerror", "-y", "-i", src,
                                  "-map", "0:a:0", "-vn", "-sn", "-dn",
+                                 *(["-af", f"atempo={speed:g}"] if speed != 1.0 else []),
                                  "-c:a", "aac", "-b:a", AAC_BITRATE, "-ac", AAC_CHANNELS,
                                  "-movflags", "+faststart", "-f", "mp4", tmp],
                                 check=True, timeout=3600,
@@ -288,14 +365,22 @@ spec:
                     raise IOError(f"incomplete download of {url}: {os.path.getsize(path)} of {total} bytes")
 
 
-                def prepare_in_background(source_path: str, token: str) -> None:
+                def prepare_in_background(source_path: str, token: str, speed: float = 1.0) -> None:
                     def run():
                         try:
-                            prepare(source_path, token)
+                            prepare(source_path, token, speed)
                         except Exception as e:  # noqa: BLE001
                             print(f"prefetch failed for {source_path}: {e}", flush=True)
 
                     threading.Thread(target=run, daemon=True).start()
+
+
+                def parse_speed(query: str) -> float:
+                    try:
+                        speed = float((urllib.parse.parse_qs(query).get("speed") or ["1"])[0])
+                    except ValueError:
+                        return 1.0
+                    return round(min(2.0, max(0.5, speed)), 2)
 
 
                 class Handler(BaseHTTPRequestHandler):
@@ -327,7 +412,7 @@ spec:
                                 return self.tracks(m.group(1), token)
                             m = re.fullmatch(r"/watch/books/([^/]+)/audio/(\d+)", url.path)
                             if m:
-                                return self.audio(m.group(1), int(m.group(2)), token)
+                                return self.audio(m.group(1), int(m.group(2)), parse_speed(url.query), token)
                             return self.send_json(404, {"error": "not found"})
                         except UpstreamError as e:
                             return self.send_json(e.status, {"error": f"storyteller returned {e.status}"})
@@ -361,13 +446,13 @@ spec:
                             prepare_in_background(sources[0]["path"], token)
                         self.send_json(200, {"tracks": tracks})
 
-                    def audio(self, book_id: str, index: int, token: str) -> None:
+                    def audio(self, book_id: str, index: int, speed: float, token: str) -> None:
                         sources = book_sources(book_id, token)
                         if index >= len(sources):
                             return self.send_json(404, {"error": "no such part"})
-                        path = prepare(sources[index]["path"], token)
+                        path = prepare(sources[index]["path"], token, speed)
                         if index + 1 < len(sources):
-                            prepare_in_background(sources[index + 1]["path"], token)
+                            prepare_in_background(sources[index + 1]["path"], token, speed)
                         size = os.path.getsize(path)
                         self.send_response(200)
                         self.send_header("Content-Type", "audio/mp4")
