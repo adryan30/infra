@@ -20,6 +20,18 @@ spec:
       chart: app-template
       helm:
         valuesObject:
+          # app-template defaults automountServiceAccountToken to false.
+          # mount-watchdog runs `kubectl rollout restart` as the
+          # storyteller-mount-watchdog ServiceAccount below -- without an
+          # automounted token it has no in-cluster credentials and
+          # `kubectl` falls back to localhost:8080, so the one recovery
+          # action it exists to perform silently fails. Confirmed live
+          # 2026-09-09: the watchdog detected a stale mount and tried to
+          # restart the Deployment, but every kubectl call was refused
+          # ("connection refused" to localhost:8080), so it never actually
+          # recovered.
+          defaultPodOptions:
+            automountServiceAccountToken: true
           controllers:
             main:
               strategy: RollingUpdate
