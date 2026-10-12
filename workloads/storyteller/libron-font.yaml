@@ -1,0 +1,158 @@
+# Libron (https://github.com/nicoverbruggen/libron, OFL) for the Storyteller
+# web reader. The reader's "Custom" font family only takes a stylesheet URL
+# (it injects a <link rel="stylesheet"> into the reader iframe), and Libron
+# isn't on Google Fonts -- so this serves a small @font-face stylesheet plus
+# the release WOFF2 files at https://storyteller.adryan.me/fonts/libron/
+# (routed by templates/istio/virtualservices/storyteller.yaml).
+#
+# Reader settings: Font family = Custom, Name = Libron,
+# URL = https://storyteller.adryan.me/fonts/libron/libron.css
+#
+# To upgrade, bump LIBRON_VERSION and LIBRON_SHA256 (sha256 of Libron_Web.zip).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: storyteller-fonts
+  namespace: books
+data:
+  default.conf: |
+    server {
+      listen 8080;
+      server_name _;
+
+      location /fonts/libron/ {
+        alias /srv/fonts/libron/;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Cache-Control "public, max-age=604800" always;
+      }
+
+      location / {
+        return 404;
+      }
+    }
+  libron.css: |
+    @font-face {
+      font-family: "Libron";
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("Libron-Regular.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Libron";
+      font-style: italic;
+      font-weight: 400;
+      font-display: swap;
+      src: url("Libron-Italic.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Libron";
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url("Libron-Bold.woff2") format("woff2");
+    }
+    @font-face {
+      font-family: "Libron";
+      font-style: italic;
+      font-weight: 700;
+      font-display: swap;
+      src: url("Libron-BoldItalic.woff2") format("woff2");
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storyteller-fonts
+  namespace: books
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storyteller-fonts
+  template:
+    metadata:
+      labels:
+        app: storyteller-fonts
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+      initContainers:
+        - name: fetch-libron
+          image: alpine:3.22
+          env:
+            - name: LIBRON_VERSION
+              value: v0.31
+            - name: LIBRON_SHA256
+              value: a1fcb64e6f49900491c5f9f5e1c589b0a757d6497aaff5117978783d7e70ed6b
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              cd /tmp
+              wget -q -O libron.zip "https://github.com/nicoverbruggen/libron/releases/download/${LIBRON_VERSION}/Libron_Web.zip"
+              echo "${LIBRON_SHA256}  libron.zip" | sha256sum -c -
+              mkdir -p /srv/fonts/libron
+              unzip -o -q libron.zip -d /srv/fonts/libron
+              cp /config/libron.css /srv/fonts/libron/libron.css
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          volumeMounts:
+            - name: fonts
+              mountPath: /srv/fonts
+            - name: config
+              mountPath: /config
+              readOnly: true
+      containers:
+        - name: nginx
+          image: nginxinc/nginx-unprivileged:1.31.6-alpine
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /fonts/libron/libron.css
+              port: http
+          resources:
+            requests:
+              cpu: 1m
+              memory: 8Mi
+            limits:
+              memory: 32Mi
+          volumeMounts:
+            - name: fonts
+              mountPath: /srv/fonts
+              readOnly: true
+            - name: config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              readOnly: true
+      volumes:
+        - name: fonts
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: storyteller-fonts
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: storyteller-fonts
+  namespace: books
+spec:
+  selector:
+    app: storyteller-fonts
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

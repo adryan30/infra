@@ -1,1 +1,36 @@
-{{- include "workload.virtualServices" (dict "root" . "name" "storyteller") }}
+{{- if eq (include "workload.enabled" (dict "root" . "name" "storyteller")) "true" }}
+# Custom VS: /fonts/ goes to the storyteller-fonts static server
+# (workloads/storyteller/libron-font.yaml) so web-reader custom font
+# stylesheets are same-origin; everything else goes to Storyteller. The generic
+# single-backend workload.virtualServices helper can't express this, same
+# reasoning as templates/istio/virtualservices/stoat.yaml.
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: storyteller
+  namespace: istio-ingress
+  labels:
+    app: storyteller
+spec:
+  hosts:
+    - "storyteller.adryan.me"
+  gateways:
+    - public
+  http:
+    - match:
+        - uri:
+            prefix: /fonts/
+      route:
+        - destination:
+            port:
+              number: 8080
+            host: storyteller-fonts.books.svc.cluster.local
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 8001
+            host: storyteller.books.svc.cluster.local
+{{- end }}
