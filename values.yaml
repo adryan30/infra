@@ -214,13 +214,10 @@ workloads:
     ingress: []
   storyteller:
     enabled: true
-    ingress:
-      - name: storyteller
-        host: storyteller.adryan.me
-        oauth: false
-        backend:
-          host: storyteller.books.svc.cluster.local
-          port: 8001
+    # /fonts/ is routed to the storyteller-fonts static server — the generic
+    # single-backend VirtualService helper can't express this. See
+    # templates/istio/virtualservices/storyteller.yaml for the hand-written VS.
+    ingress: []
   storyteller-beta:
     enabled: true
     ingress:
