@@ -17,6 +17,20 @@ spec:
     helm:
       valuesObject:
         node:
+          # Default rclone node-plugin memory limit is 300Mi, shared by
+          # every rclone mount on the node. storyteller's library mount
+          # enabled vfs-cache-mode=full + vfs-cache-max-size=5G
+          # (templates/rclone/drive/mounts/storyteller-books.yaml), which
+          # OOM-killed this container in production 2026-09-09 -- killing
+          # the FUSE process left every pod with that volume already
+          # mounted stuck with a stale "transport endpoint is not
+          # connected" handle until manually recreated. Nodes have >20Gi
+          # allocatable memory with headroom to spare (see incident notes),
+          # so 1Gi is a conservative bump, not a tight fit.
+          resources:
+            rclone:
+              limits:
+                memory: 1Gi
           metrics:
             enbled: true
             service:
