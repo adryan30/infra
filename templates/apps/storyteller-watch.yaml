@@ -20,7 +20,7 @@ spec:
   # Storyteller is the user's reading position (POST /api/v2/books/<id>/positions).
   source:
     repoURL: https://bjw-s-labs.github.io/helm-charts
-    targetRevision: 5.1.0
+    targetRevision: 5.3.0
     chart: app-template
     helm:
       valuesObject:
